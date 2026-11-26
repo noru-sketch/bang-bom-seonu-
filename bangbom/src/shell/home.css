@@ -5,19 +5,49 @@
 .hs__body:empty{display:none}
 .hs__close{margin-top:var(--s6);font-size:clamp(18px,1.6vw,22px);font-weight:600;letter-spacing:-.03em;line-height:1.5}
 .hs__cta{margin-top:var(--s6);display:flex;justify-content:center}
-/* 2. 문제: 근거 카드 4개. 카드 틀(.card)·큰 숫자(.stat__num)는 p1_head.html 것을 그대로 쓴다 */
-.hp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3)}
-.hp{display:flex;flex-direction:column;padding:var(--s4) var(--s3)}
-.hp__k{font-size:14px;font-weight:600;color:var(--sub)}
-.hp .stat__num{margin:var(--s2) 0 0}
-.hp__t{margin:var(--s2) 0 0;font-weight:600;line-height:1.55}
-.hp__more{margin:var(--s1) 0 0;font-size:14px;color:var(--sub)}
-.hp__src{list-style:none;margin:auto 0 0;padding:var(--s3) 0 0;font-size:12px;line-height:1.5;color:var(--sub)}
-.hp__src li{padding-top:var(--s1);border-top:1px solid var(--line)}
-.hp__src li + li{margin-top:var(--s1)}
-.hp__src a{text-decoration:underline;text-underline-offset:2px}
-@media (max-width:1100px){.hp-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:820px){.hp-grid{grid-template-columns:1fr;gap:var(--s2)}.hp{padding:var(--s3)}}
+/* 판정 표시: 모든 홈 화면에서 같은 기호·색. 색만으로 구분하지 않게 모양(채움·반 채움·테두리)과 글자를 같이 쓴다 */
+:root{--jd-on:#1f6b4f;--jd-dim:#c7891d;--jd-off:#a9a7a0}
+.jd{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.jd i,.jd-dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;box-sizing:border-box;vertical-align:-1px}
+.jd--on{background:var(--green-soft);color:var(--jd-on)}.jd--on i,.jd-dot--on{background:var(--jd-on)}
+.jd--dim{background:#fbf1de;color:#835a10}.jd--dim i,.jd-dot--dim{border:1.5px solid var(--jd-dim);background:linear-gradient(90deg,var(--jd-dim) 50%,transparent 50%)}
+.jd--off{background:var(--gray);color:var(--sub)}.jd--off i,.jd-dot--off{border:1.5px solid var(--jd-off);background:transparent}
+/* 2. 문제: 큰 숫자 두 개를 맞대고(테두리·배경 없이), 아래에 이유 두 줄. PC 1440×900 한 화면에 들어가게 위아래 여백을 줄인다 */
+#home-problem.section{padding:calc(var(--nav-h) + 40px) 0 48px}
+.pb-big{display:grid;grid-template-columns:1fr 1fr;margin-top:var(--s5);border-top:1px solid var(--line)}
+.pb-big__item{padding:var(--s4) var(--s4) 0 0}
+.pb-big__item + .pb-big__item{padding-left:var(--s5);border-left:1px solid var(--line)}
+.pb-num{display:flex;align-items:baseline;gap:6px;color:var(--green);font-weight:500;font-size:clamp(64px,7vw,100px);line-height:1;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.pb-num small{font-size:clamp(20px,1.8vw,26px);font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.pb-ref{font-size:15px;font-weight:600;color:var(--sub);letter-spacing:0;line-height:1;vertical-align:super;margin-left:2px}
+.pb-num .pb-ref{align-self:flex-start;margin-top:.3em}
+.pb-lbl{margin-top:var(--s2);font-size:clamp(18px,1.5vw,21px);font-weight:600;letter-spacing:-.03em}
+.pb-sub{margin-top:4px;font-size:14px;color:var(--sub)}
+.pb-why{margin-top:var(--s5);padding-top:var(--s3);border-top:1px solid var(--line)}
+.pb-why__t{font-size:15px;font-weight:600;color:var(--sub);letter-spacing:-.02em}
+.pb-why__list{list-style:none;margin:var(--s2) 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:var(--s1) var(--s5)}
+.pb-why__list li{display:flex;align-items:center;gap:var(--s3)}
+.pb-why__num{flex:none;min-width:150px;font-size:40px;font-weight:500;line-height:1.1;letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums}
+.pb-why__num small{font-size:18px;font-weight:600;margin-left:2px}
+.pb-why__list li > p:last-child{font-size:16px;line-height:1.5}
+.pb-close{margin-top:var(--s5);font-size:clamp(22px,2.1vw,30px);line-height:1.4;letter-spacing:-.04em}
+.pb-more{margin-top:var(--s3);font-size:13px;line-height:1.6;color:var(--sub)}
+.pb-src{margin-top:var(--s1);font-size:13px;line-height:1.7;color:var(--sub)}
+.pb-src span{margin-left:10px}
+.pb-src a{text-decoration:underline;text-underline-offset:2px}
+@media (max-width:820px){
+  #home-problem.section{padding:56px 0 48px}
+  .pb-big{grid-template-columns:1fr;margin-top:var(--s3)}
+  .pb-big__item{padding:var(--s3) 0}
+  .pb-big__item + .pb-big__item{padding-left:0;border-left:0;border-top:1px solid var(--line)}
+  .pb-num{font-size:60px}
+  .pb-why{margin-top:var(--s2)}
+  .pb-why__list{grid-template-columns:1fr;gap:var(--s2)}
+  .pb-why__num{min-width:104px;font-size:32px}
+  .pb-why__list li > p:last-child{font-size:15px}
+  .pb-close{margin-top:var(--s4);font-size:21px}
+  .pb-src span{display:block;margin-left:0}
+}
 /* 3. 해결 1: 판정 미리보기 카드 + 세 단계 설명. 줄 배치는 .zz__row 를 그대로 쓴다 */
 .hsu{padding:var(--s4)}
 .hsu__head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s2)}

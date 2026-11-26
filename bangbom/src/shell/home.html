@@ -21,56 +21,43 @@
     <div class="scroll-cue" aria-hidden="true">Scroll<i></i></div>
   </div>
 
-  <!-- 2. 문제 -->
+  <!-- 2. 문제: 큰 숫자 두 개(떠나는 청년 · 빈 집) → 왜 혼자 찾기 어려울까요(두 줄) → 마무리 → 보충 한 줄 → 출처 한 줄.
+       숫자·출처는 docs/인수인계_혜원.md 3번 표 그대로. 숫자 옆 작은 번호가 맨 아래 출처 번호다. 보도 숫자에는 "보도 기준" -->
   <div class="section section--white hs" id="home-problem" data-hs="문제">
     <div class="container">
       <div class="hs__head reveal">
         <span class="eyebrow">Why it's hard</span>
-        <h2 class="title">대구에서 집 구하기가 유독 어려운 이유</h2>
+        <h2 class="title">청년은 떠나고, 집은 비어 있어요</h2>
       </div>
-      <!-- 근거 카드 4개(떠나는 청년 · 약한 벌이 · 모르는 정책 · 빈 집). 카드마다 출처와 기준일, 보도 숫자는 "보도 기준" -->
-      <!-- 숫자·출처는 docs/인수인계_혜원.md 3번 표 그대로. 확인 안 된 숫자는 넣지 않는다 -->
-      <div class="hs__body hp-grid" id="homeProblemCards">
-        <article class="card hp reveal">
-          <span class="hp__k">떠나는 청년</span>
-          <p class="stat__num">67.6<small>%</small></p>
-          <p class="hp__t">2026년 6월 대구를 떠난 822명 중 556명이 20~39세였어요.</p>
-          <p class="hp__more">2019년부터 2024년까지 대구에서 빠져나간 청년은 3만 5,700명이에요.</p>
-          <ul class="hp__src">
-            <li>국가데이터처 국내인구이동통계, 동북지방통계청 분석 · <a href="https://kbmaeil.com/article/20260730500246" target="_blank" rel="noopener">경북매일 2026.7.30</a></li>
-            <li>동북지방데이터청 · <a href="https://kbmaeil.com/article/20261027500130" target="_blank" rel="noopener">경북매일 2026.10.27</a></li>
-          </ul>
-        </article>
-        <article class="card hp reveal">
-          <span class="hp__k">약한 벌이</span>
-          <p class="stat__num">58.5<small>%</small></p>
-          <p class="hp__t">대구 고용률은 전국 시·도 중 가장 낮아요. (보도 기준)</p>
-          <p class="hp__more">1인당 지역내총생산과 1인당 가계 처분가능소득도 모두 전국 평균보다 낮아요.</p>
-          <ul class="hp__src">
-            <li>보도 기준 · <a href="https://www.hankyung.com/article/202607243355H" target="_blank" rel="noopener">한국경제 2026.7.24</a></li>
-            <li>국가데이터처 · <a href="https://mobile.newsis.com/view/NISX20260703_0003695527" target="_blank" rel="noopener">뉴시스 2026.7.3</a></li>
-          </ul>
-        </article>
-        <article class="card hp reveal">
-          <span class="hp__k">모르는 정책</span>
-          <p class="stat__num">84.5<small>%</small></p>
-          <p class="hp__t">청년 열 명 중 여덟 명은 청년정책 계획을 들어 본 적만 있거나 전혀 몰라요.</p>
-          <p class="hp__more">연 소득 2,400만 원 미만 청년 중 자세히 아는 사람은 7.1%뿐이에요.</p>
-          <ul class="hp__src">
-            <li>청년정책 플랫폼 설문(521명) · <a href="https://view.asiae.co.kr/article/2026022011075035575" target="_blank" rel="noopener">아시아경제 2026.2.20</a></li>
-          </ul>
-        </article>
-        <article class="card hp reveal">
-          <span class="hp__k">빈 집</span>
-          <p class="stat__num">3,077<small>세대</small></p>
-          <p class="hp__t">그런데 대구에는 다 지어 놓고도 비어 있는 집이 이만큼 있어요.</p>
-          <p class="hp__more">준공 후 미분양 기준이고, 전국 시·도 중 가장 많아요.</p>
-          <ul class="hp__src">
-            <li>국토교통부 주택통계 · 2026.9 기준</li>
-          </ul>
-        </article>
+      <div class="pb-big reveal">
+        <div class="pb-big__item">
+          <p class="pb-num"><b data-count="67.6">67.6</b><small>%</small><sup class="pb-ref">①</sup></p>
+          <p class="pb-lbl">대구를 떠난 사람 중 20~39세</p>
+          <p class="pb-sub">2026년 6월, 822명 중 556명</p>
+        </div>
+        <div class="pb-big__item">
+          <p class="pb-num"><b data-count="3077">3,077</b><small>세대</small><sup class="pb-ref">②</sup></p>
+          <p class="pb-lbl">다 짓고도 비어 있는 집</p>
+          <p class="pb-sub">준공 후 미분양, 전국 시·도 중 가장 많아요</p>
+        </div>
       </div>
-      <p class="hs__close reveal">집은 있는데, 내 조건에 맞는 집과 지원을 한 번에 보여주는 곳이 없어요.</p>
+      <div class="pb-why reveal">
+        <h3 class="pb-why__t">왜 혼자 찾기 어려울까요?</h3>
+        <ul class="pb-why__list">
+          <li><p class="pb-why__num">58.5<small>%</small><sup class="pb-ref">③</sup></p><p>고용률, 전국 시·도 중 가장 낮아요 (보도 기준)</p></li>
+          <li><p class="pb-why__num">84.5<small>%</small><sup class="pb-ref">④</sup></p><p>청년 열 명 중 여덟 명은 청년정책을 잘 몰라요</p></li>
+        </ul>
+      </div>
+      <p class="hs__close pb-close reveal">집은 있는데, 내 조건에 맞는 집과 지원을 한 번에 보여주는 곳이 없어요.</p>
+      <p class="pb-more">2019~2024년 대구 청년 3만 5,700명 순유출<sup class="pb-ref">⑤</sup> · 1인당 지역내총생산과 1인당 가계 처분가능소득 모두 전국 평균 아래<sup class="pb-ref">⑥</sup> · 연 소득 2,400만 원 미만 청년 중 청년정책을 자세히 아는 사람 7.1%<sup class="pb-ref">④</sup></p>
+      <p class="pb-src">출처
+        <span>① 국가데이터처 국내인구이동통계, 동북지방통계청 분석 · <a href="https://kbmaeil.com/article/20260730500246" target="_blank" rel="noopener">경북매일 2026.7.30</a></span>
+        <span>② 국토교통부 주택통계 · 2026.9 기준</span>
+        <span>③ 보도 기준 · <a href="https://www.hankyung.com/article/202607243355H" target="_blank" rel="noopener">한국경제 2026.7.24</a></span>
+        <span>④ 청년정책 플랫폼 설문(521명) · <a href="https://view.asiae.co.kr/article/2026022011075035575" target="_blank" rel="noopener">아시아경제 2026.2.20</a></span>
+        <span>⑤ 동북지방데이터청 · <a href="https://kbmaeil.com/article/20261027500130" target="_blank" rel="noopener">경북매일 2026.10.27</a></span>
+        <span>⑥ 국가데이터처 · <a href="https://mobile.newsis.com/view/NISX20260703_0003695527" target="_blank" rel="noopener">뉴시스 2026.7.3</a></span>
+      </p>
     </div>
   </div>
 
