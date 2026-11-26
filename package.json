@@ -1,0 +1,45 @@
+{
+  "name": "bangkkumi2",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "lint": "oxlint",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "preview": "vite preview",
+    "serve": "vite preview --host --port 4180",
+    "check:dist": "node scripts/check-dist.mjs && node scripts/check-secrets.mjs dist",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "verify": "npm test && npm run build && npm run check:dist && npm run check:secrets",
+    "hooks": "node scripts/setup-hooks.mjs",
+    "prepare": "node scripts/setup-hooks.mjs",
+    "pack": "node scripts/pack-source.mjs",
+    "report": "node scripts/make-report.mjs",
+    "bangbom": "python bangbom/src/shell/build.py && node scripts/sync-bangbom.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "marked": "^18.3.0",
+    "oxlint": "^1.90.0",
+    "tailwindcss": "^4.3.5",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6"
+  },
+  "engines": {
+    "node": "26.x"
+  }
+}

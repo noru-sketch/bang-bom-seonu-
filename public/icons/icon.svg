@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 앱 아이콘: 바탕색 위에 평면도 표시. 가장자리가 잘려도 그림이 남도록 가운데 60%만 쓴다 -->
+  <rect width="512" height="512" fill="#f3f2ee"/>
+  <g transform="translate(102.4 102.4) scale(9.6)" fill="none" stroke="#1f6b4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 27H6V5h20v22h-6"/>
+    <path d="M20 27v-7"/>
+    <path d="M20 20a7 7 0 0 0-7 7" stroke-width="1.25"/>
+    <path d="M6 14h9"/>
+  </g>
+</svg>

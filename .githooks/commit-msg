@@ -1,0 +1,8 @@
+#!/bin/sh
+# 커밋 설명 글에 비밀값이 섞이지 않았는지 본다 (pre-commit은 파일 내용만 보고 설명 글은 보지 못한다).
+node scripts/check-secrets.mjs "$1" > /dev/null
+if [ "$?" -ne 0 ]; then
+  echo "커밋을 멈췄어요. 커밋 설명 글에 비밀값으로 보이는 글자가 있어요. 그 부분을 지우고 다시 커밋해 주세요."
+  exit 1
+fi
+exit 0

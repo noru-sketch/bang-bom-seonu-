@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="#1f6b4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- 평면도: 바깥 벽(아래쪽에 문 자리), 문 열림 호, 안쪽 벽 -->
+  <path d="M13 27H6V5h20v22h-6"/>
+  <path d="M20 27v-7"/>
+  <path d="M20 20a7 7 0 0 0-7 7" stroke-width="1.25"/>
+  <path d="M6 14h9"/>
+</svg>

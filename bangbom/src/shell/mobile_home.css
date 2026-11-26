@@ -1,0 +1,166 @@
+
+/* ═════════ 휴대폰 화면: 홈·이용 안내 (build.py가 맨 끝에 붙인다) ═════════ */
+
+/* 휴대폰에서만 쓰는 것들. PC(821px 이상)에서는 숨겨서 전과 똑같이 보인다 */
+.cats,.zz-dots,.story__toggle{display:none}
+
+/* 한글은 낱말 가운데에서 줄이 바뀌지 않게 한다. 휴대폰에만 있던 규칙인데 PC 첫 화면 문단도 낱말이 잘려서("눈높 / 이까지") 모든 폭에 건다 */
+#page-home,#page-guide,.footer,.panel,#mh{word-break:keep-all;overflow-wrap:break-word}
+
+/* 터치 화면: 비교 사진은 어디를 잡아도 선이 따라오게 shell.js 가 직접 처리한다. 세로로 밀면 페이지가 내려간다 */
+@media (pointer:coarse){
+  .ba{touch-action:pan-y}
+  .ba__range{pointer-events:none}
+}
+
+/* 터치 화면에서는 누른 뒤에도 hover 색이 남아서 단추가 흐려 보인다. 누르는 동안에만 색을 바꾼다 */
+@media (hover:none){
+  .round-btn:hover{background:#fff}
+  .round-btn:active{background:var(--gray)}
+  .story__toggle:hover{color:inherit}
+}
+
+@media (max-width:820px){
+  /* --panel-h: 위 막대 + 칩 줄 + 아래 탭 막대를 뺀, 묶음 하나가 쓰는 한 화면 높이 */
+  :root{--cat-h:52px;--safe-b:env(safe-area-inset-bottom,0px);--vh:100vh;--zz-r:.625;--panel-h:calc(var(--vh) - var(--nav-h) - var(--cat-h) - var(--tab-h) - var(--safe-b))}
+  @supports (height:100svh){:root{--vh:100svh}}
+
+  /* 제목은 줄 길이를 고르게 */
+  .title,.hero__title,.zz__title,.cta__title{text-wrap:balance}
+  #page-home p,#page-guide p{text-wrap:pretty}
+
+  /* 위 막대·아래 탭 막대·메뉴. 홈·이용 안내에서는 위 막대를 불투명한 종이색으로 해서 바로 아래 칩 줄과 한 덩어리로 보이게 한다
+     (반투명이면 칩 줄이 붙은 자리에서 뒤의 어두운 큰 그림이 비쳐 회색으로 보인다). 탭 막대도 뒤의 어두운 맨 아래 정보가 비치지 않게 한다 */
+  body:not(.app-mode) .nav:not(.is-clear){background:var(--bg);border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .tabbar{background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .nav .logo{padding:11px 0}
+  .tabbar a{font-size:12px;-webkit-tap-highlight-color:transparent}
+  .tabbar a:active{color:var(--ink)}
+  .panel__foot{padding-bottom:calc(var(--s3) + var(--safe-b))}
+  .panel__note{font-size:14px}
+  .hero{height:calc(var(--vh) - var(--tab-h) - var(--safe-b))}
+
+  /* 카테고리 칩 줄: 위 막대 바로 아래에 붙는다. 보이는 알약은 38px, 손가락이 닿는 단추는 44px */
+  .cats{display:flex;gap:6px;position:sticky;top:var(--nav-h);z-index:40;height:var(--cat-h);padding:4px var(--pad-x);background:var(--bg);box-shadow:0 1px 0 var(--line);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+  .cats::-webkit-scrollbar{display:none}
+  .cat{flex:none;display:inline-flex;align-items:center;height:44px;min-width:44px;-webkit-tap-highlight-color:transparent}
+  .cat span{display:inline-flex;align-items:center;justify-content:center;height:38px;min-width:44px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+  .cat:active span{background:var(--gray)}
+  .cat.is-on span,.cat.is-on:active span{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+  .cat:focus-visible{outline:none}
+  .cat:focus-visible span{outline:2px solid var(--green);outline-offset:2px}
+
+  /* 고른 묶음 하나만 보인다 */
+  [data-catp]{display:none}
+  [data-catp].is-on{display:block;animation:tabIn .45s cubic-bezier(.2,.7,.2,1) backwards}
+
+  /* ── 홈 · 숫자: 세 숫자를 한 화면 가운데에 ── */
+  .stats[data-catp].is-on{display:flex;flex-direction:column;justify-content:center;min-height:var(--panel-h);border-bottom:0}
+  .stat{padding:22px var(--s2)}
+  .stat__num{font-size:clamp(44px,13vw,56px)}
+  .stat__num small{font-size:18px}
+  .stat__src{font-size:14px}
+
+  /* ── 홈 · 평면: 옆으로 밀어서 넘긴다. 다음 카드가 조금 보여서 더 있다는 걸 알린다 ── */
+  .section[data-catp="plan"]{min-height:var(--panel-h);padding:28px 0 24px}
+  .plans__head{gap:8px;margin-bottom:20px}
+  .plans__head .eyebrow{margin-bottom:8px}
+  .plans__head .title{font-size:26px}
+  .plans__track{gap:12px;padding-bottom:4px}
+  .plan-card{flex:0 0 min(78vw,320px)}
+  /* 평면 그림의 높이를 화면 높이에 맞춰서 제목·카드·설명이 한 화면에 들어오게 한다 */
+  .plan-card__media{aspect-ratio:auto;height:clamp(204px,calc(var(--panel-h) - 300px),320px)}
+  .plan-card__name{margin-top:12px}
+  .plans__btns{display:none}
+
+  /* ── 홈 · 돕는 방법: 탭 줄 대신 네 장을 옆으로 넘긴다. 사진 아래에 점 표시와 앞뒤 단추 ── */
+  .section[data-catp="help"]{min-height:var(--panel-h);padding:24px 0 20px}
+  [data-catp="help"] > .container{display:grid;grid-template-columns:minmax(0,1fr);padding:0;container-type:inline-size}
+  [data-catp="help"] .head-center{max-width:none;margin:0 0 14px;padding:0 var(--pad-x);text-align:left}
+  [data-catp="help"] .head-center .eyebrow{font-size:20px;margin-bottom:6px}
+  [data-catp="help"] .head-center .title{font-size:24px}
+  .zz-tabs{display:none}
+  .zz--tabbed{grid-row:2;grid-column:1;flex-direction:row;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+  .zz--tabbed::-webkit-scrollbar{display:none}
+  .zz--tabbed .zz__row,.zz--tabbed .zz__row.is-on{display:grid;flex:0 0 100%;min-width:0;grid-template-columns:minmax(0,1fr);align-content:start;row-gap:58px;padding:0 var(--pad-x);scroll-snap-align:start;scroll-snap-stop:always;animation:none}
+  .zz__media{aspect-ratio:1/var(--zz-r)}
+  .pill-label{font-size:14px}
+  .zz__text .zz__no{margin:0 0 2px;font-size:18px}
+  .zz__title{font-size:22px}
+  .zz__text p{margin-top:8px;font-size:15px;line-height:1.6}
+  .zz__hint{margin-top:8px}
+  .zz__text .link{align-items:center;min-height:44px;margin-top:4px}
+  /* 점 표시와 단추는 넘어가는 장 위에 겹쳐 두고, 사진 높이만큼 내려서 사진과 글 사이에 놓는다 */
+  .zz-nav{grid-row:2;grid-column:1;align-self:start;justify-content:flex-start;align-items:center;margin:calc((100vw - 2 * var(--pad-x)) * var(--zz-r) + 7px) var(--pad-x) 0;pointer-events:none}
+  @supports (width:1cqw){.zz-nav{margin-top:calc((100cqw - 2 * var(--pad-x)) * var(--zz-r) + 7px)}}
+  .zz-nav .round-btn{width:44px;height:44px;pointer-events:auto}
+  .zz-dots{display:flex;align-items:center;gap:6px;order:-1;margin-right:auto}
+  .zz-dots i{width:6px;height:6px;border-radius:var(--r-pill);background:#c9c7c0;transition:width .25s cubic-bezier(.2,.7,.2,1),background .25s}
+  .zz-dots i.is-on{width:22px;background:var(--ink)}
+
+  /* ── 홈 · 우리 이야기: 글 → 목록 → 사진 → 마무리 배너 ── */
+  .section[data-catp="story"]{background:var(--white);padding:28px 0 0}
+  .story{gap:20px}
+  .story__fig{order:2;max-width:none}
+  .story__fig:has(img.is-missing){display:none}
+  .story__img{aspect-ratio:3/2}
+  .story__body .eyebrow{margin-bottom:8px}
+  .story__body .title{font-size:26px}
+  .story__body p{margin-top:14px;font-size:15px}
+  .story__more{display:none}
+  .story__more.is-open{display:block}
+  .story__toggle{display:inline-flex;align-items:center;min-height:44px;margin-top:2px;font-size:15px}
+  .story__list{margin:10px 0 0}
+  .story__list li{padding:14px 0}
+  .story__list span{font-size:14px}
+  /* 같은 곳(조건 입력)으로 가는 단추가 바로 아래 마무리 배너에 있다 */
+  .story__body > .btn{display:none}
+  .section[data-catp="story"] + .section[data-catp="story"]{padding:24px 0 28px!important}
+  .cta{height:auto;padding:48px 0 36px}
+  .cta__en{font-size:18px}
+  .cta__title{margin-top:8px;font-size:26px}
+  .cta .btn{margin-top:20px}
+
+  /* ── 맨 아래 정보 ── */
+  .footer{padding:36px 0 28px}
+  .footer__top{gap:24px;padding-bottom:20px}
+  .footer .logo b{font-size:22px}
+  .footer .logo i{font-size:20px}
+  .footer__team{margin-top:8px;font-size:14px}
+  .footer__label{margin-bottom:4px;font-size:18px}
+  .footer__src li{padding:7px 0}
+  .footer__src li:last-child{border-bottom:0}
+  .footer__src li span{color:rgba(255,255,255,.6)}
+  .footer__bottom{gap:8px;padding-top:16px;font-size:14px;color:rgba(255,255,255,.62)}
+
+  /* ── 이용 안내: [다섯 걸음] [자주 묻는 질문] ── */
+  #page-guide{padding-top:var(--nav-h)}
+  #page-guide [data-catp].is-on{min-height:var(--panel-h)}
+  #page-guide .page-head{padding-top:28px;padding-bottom:28px}
+  #page-guide .page-head .eyebrow{margin-bottom:8px}
+  #page-guide .page-head .title{font-size:26px}
+  #page-guide .page-head .lead{margin-top:10px;font-size:15px}
+  .steps5{margin-top:20px}
+  .s5,.s5 + .s5{grid-template-columns:48px 1fr;padding:16px 0}
+  .s5 i{font-size:40px}
+  .s5 b{font-size:17px}
+  .s5 p{margin-top:4px}
+  #page-guide .section[data-catp="faq"]{padding:28px 0 32px}
+  #page-guide .head-center{max-width:none;text-align:left}
+  #page-guide .head-center .eyebrow{margin-bottom:8px}
+  #page-guide .head-center .title{font-size:26px}
+  .faq{margin-top:16px}
+  .faq summary{min-height:56px;padding:14px 0}
+  .faq details p{padding-bottom:18px;font-size:15px}
+}
+
+/* 창을 좁힌 PC(마우스): 손가락으로 밀 수 없으니 평면 줄의 앞뒤 단추를 다시 보여 준다 */
+@media (max-width:820px) and (hover:hover) and (pointer:fine){
+  .plans__btns{display:flex}
+}
+
+/* 키가 작은 휴대폰(높이 760px 이하): 사진을 조금 낮춰서 글과 단추가 한 화면에 들어오게 한다 */
+@media (max-width:820px) and (max-height:760px){
+  :root{--zz-r:.5625}
+  .stat{padding:18px var(--s2)}
+}
