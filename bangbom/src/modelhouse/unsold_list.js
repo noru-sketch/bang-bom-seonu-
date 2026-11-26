@@ -1,5 +1,5 @@
 /* 대구시 공개 미분양 목록 (판정 없음 · 지도에 작은 점). make_unsold.py가 만든 파일, 직접 고치지 않기.
-   9월 미분양 null = 비공개(0 아님). 좌표: OpenStreetMap Nominatim, approx=true는 동 중심 근사. 현재 계약 가능 여부는 확인 필요 */
+   9월 미분양 null = 비공개(0 아님). 좌표: OpenStreetMap Nominatim, approx=true는 동 중심 근사. 단지 위치를 찾은 곳은 OpenStreetMap(Photon) 좌표(2026-11-27). 언론 보도 단지 3곳 추가. 현재 계약 가능 여부는 확인 필요 */
 const UNSOLD_SRC_URL = "https://www.daegu.go.kr/build/index.do?menu_link=/icms/bbs/selectBoardArticle.do&menu_id=00001338&bbsId=BBS_00153&nttId=829484";
 const UNSOLD_LIST = [
 {
@@ -89,7 +89,9 @@ const UNSOLD_LIST = [
 "lat": 35.85736,
 "lng": 128.59623,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"approx": false,
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "더샵 동성로센트리엘",
@@ -160,11 +162,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-03",
 "builder": "대우조선 해양건설㈜",
-"lat": 35.88399,
-"lng": 128.62359,
-"approx": true,
+"lat": 35.88096,
+"lng": 128.62764,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "용계역 푸르지오 아츠베르 1단지",
@@ -220,11 +223,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-07",
 "builder": "㈜대우건설",
-"lat": 35.88148,
-"lng": 128.64372,
-"approx": true,
+"lat": 35.87535,
+"lng": 128.63616,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "동대구역 센텀 화성파크드림",
@@ -313,7 +317,9 @@ const UNSOLD_LIST = [
 "lat": 35.87643,
 "lng": 128.62743,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"approx": false,
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "벤처벨리 푸르지오",
@@ -354,11 +360,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-08",
 "builder": "GS건설㈜",
-"lat": 35.86256,
-"lng": 128.56189,
-"approx": true,
+"lat": 35.85955,
+"lng": 128.55854,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "반고개역 푸르지오 엘리비엔",
@@ -414,11 +421,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-02",
 "builder": "현대건설㈜",
-"lat": 35.83873,
-"lng": 128.5751,
-"approx": true,
+"lat": 35.84257,
+"lng": 128.58725,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "대명 헤리티지",
@@ -474,11 +482,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-02",
 "builder": "㈜대우건설",
-"lat": 35.88901,
-"lng": 128.57974,
-"approx": true,
+"lat": 35.88727,
+"lng": 128.57921,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "대구역자이 더 스타",
@@ -504,11 +513,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-02",
 "builder": "주식회사 화성개발",
-"lat": 35.94809,
-"lng": 128.55218,
-"approx": true,
+"lat": 35.93661,
+"lng": 128.55259,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "태왕아너스프리미어",
@@ -579,11 +589,12 @@ const UNSOLD_LIST = [
 "completed": false,
 "move_in": "2027-06",
 "builder": "두산건설 주식회사",
-"lat": 35.95291,
-"lng": 128.56546,
-"approx": true,
+"lat": 35.95429,
+"lng": 128.55749,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "더펜트하우스 수성",
@@ -609,11 +620,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2021-12",
 "builder": "보광종합 건설㈜",
-"lat": 35.84506,
-"lng": 128.6116,
-"approx": true,
+"lat": 35.84255,
+"lng": 128.61141,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "수성뷰웰 리버파크",
@@ -624,11 +636,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-03",
 "builder": "동광건설㈜",
-"lat": 35.84506,
-"lng": 128.6116,
-"approx": true,
+"lat": 35.84412,
+"lng": 128.61004,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "더샵 수성오클레어",
@@ -639,11 +652,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-12",
 "builder": "포스코건설",
-"lat": 35.85519,
-"lng": 128.61044,
-"approx": true,
+"lat": 35.84891,
+"lng": 128.60891,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "수성포레스트스위첸",
@@ -657,7 +671,9 @@ const UNSOLD_LIST = [
 "lat": 35.81841,
 "lng": 128.61648,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"approx": false,
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "범어자이",
@@ -758,11 +774,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-11",
 "builder": "㈜이테크건설",
-"lat": 35.84855,
-"lng": 128.54092,
-"approx": true,
+"lat": 35.84796,
+"lng": 128.5332,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "뉴센트럴 두산위브더제니스",
@@ -773,11 +790,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-06",
 "builder": "두산건설㈜",
-"lat": 35.84091,
-"lng": 128.53927,
-"approx": true,
+"lat": 35.83991,
+"lng": 128.53765,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "해링턴 플레이스 감삼 Ⅲ",
@@ -788,11 +806,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-09",
 "builder": "효성 중공업㈜",
-"lat": 35.84855,
-"lng": 128.54092,
+"lat": 35.84727,
+"lng": 128.53319,
 "approx": true,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "달서 롯데캐슬센트럴스카이",
@@ -863,11 +882,12 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-11",
 "builder": "주식회사 동부건설",
-"lat": 35.85661,
-"lng": 128.56483,
-"approx": true,
+"lat": 35.85219,
+"lng": 128.55142,
+"approx": false,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
-"as_of": "2026-09-30"
+"as_of": "2026-09-30",
+"geo_src": "OpenStreetMap(Photon) 단지 위치"
 },
 {
 "name": "달서자이 제니크",
@@ -898,5 +918,50 @@ const UNSOLD_LIST = [
 "approx": true,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
 "as_of": "2026-09-30"
+},
+{
+"name": "수성레이크 우방아이유쉘",
+"gu": "수성구",
+"dong": "두산동",
+"total_units": 288,
+"unsold_sep": null,
+"completed": true,
+"move_in": null,
+"builder": null,
+"lat": 35.82165,
+"lng": 128.61453,
+"approx": false,
+"source": "언론 보도(CR리츠 전세 전환·할인 단지, 대구시 목록 미포함)",
+"as_of": "2026-11"
+},
+{
+"name": "빌리브 라디체",
+"gu": "달서구",
+"dong": "본동",
+"total_units": 222,
+"unsold_sep": null,
+"completed": true,
+"move_in": null,
+"builder": null,
+"lat": 35.8354,
+"lng": 128.53973,
+"approx": true,
+"source": "언론 보도(CR리츠 전세 전환·할인 단지, 대구시 목록 미포함)",
+"as_of": "2026-11"
+},
+{
+"name": "대명 더퍼스트",
+"gu": "남구",
+"dong": "대명동",
+"total_units": null,
+"unsold_sep": null,
+"completed": true,
+"move_in": null,
+"builder": null,
+"lat": 35.83873,
+"lng": 128.5751,
+"approx": true,
+"source": "언론 보도(CR리츠 전세 전환·할인 단지, 대구시 목록 미포함)",
+"as_of": "2026-11"
 }
 ];

@@ -102,7 +102,7 @@ function renderPanels() {
     $("#pillsR").innerHTML = `<span class="pill-n">모은 돈 <b>${won(S.profile.assets)}만</b></span><span class="pill-n">월 예산 <b>${won(S.profile.monthly_budget)}만</b></span>${mn != null ? `<span class="pill-n">지원 반영 최저 <b>월 ${man1(mn)}만</b></span>` : ""}`;
     $("#legend").innerHTML = "";
   } else {
-    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">단지를 누르면 주변 시설과 집 정보가 보여요</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(판정 없음, 2026.9.30 기준)</p>
+    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">단지를 누르면 주변 시설과 집 정보가 보여요</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(2026.9.30) + 언론 보도 단지, 판정 없음</p>
       <div class="jp-btns"><button class="btn btn--sm" id="bMatch">${S.profile ? "내 조건으로 보기" : "내 조건 넣고 불 켜기"} →</button></div></div>`;
     $("#bMatch").onclick = () => S.profile ? setMode("match") : (location.hash = "#input");
     $("#panelL").dataset.mode = "browse";
@@ -207,10 +207,10 @@ function openUnsold(k) {
   const u = UNSOLD_LIST[k], p = $("#panelR"); S.sel = null;
   p.innerHTML = `<div class="cc"><div class="cc-top"><div><span class="eyebrow-s">Public list</span><h2>${esc(u.name)}</h2><div class="tags"><span class="tag">${esc(u.gu)} ${esc(u.dong)}</span></div></div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
-    <p class="why">대구시 공개 미분양 목록 · 현재 계약 가능 여부는 확인 필요</p>
+    <p class="why">${/언론/.test(u.source) ? "언론 보도로 확인된 단지" : "대구시 공개 미분양 목록"} · 현재 계약 가능 여부는 확인 필요</p>
     <p class="small muted" style="margin-top:12px">${esc(u.source)} · ${esc(u.as_of)} 기준</p>
     <div class="links" style="margin-top:8px"><a href="${esc(UNSOLD_SRC_URL)}" target="_blank" rel="noopener">대구시 원자료 ↗</a></div>
-    ${u.approx ? `<p class="small muted" style="margin-top:8px">지도 위치는 동 중심 근사예요.</p>` : ""}</div>`;
+    ${u.approx ? `<p class="small muted" style="margin-top:8px">지도 위치는 동 중심 근사예요.</p>` : `<p class="small muted" style="margin-top:8px">지도 위치: OpenStreetMap 단지 위치</p>`}</div>`;
   p.classList.add("is-open"); p.scrollTop = 0;
   $("#ccX").onclick = () => { closeCard(); MapView.select(null); };
   document.body.classList.add("card-open"); syncPl();
@@ -369,7 +369,7 @@ function windowTexture(seed, frac, lit) {
 
 /* ═══════════════ 2.5D 미분양 지도 ═══════════════ */
 const MapView = {
-  ok: false, units: {}, target: HAS3D ? new T3.Vector3(innerWidth < 768 ? 14 : 18, 0, innerWidth < 768 ? 18 : 16) : null, zoom: innerWidth < 768 ? 17 : 26, fly0: null, lines: null, lineFor: null, lineT: 0, touchArmed: null,
+  ok: false, units: {}, target: HAS3D ? new T3.Vector3((innerWidth < 768 ? 14 : 18) * MAP_K, 0, (innerWidth < 768 ? 18 : 16) * MAP_K) : null, zoom: (innerWidth < 768 ? 17 : 26) / MAP_K * 1.4, fly0: null, lines: null, lineFor: null, lineT: 0, touchArmed: null,
   init() {
     if (!HAS3D) { mapFail("3D 지도를 불러오지 못했어요. 새로 고침을 해 보세요. 조건 입력과 집 보기, 상담은 그대로 쓸 수 있어요."); return; }
     const cv = $("#mapCanvas"); this.cv = cv; this.r = renderer(cv); this.r.setClearColor(new T3.Color("#e4e2dc"), 1);
@@ -386,7 +386,7 @@ const MapView = {
     dragInput(cv, {
       down: () => { this.fly0 = null; },
       drag: (dx, dy) => { const s = 1 / this.zoom, e = Math.asin(1 / Math.sqrt(3)); const right = new T3.Vector3(1, 0, -1).normalize(), fwd = new T3.Vector3(-1, 0, -1).normalize(); this.target.addScaledVector(right, -dx * s).addScaledVector(fwd, dy * s / Math.sin(e)); this.clampT(); },
-      zoom: k => { this.zoom = clamp(this.zoom * k, 4.5, 90); this.fly0 = null; },
+      zoom: k => { this.zoom = clamp(this.zoom * k, 4.5 / MAP_K, 90); this.fly0 = null; },
       hover: e => { if (e.pointerType !== "mouse") return; this.ray.setFromCamera(ndc(cv, e), this.cam); const h = this.ray.intersectObjects(hits())[0]; const id = h ? h.object.userData.id : null; cv.style.cursor = id ? "pointer" : "grab"; if (id !== S.hover) { S.hover = id; this.lift(); } },
       leave: () => { if (S.hover) { S.hover = null; this.lift(); } },
       tap: e => {
@@ -404,7 +404,7 @@ const MapView = {
     const loop = t => { const dt = Math.min(.05, (t - t0) / 1000); t0 = t; this.tick(dt, t / 1000); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
   },
-  clampT() { this.target.x = clamp(this.target.x, -18, 64); this.target.z = clamp(this.target.z, -76, 62); },
+  clampT() { this.target.x = clamp(this.target.x, -18 * MAP_K, 64 * MAP_K); this.target.z = clamp(this.target.z, -76 * MAP_K, 62 * MAP_K); },
   resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); },
   blocked(x, z, pad) {
     if (!inGeo(x, z, GEO.outline)) return true;
@@ -429,7 +429,7 @@ const MapView = {
     const trees = [];
     GEO.mounts.forEach(([mx, mz, r]) => { for (let k = 0; k < r * r * 7; k++) { const a = rnd() * 6.283, d = Math.sqrt(rnd()) * r, x = mx + Math.cos(a) * d, z = mz + Math.sin(a) * d; if (!inGeo(x, z, GEO.outline) || inGeo(x, z, GEO.urban)) continue; const hgt = 1 - d / r; trees.push([x, z, .34 + rnd() * .26, .2 + hgt * .9 + rnd() * .15, rnd()]); } });
     /* 군 지역 들판·마을 조각 */
-    for (let k = 0; k < 2600; k++) { const x = -20 + rnd() * 87, z = -79 + rnd() * 144; if (!inGeo(x, z, GEO.outline) || inGeo(x, z, GEO.urban)) continue; if (rnd() < .22) trees.push([x, z, .25 + rnd() * .2, .16 + rnd() * .2, rnd()]); }
+    for (let k = 0; k < 2600 * MAP_K; k++) { const x = (-20 + rnd() * 87) * MAP_K, z = (-79 + rnd() * 144) * MAP_K; if (!inGeo(x, z, GEO.outline) || inGeo(x, z, GEO.urban)) continue; if (rnd() < .22) trees.push([x, z, .25 + rnd() * .2, .16 + rnd() * .2, rnd()]); }
     /* 호수 · 공원 · 강 · 도로 */
     GEO.lakes.forEach(([x, z, rx, rz]) => { flat(ell(x, z, rx + .3, rz + .25), "#e3e2d8", .006); flat(ell(x, z, rx, rz), "#a9c9cb", .008); });
     INFRA.filter(i => i.category === "park").forEach(i => { flat(ell(i.map_x, i.map_z, 1.25, 1.0), "#dbe5d6", .007); for (let k = 0; k < 9; k++) { const a = rnd() * 6.28, d = Math.sqrt(rnd()) * .9; trees.push([i.map_x + Math.cos(a) * d * 1.15, i.map_z + Math.sin(a) * d * .9, .2 + rnd() * .1, .16, rnd()]); } });
@@ -446,7 +446,7 @@ const MapView = {
       const c = document.createElement("canvas"); c.width = 512; c.height = 160; const t = c.getContext("2d");
       t.font = '600 92px "PretendardLocal", sans-serif'; t.fillStyle = "rgba(31,38,34,.34)"; t.textAlign = "center"; t.textBaseline = "middle"; t.fillText(k, 256, 84);
       const tex = new T3.CanvasTexture(c); tex.encoding = T3.sRGBEncoding; tex.anisotropy = 8;
-      const big = k === "달성군" || k === "군위군", w = big ? 9 : k === "중구" ? 3.2 : 5;
+      const big = k === "달성군" || k === "군위군", w = (big ? 9 : k === "중구" ? 3.2 : 5) * MAP_K * .8;
       const g = new T3.PlaneGeometry(w, w * 160 / 512); g.rotateX(-Math.PI / 2); g.rotateY(Math.PI / 4);
       const me = new T3.Mesh(g, new T3.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false })); me.position.set(x, .03, z); me.renderOrder = 4; this.scene.add(me); this.guLabels.push(me);
     });
@@ -461,19 +461,19 @@ const MapView = {
     const fade = new T3.CanvasTexture(c), loader = new T3.TextureLoader();
     COMPLEX.forEach(u => loader.load(`img/map/${u.id}.jpg`, tex => {
       tex.encoding = T3.sRGBEncoding; tex.anisotropy = 8;
-      const top = u.id === "c01", geo = new T3.PlaneGeometry(8, 8); geo.rotateX(-Math.PI / 2);
+      const top = u.id === "c01", geo = new T3.PlaneGeometry(8 * MAP_K, 8 * MAP_K); geo.rotateX(-Math.PI / 2);
       const m = new T3.Mesh(geo, new T3.MeshStandardMaterial({ map: tex, alphaMap: fade, transparent: true, depthWrite: false, roughness: 1, metalness: 0 }));
       m.position.set(u.map_x, top ? .02 : .018, u.map_z); m.renderOrder = top ? 2 : 1; m.receiveShadow = true; this.decor.add(m);
     }, undefined, () => {})); /* 파일로 열면(file://) 그림이 안 올라와도 기본 지도는 그대로 */
   },
   buildCity() {
     /* 도심 격자 블록 (예시, 실제 건물 아님): 미분양 단지보다 낮고 무채색으로 */
-    const rnd = seeded("daegu-v5"), apt = [], low = [], field = [], CW = 2.0, CD = 1.7;
-    for (let gx = -11; gx < 34; gx++) for (let gz = -12; gz < 40; gz++) {
+    const rnd = seeded("daegu-v5"), apt = [], low = [], field = [], CW = 2.0 * MAP_K / 1.5, CD = 1.7 * MAP_K / 1.5;
+    for (let gx = Math.floor(-22 * MAP_K / CW); gx < Math.ceil(68 * MAP_K / CW); gx++) for (let gz = Math.floor(-20.4 * MAP_K / CD); gz < Math.ceil(68 * MAP_K / CD); gz++) {
       const cx = gx * CW + CW / 2, cz = gz * CD + CD / 2;
       if (!inGeo(cx, cz, GEO.urban) || rnd() < .3 || rnd() < .5) continue;
       const free = (x, z, pad) => !this.blocked(x, z, pad) && inGeo(x, z, GEO.urban) && !COMPLEX.some(u => Math.hypot(x - u.map_x, z - u.map_z) < 3.2); /* 바닥 지도 위에는 예시 블록을 두지 않음 */
-      const kind = rnd(), dense = Math.max(0, 1 - Math.hypot(cx - 18, cz - 13) / 22);
+      const kind = rnd(), dense = Math.max(0, 1 - Math.hypot(cx - 18 * MAP_K, cz - 13 * MAP_K) / (22 * MAP_K));
       if (kind < .36 + dense * .2) {
         const rows = 2 + Math.floor(rnd() * 2), hgt = (.3 + rnd() * .28 + dense * .2) * .6;
         for (let r = 0; r < rows; r++) { const z = cz - CD * .3 + r * (CD * .6 / Math.max(1, rows - 1)); for (const x of [cx - .45, cx + .45]) if (free(x, z, .15)) apt.push([x, z, .78, .24, hgt * (.85 + rnd() * .3)]); }
@@ -546,7 +546,7 @@ const MapView = {
     const hg = new T3.CylinderGeometry(.6, .6, .8, 8); hg.translate(0, .4, 0);
     const same = {}; /* 동 중심 근사로 같은 자리에 겹친 점은 작은 원으로 벌려 각각 누를 수 있게 */
     this.uPos = UNSOLD_LIST.map(u => { const key = u.lat + "," + u.lng, i = same[key] = (same[key] || 0) + 1, a = i * 2.4, r = i > 1 ? .75 * Math.sqrt(i - 1) : 0;
-      let x = (u.lng - 128.48) * 160 + Math.cos(a) * r, z = (35.93 - u.lat) * 200 + Math.sin(a) * r;
+      let x = PX(u.lng) + Math.cos(a) * r, z = PZ(u.lat) + Math.sin(a) * r;
       const c = COMPLEX.find(c => Math.abs(x - c.map_x) < 2.2 && Math.abs(z - c.map_z) < 2.0); if (c) z = c.map_z + (z >= c.map_z ? 2.0 : -2.0); /* 판정 단지 건물에 가려지지 않게 */
       return [x, z]; });
     this.uHits = UNSOLD_LIST.map((u, k) => {
@@ -636,7 +636,7 @@ const MapView = {
       u.ring0.material.opacity = u.light === "on" ? .9 : 0;
       u.sq.material.opacity = u.light === "dim" ? .5 : 0;
       u.lift = (u.lift || 0) + ((u.liftT || 0) - (u.lift || 0)) * Math.min(1, dt * 10); u.blds.position.y = u.lift;
-      const p = this.project(new T3.Vector3(u.c.map_x, u.top + .6, u.c.map_z)); const far = this.zoom < 18; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
+      const p = this.project(new T3.Vector3(u.c.map_x, u.top + .6, u.c.map_z)); const far = this.zoom < 18 / MAP_K; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
       u.lbl.style.left = p.x + "px"; u.lbl.style.top = p.y + "px"; u.lbl.classList.toggle("is-dot", far); const focus = this.lineFor && S.sel; u.lbl.classList.toggle("is-faint", !!focus && focus !== u.c.id);
     });
     const near = this.zoom >= 30;
