@@ -1,0 +1,10 @@
+[작업 1: 지도 재해석] 한국어로 진행 상황을 짧게 알려 주면서, 아래를 순서대로 끝까지 진행해. 단계 사이에 멈추지 말고, 문제가 생겼을 때만 멈춰서 물어봐.
+먼저 CLAUDE.md와 docs/지도재해석_ClaudeCode.md를 읽어. git이 없으면 git init 후 현재 상태를 커밋하고, 있으면 시작 전에 커밋해.
+
+1) python trace\make_refs.py 실행 → trace\refs 에 c01~c08 8장 확인 (Pillow 없으면 pip install pillow).
+2) BAZE API Gateway에서 Seedream Pro 이미지 편집(참고 이미지 + 프롬프트) 호출 방법을 확인. python server.py --models 로 모델 이름 확인, 필요하면 docs.factchat.kr 문서 확인. 키는 import server → server.API_KEY 로만 쓰고 절대 출력하지 마.
+   trace\seedream_baze.py 를 만들어 c01 1장만 생성(trace\reinterpret_prompt.txt 사용) → trace\art\c01_sangin.png.
+   생성된 이미지를 직접 열어 확인: 글자가 남았거나 길 배치가 크게 바뀌었으면 프롬프트를 고쳐 1번만 다시 생성.
+3) 괜찮으면 나머지 7장 생성. 실패한 건 1번만 재시도. trace\art\_preview.jpg (2x4 미리보기) 저장.
+4) docs/지도재해석_ClaudeCode.md 4단계대로 3D 지도 바닥에 배치하고 c06 좌표 수정, 출처 표기 추가. python src/shell/build.py 로 빌드.
+끝나면 커밋하고, 바뀐 파일과 확인 방법(시연하기.cmd → 지도)을 5줄로 요약해. 사용한 이미지 생성 횟수도 알려줘.
