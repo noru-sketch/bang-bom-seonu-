@@ -36,6 +36,10 @@ body.house-mode #mh .fab{display:none}
   #mh #form > .persona{order:1;margin-top:14px}
   #mh #form > .persona > .muted{display:none}
   #mh #form > .persona .chip{height:44px;font-size:15px}
+  /* 예시 단추가 둘이라(김지훈 · 모은 돈이 부족할 때) 좁은 폭(360)에서 두 줄로 접히면 첫 걸음이 한 화면을 넘친다. 한 줄로 두고 그 줄 안에서만 옆으로 민다 */
+  #mh #form > .persona{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  #mh #form > .persona::-webkit-scrollbar{display:none}
+  #mh #form > .persona > *{flex:none}
   #mh .fgrid{order:2;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:14px}
   #mh #vInput[data-step="1"] .f:not([data-step="1"]),#mh #vInput[data-step="2"] .f:not([data-step="2"]),#mh #vInput[data-step="3"] .f:not([data-step="3"]){display:none}
   #mh .f label,#mh .f .lb{font-size:15px;margin-bottom:4px;align-items:baseline}
