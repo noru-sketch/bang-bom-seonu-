@@ -273,12 +273,11 @@ async function run(cdp) {
     })
     await check(`${P} 8. 홈 "아이 눈높이 90cm로 보기" → 집 보기 3D 아이 눈높이: 시트 접힘, 끌어서 둘러보기, 바닥 눌러 옮겨 가기`, async () => {
       await fresh('#home')
-      // 칩 줄은 큰 그림 아래에 있다. 손가락으로 민 것처럼 칩 줄이 위 막대 아래에 붙는 곳까지 내린다
-      await ev(`(() => { const r = ${q('#homeCats')}; scrollTo(0, r.getBoundingClientRect().top + scrollY - 72) })()`); await sleep(500)
-      await tap(`${q('#homeCats')}.querySelector('[data-cat="help"]')`, '칩 돕는 방법'); await sleep(700)
-      await tap(q('#zzNext'), '다음'); await sleep(900); await tap(q('#zzNext'), '다음'); await sleep(1000)
+      // 홈 6화면: 링크는 4번 화면(해결 2 · #home-house)의 "평면도에서 3D로" 줄에 있다. 손가락으로 민 것처럼 링크가 화면 가운데 오도록 내린다
+      await ev(`(() => { const a = ${q('#home-house a[data-eye="child"]')}; scrollTo(0, a.getBoundingClientRect().top + scrollY - innerHeight / 2) })()`); await sleep(1000)
       const link = await ev(`__q.rect('a[data-eye="child"]')`)
-      await tap(q('a[data-eye="child"]'), '아이 눈높이 90cm로 보기'); await waitFor(`location.hash === '#house'`, '#house', 6000)
+      // 집 보기는 고른 방을 주소 뒤에 붙인다(#house/liv). 그래서 '#house' 로 시작하는지만 본다
+      await tap(q('a[data-eye="child"]'), '아이 눈높이 90cm로 보기'); await waitFor(`location.hash.startsWith('#house')`, '#house', 6000)
       const f = await waitFrame('')
       // 방 배치 도구(iframe) 안의 눈높이 상태: 3D 화면 바깥 요소의 data-eye-* 와 캔버스·시트 크기
       const eye = `(() => { const d = ${q('#kkumiFrame')}.contentDocument, r = d && d.querySelector('[data-eye-mode]'), c = r && r.querySelector('canvas'); if (!c || !r.dataset.eyeX) return null; const b = c.getBoundingClientRect(), s = d.querySelector('section[aria-label="조작 패널"]'); return { mode: r.dataset.eyeMode, x: +r.dataset.eyeX, y: +r.dataset.eyeY, yaw: +r.dataset.eyeYaw, markers: +r.dataset.eyeMarkers, cx: b.left, cy: b.top, cw: b.width, ch: b.height, sheet: s ? Math.round(s.getBoundingClientRect().height) : -1, note: __q.txt(r).slice(0, 70) } })()`
