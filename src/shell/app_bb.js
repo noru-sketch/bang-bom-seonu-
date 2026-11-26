@@ -11,14 +11,14 @@ const man1 = n => n == null ? "—" : (Math.round(n * 10) / 10).toFixed(1);
 function toast(m) { const t = $("#mhToast"); t.textContent = m; t.classList.add("is-on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("is-on"), 2400); }
 
 /* ─── 상태 ─── */
-const PERSONA = { age: 27, monthly_income: 250, annual_income_gross: null, assets: 1000, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
+const PERSONA = { age: 27, monthly_income: 250, annual_income_gross: null, assets: 4500, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
 const S = { mode: "browse", profile: null, pr: null, evals: {}, sel: null, hover: null, chk: {} };
 try { const raw = localStorage.getItem("mh-profile"); if (raw) { S.profile = JSON.parse(raw); } } catch (e) {}
-const COMPLEX = COMPLEXES.map(c => Object.assign({}, c, { nearby: nearbyOf(c) }));
+const COMPLEX = COMPLEXES.map(c => { const nb = nearbyOf(c); return Object.assign({}, c, { nearby: nb, infra_score: infraScore(nb) }); });
 function recompute() {
   if (!S.profile) { S.pr = null; S.evals = {}; return; }
   S.pr = profileResult(S.profile); S.evals = {};
-  COMPLEX.forEach(c => { S.evals[c.id] = evaluate(S.profile, c, S.pr); });
+  COMPLEX.forEach(c => { S.evals[c.id] = evaluate(S.profile, c, S.pr); c.infra_score = infraScore(c.nearby, S.profile.priorities || []); });
 }
 function counts() { const n = { on: 0, dim: 0, off: 0 }; Object.values(S.evals).forEach(e => n[e.light]++); return n; }
 function minNet() { const v = Object.values(S.evals).map(e => e.net_monthly).filter(x => x != null); return v.length ? Math.min(...v) : null; }
@@ -102,11 +102,11 @@ function whyLine(c) {
 }
 function cardHTML(id) {
   const c = COMPLEX.find(x => x.id === id), ev = S.evals[id], match = S.mode === "match" && ev;
-  const pr = (S.profile && S.profile.priorities) || [], near = c.nearby.slice().sort((a, b) => pr.includes(b.category) - pr.includes(a.category)).map(n => `<li><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${CAT_DARK[n.category]};margin-right:6px"></i>${esc(n.name)} · ${n.walk_min != null ? `도보 ${n.walk_min}분` : `차 ${n.drive_min}분`}</span></li>`).join("");
-  const mg = c.mgmt_known ? `${c.mgmt}만 원` : `미확인 (추정 ${c.mgmt}만 원)`;
+  const near = c.nearby.map(n => `<li><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${CAT_DARK[n.category]};margin-right:6px"></i>${esc(n.name)}</span><span>${n.walk_min != null ? `도보 ${n.walk_min}분` : `차 ${n.drive_min}분`} · ${n.distance_km}km</span></li>`).join("");
+  const mg = c.mgmt_known ? `${c.mgmt}만 원` : `${c.mgmt}만 원(예시 · 추정)`;
   const roomNote = c.room_id === "room_84a" && c.area_m2 !== 84 ? `<p class="small muted" style="margin-top:6px">집 보기는 ${c.area_m2}㎡ 평면이 아직 없어 84㎡ 구조로 대신 보여줘요.</p>` : "";
   let head = `<div class="cc-plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2>
-    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div>${whyLine(c)}</div>
+    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div>${whyLine(c)}${!c.is_sample && c.source_url ? `<p class="cc-src">단지 정보 출처 <a href="${esc(c.source_url)}" target="_blank" rel="noopener">${esc(c.source)} ↗</a> · 금액·관리비는 예시</p>` : ""}</div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>`;
   let body = "";
   if (match) {
@@ -116,11 +116,11 @@ function cardHTML(id) {
       ${ev.net_monthly == null && ev.net_monthly_best != null ? "요건 충족 지원만으로는 어려워요 · 확인 필요까지 받을 때 기준<br>" : ""}지원 모두 받으면 ${man1(ev.net_monthly_best)}만 · 하나도 못 받으면 ${ev.net_monthly_worst != null ? man1(ev.net_monthly_worst) + "만 원" : "대출 한도 초과"}</p>
       <p class="why">${esc(ev.light_reason)}</p>`;
     if (bd) body += `<details class="fold"><summary>계산 내역</summary><table class="calc"><tbody>
-      <tr><td>월세</td><td>${man1(bd.rent)}만</td></tr><tr><td>관리비${c.mgmt_known ? "" : " (추정)"}</td><td>${man1(bd.mgmt)}만</td></tr>
+      <tr><td>월세</td><td>${man1(bd.rent)}만</td></tr><tr><td>관리비${c.mgmt_known ? "" : " (예시 · 추정)"}</td><td>${man1(bd.mgmt)}만</td></tr>
       <tr><td>보증금 대출이자<br><span class="muted">${wonK(bd.loan_needed)} × ${bd.rate}% ÷ 12</span></td><td>${man1(bd.loan_interest)}만</td></tr>
       <tr><td>월세 지원</td><td class="neg">−${man1(bd.rent_support)}만</td></tr>
       <tr class="tot"><td>월 실부담 · ${esc(bd.financing)}</td><td>${man1(bd.total)}만</td></tr></tbody></table>
-      <p class="small muted" style="margin-top:6px">실부담 = 월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원 (이자지원은 금리에서 빼서 계산)</p></details>`;
+      <p class="small muted" style="margin-top:6px">실부담 = 월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원 (이자지원은 금리에서 빼서 계산)</p><p class="small muted" style="margin-top:4px">참고 · 중개수수료 지원은 한 번만 받는 돈이라 월 부담에는 넣지 않았어요</p></details>`;
     body += `<details class="fold"><summary>적용 지원 · 빠진 지원</summary><ul class="lst">${al.applied.map(a => `<li><span>${esc(a.name)}</span><span class="st st--${a.status}">${ST_KO[a.status]}</span></li>`).join("") || "<li><span>대출·지원 없이 계산</span><span></span></li>"}
       ${al.not_applied.map(a => `<li><span class="muted">${esc(a.name)}</span><span style="white-space:normal;text-align:right">${esc(a.reason)}</span></li>`).join("")}</ul></details>`;
     body += `<details class="fold"><summary>계약 전 체크리스트</summary><ul class="chk">${RULES.fixed_checklist.concat(["등기부등본으로 소유자·근저당 확인", "전세보증보험 가입 가능 여부 확인"]).map((t, i) => `<li><label><input type="checkbox" data-ck="${c.id}-${i}"${S.chk[c.id + "-" + i] ? " checked" : ""}>${esc(t)}</label></li>`).join("")}</ul></details>`;
@@ -129,7 +129,7 @@ function cardHTML(id) {
   } else {
     body += `<p class="big">보증금<b>${wonK(c.deposit)}</b>${c.rent ? `월세 ${c.rent}만 원` : "월세 없음 (전세)"} · 관리비 ${mg}</p><p class="why">내 조건을 넣으면 대출·지원을 반영한 실제 월 부담을 계산해 드려요.</p>`;
   }
-  body += `<details class="fold"><summary>가까운 시설</summary><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
+  body += `<details class="fold"><summary>주변 시설까지 거리</summary><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
   body += roomNote;
   body += `<div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
   return `<div class="cc">${head}${body}</div>`;
@@ -142,7 +142,7 @@ function openCard(id) {
   $$("[data-ck]").forEach(i => i.addEventListener("change", () => S.chk[i.dataset.ck] = i.checked));
   document.body.classList.add("card-open"); syncPl();
 }
-function closeCard() { document.body.classList.remove("card-open"); $("#panelR").classList.remove("is-open"); syncPl(); }
+function closeCard() { document.body.classList.remove("card-open"); $("#panelR").classList.remove("is-open"); syncPl(); if (MapView.units && MapView.units.c01) MapView.paintSel(); }
 
 /* ─── S1 입력 ─── */
 const fval = { homeless: 1, lives_with_parents: 0, daegu_resident_or_moving: 1 };
@@ -157,10 +157,43 @@ function fillForm(p) {
 function syncSeg() { $$("#form .seg").forEach(g => $$("button", g).forEach(b => b.classList.toggle("is-on", String(fval[g.dataset.k]) === b.dataset.v))); }
 $$("#form .seg").forEach(g => $$("button", g).forEach(b => b.addEventListener("click", () => { fval[g.dataset.k] = +b.dataset.v; syncSeg(); })));
 function renderPrio() {
+  if (!$("#prioChips")) return;
   $("#prioChips").innerHTML = Object.entries(CAT_KO).map(([k, v]) => `<button type="button" class="chip${prio.includes(k) ? " is-on" : ""}" data-p="${k}" aria-pressed="${prio.includes(k)}">${v}</button>`).join("");
   $$("#prioChips button").forEach(b => b.addEventListener("click", () => { const k = b.dataset.p; prio = prio.includes(k) ? prio.filter(x => x !== k) : [...prio, k]; renderPrio(); }));
 }
-$("#fillPersona").onclick = () => fillForm(PERSONA);
+/* 한 문항씩 넘기는 입력 */
+const Step = {
+  i: 0,
+  fields() { return $$("#form .fgrid > .f"); },
+  check(f) {
+    const inp = $("input", f); if (!inp || !inp.required) return true;
+    const v = inp.value.trim(), n = Number(v), err = $(".err", f);
+    let msg = "";
+    if (v === "") msg = inp.id === "f-assets" ? "없으면 0을 넣어주세요" : "값을 넣어주세요";
+    else if (inp.id === "f-age" && (n < 19 || n > 70)) msg = "19~70 사이로 넣어주세요";
+    else if (inp.id === "f-budget" && n <= 0) msg = "0보다 큰 금액을 넣어주세요";
+    if (err) err.textContent = msg;
+    if (msg) inp.focus();
+    return !msg;
+  },
+  go(k, focus = true) {
+    const fs = this.fields(), n = fs.length; this.i = clamp(k, 0, n - 1);
+    fs.forEach((f, j) => f.classList.toggle("is-cur", j === this.i));
+    $("#stpNo").textContent = `${this.i + 1} / ${n}`; $("#stpFill").style.width = ((this.i + 1) / n * 100) + "%";
+    $("#stPrev").disabled = this.i === 0;
+    const last = this.i === n - 1; $("#stNext").hidden = last; $("#stSubmit").hidden = !last;
+    const inp = $("input", fs[this.i]); if (focus && inp && !isMobile()) setTimeout(() => inp.focus(), 60);
+  },
+  next() { const f = this.fields()[this.i]; if (this.check(f)) this.go(this.i + 1); }
+};
+$("#form").classList.add("is-step");
+$("#stNext").onclick = () => Step.next();
+$("#stPrev").onclick = () => Step.go(Step.i - 1);
+$$("#form .fgrid input").forEach(inp => inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); if (Step.i < Step.fields().length - 1) Step.next(); else $("#form").requestSubmit(); } }));
+$$("#form .seg button").forEach(b => b.addEventListener("click", () => setTimeout(() => { if (Step.i < Step.fields().length - 1) Step.go(Step.i + 1); }, 220)));
+Step.go(0, false);
+$("#fillPersona").onclick = () => { fillForm(PERSONA); Step.go(Step.fields().length - 1); };
+$("#fillShort").onclick = () => { fillForm(Object.assign({}, PERSONA, { assets: 1000 })); Step.go(Step.fields().length - 1); };
 $("#formBack").onclick = () => { S.mode = "browse"; location.hash = "#map"; };
 $("#form").addEventListener("submit", e => {
   e.preventDefault();
@@ -170,7 +203,7 @@ $("#form").addEventListener("submit", e => {
   const errs = { age: p.age == null || p.age < 19 || p.age > 70 ? "19~70 사이로 넣어주세요" : "", income: p.monthly_income == null || p.monthly_income < 0 ? "월 실수령을 넣어주세요" : "",
     assets: p.assets == null || p.assets < 0 ? "모은 돈을 넣어주세요 (없으면 0)" : "", budget: p.monthly_budget == null || p.monthly_budget <= 0 ? "월 예산을 넣어주세요" : "" };
   Object.entries(errs).forEach(([k, v]) => $("#e-" + k).textContent = v);
-  const bad = Object.entries(errs).find(([, v]) => v); if (bad) { $("#f-" + bad[0]).focus(); return; }
+  const bad = Object.entries(errs).find(([, v]) => v); if (bad) { const fi = Step.fields().findIndex(f => f.contains($("#f-" + bad[0]))); Step.go(fi); return; }
   S.profile = p; try { localStorage.setItem("mh-profile", JSON.parse(JSON.stringify(p)) && JSON.stringify(p)); } catch (er) {}
   recompute(); S.mode = "match"; jpOpen = false; location.hash = "#map"; MapView.applyMode(true);
 });
@@ -257,7 +290,7 @@ const MapView = {
     this.buildCity(); this.buildLandmarks(); this.buildUnits();
     this.lines = new T3.Group(); sc.add(this.lines);
     this.ray = new T3.Raycaster();
-    const hits = () => Object.values(this.units).map(u => u.hit);
+    const hits = () => Object.values(this.units).filter(u => u.g.visible).map(u => u.hit);
     dragInput(cv, {
       down: () => { this.fly0 = null; },
       drag: (dx, dy) => { const s = 1 / this.zoom, e = Math.asin(1 / Math.sqrt(3)); const right = new T3.Vector3(1, 0, -1).normalize(), fwd = new T3.Vector3(-1, 0, -1).normalize(); this.target.addScaledVector(right, -dx * s).addScaledVector(fwd, dy * s / Math.sin(e)); this.clampT(); },
@@ -272,7 +305,7 @@ const MapView = {
       }
     });
     new ResizeObserver(() => this.resize()).observe($("#mapWrap"));
-    this.resize(); this.applyMode(false); this.ok = true;
+    this.resize(); this.applyMode(false); this.ok = true; this.overview(false);
     let t0 = performance.now();
     const loop = t => { const dt = Math.min(.05, (t - t0) / 1000); t0 = t; this.tick(dt, t / 1000); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
@@ -281,7 +314,7 @@ const MapView = {
   resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); },
   blocked(x, z, pad) {
     if (!inGeo(x, z, GEO.outline)) return true;
-    for (const c of COMPLEX) if (Math.abs(x - c.map_x) < 2.0 + pad && Math.abs(z - c.map_z) < 1.8 + pad) return true;
+    for (const c of COMPLEX) if (Math.abs(x - c.map_x) < 1.35 + pad && Math.abs(z - c.map_z) < 1.2 + pad) return true;
     for (const i of INFRA) if (Math.hypot(x - i.map_x, z - i.map_z) < (i.category === "park" ? 1.4 : .9)) return true;
     if (GEO.lakes.some(([lx, lz, rx, rz]) => ((x - lx) / (rx + .5)) ** 2 + ((z - lz) / (rz + .5)) ** 2 < 1)) return true;
     const near = (list, extra) => list.some(r => { for (let k = 0; k < r.pts.length - 1; k++) if (segD(x, z, r.pts[k], r.pts[k + 1]) < r.w / 2 + extra) return true; return false; });
@@ -324,35 +357,21 @@ const MapView = {
       const me = new T3.Mesh(g, new T3.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false })); me.position.set(x, .03, z); me.renderOrder = 4; this.scene.add(me); this.guLabels.push(me);
     });
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(mk);
-    this.buildArt();
-  },
-  buildArt() {
-    /* 단지 주변 바닥 지도: OpenStreetMap 데이터로 다시 그린 그림(img/map, 8x8 단위). 가장자리는 둥글게 흐려지게 */
-    const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d");
-    const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, "#fff"); g.addColorStop(.6, "#fff"); g.addColorStop(1, "#000");
-    x.fillStyle = g; x.fillRect(0, 0, 256, 256);
-    const fade = new T3.CanvasTexture(c), loader = new T3.TextureLoader();
-    COMPLEX.forEach(u => loader.load(`img/map/${u.id}.jpg`, tex => {
-      tex.encoding = T3.sRGBEncoding; tex.anisotropy = 8;
-      const top = u.id === "c01", geo = new T3.PlaneGeometry(8, 8); geo.rotateX(-Math.PI / 2);
-      const m = new T3.Mesh(geo, new T3.MeshStandardMaterial({ map: tex, alphaMap: fade, transparent: true, depthWrite: false, roughness: 1, metalness: 0 }));
-      m.position.set(u.map_x, top ? .02 : .018, u.map_z); m.renderOrder = top ? 2 : 1; m.receiveShadow = true; this.decor.add(m);
-    }, undefined, () => {})); /* 파일로 열면(file://) 그림이 안 올라와도 기본 지도는 그대로 */
   },
   buildCity() {
     /* 도심 격자 블록 (예시, 실제 건물 아님): 미분양 단지보다 낮고 무채색으로 */
     const rnd = seeded("daegu-v5"), apt = [], low = [], field = [], CW = 2.0, CD = 1.7;
     for (let gx = -11; gx < 34; gx++) for (let gz = -12; gz < 40; gz++) {
       const cx = gx * CW + CW / 2, cz = gz * CD + CD / 2;
-      if (!inGeo(cx, cz, GEO.urban) || rnd() < .3 || rnd() < .5) continue;
-      const free = (x, z, pad) => !this.blocked(x, z, pad) && inGeo(x, z, GEO.urban) && !COMPLEX.some(u => Math.hypot(x - u.map_x, z - u.map_z) < 3.2); /* 바닥 지도 위에는 예시 블록을 두지 않음 */
+      if (!inGeo(cx, cz, GEO.urban) || rnd() < .3) continue;
+      const free = (x, z, pad) => !this.blocked(x, z, pad) && inGeo(x, z, GEO.urban);
       const kind = rnd(), dense = Math.max(0, 1 - Math.hypot(cx - 18, cz - 13) / 22);
       if (kind < .36 + dense * .2) {
-        const rows = 2 + Math.floor(rnd() * 2), hgt = (.3 + rnd() * .28 + dense * .2) * .6;
+        const rows = 2 + Math.floor(rnd() * 2), hgt = .3 + rnd() * .28 + dense * .2;
         for (let r = 0; r < rows; r++) { const z = cz - CD * .3 + r * (CD * .6 / Math.max(1, rows - 1)); for (const x of [cx - .45, cx + .45]) if (free(x, z, .15)) apt.push([x, z, .78, .24, hgt * (.85 + rnd() * .3)]); }
       } else if (kind < .9) {
-        for (let k = 0; k < 7; k++) { const x = cx + (rnd() - .5) * CW * .8, z = cz + (rnd() - .5) * CD * .8; if (free(x, z, .1)) low.push([x, z, .22 + rnd() * .2, .2 + rnd() * .18, (.08 + rnd() * .1) * .7]); }
-      } else if (free(cx, cz, .5)) { field.push([cx - .25, cz]); apt.push([cx + .55, cz, .26, .9, .18]); }
+        for (let k = 0; k < 7; k++) { const x = cx + (rnd() - .5) * CW * .8, z = cz + (rnd() - .5) * CD * .8; if (free(x, z, .1)) low.push([x, z, .22 + rnd() * .2, .2 + rnd() * .18, .08 + rnd() * .1]); }
+      } else if (free(cx, cz, .5)) { field.push([cx - .25, cz]); apt.push([cx + .55, cz, .26, .9, .3]); }
     }
     const inst = (arr, color) => {
       const geo = new T3.BoxGeometry(1, 1, 1); geo.translate(0, .5, 0);
@@ -360,7 +379,7 @@ const MapView = {
       arr.forEach((b, i) => { m.compose(new T3.Vector3(b[0], 0, b[1]), q, new T3.Vector3(b[2], b[4], b[3])); im.setMatrixAt(i, m); });
       im.castShadow = true; im.receiveShadow = true; this.decor.add(im);
     };
-    inst(apt, "#eeeeec"); inst(low, "#ebeae7");
+    inst(apt, "#e4e5e2"); inst(low, "#dddcd8");
     field.forEach(([x, z]) => { const f = rbox(1.0, .02, 1.1, .3, mat("#e2d9c8")); f.position.set(x, 0, z); f.castShadow = false; this.decor.add(f); });
   },
   buildLandmarks() {
@@ -382,35 +401,33 @@ const MapView = {
   buildUnits() {
     COMPLEX.forEach(c => {
       const g = new T3.Group(); g.position.set(c.map_x, 0, c.map_z); this.scene.add(g);
-      const rim = rbox(3.3, .03, 2.8, .3, mat("#d9e8de")); g.add(rim); const site = rbox(3.1, .05, 2.6, .25, mat("#f7f2e8")); g.add(site);
-      const rnd = seeded(c.id), n = 3 + (rnd() > .5 ? 1 : 0), L = rnd() > .5;
+      const rimM = mat("#d9e8de").clone(); const rim = rbox(1.95, .03, 1.65, .3, rimM); g.add(rim); const site = rbox(1.8, .05, 1.5, .25, mat("#f7f2e8")); g.add(site);
+      const rnd = seeded(c.id), n = 2 + (rnd() > .45 ? 1 : 0), L = false;
       const wallTex = windowTexture(c.id, 1, false);
       const em = { browse: windowTexture(c.id, .4, true), on: windowTexture(c.id, .7, true), dim: windowTexture(c.id, .3, true) };
       const wallM = new T3.MeshStandardMaterial({ color: 0xffffff, map: wallTex, roughness: .9, emissive: new T3.Color("#FFC46B").convertSRGBToLinear(), emissiveMap: em.browse, emissiveIntensity: 1.2 });
       const roofM = new T3.MeshStandardMaterial({ color: new T3.Color("#FFF1D6").convertSRGBToLinear(), roughness: .9 });
       const bandM = new T3.MeshStandardMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), roughness: .8 });
-      const blds = new T3.Group(); g.add(blds); let top = 0;
+      const blds = new T3.Group(); g.add(blds);
       for (let k = 0; k < n; k++) {
-        const h = (2.7 + rnd() * 1.1) * 2.5, x = L && k === n - 1 ? .95 : -1.05 + k * (2.1 / (n - (L ? 2 : 1) || 1)), z = L && k === n - 1 ? .45 : -.4;
-        const b = new T3.Mesh(new T3.BoxGeometry(.62, h, 1.0), [wallM, wallM, roofM, roofM, wallM, wallM]); b.castShadow = true; b.receiveShadow = true;
+        const h = 2.7 + rnd() * 1.1, x = n === 1 ? 0 : -.5 + k * (1 / (n - 1)), z = (k % 2 ? .22 : -.22);
+        const b = new T3.Mesh(new T3.BoxGeometry(.42, h, .66), [wallM, wallM, roofM, roofM, wallM, wallM]); b.castShadow = true; b.receiveShadow = true;
         if (L && k === n - 1) b.rotation.y = Math.PI / 2;
-        b.position.set(clamp(x, -1.05, 1.05), h / 2 + .05, z); blds.add(b); top = Math.max(top, h);
-        const t = .06, y = h + .07, bw = .62, bd = 1.0, rot = b.rotation.y;
+        b.position.set(x, h / 2 + .05, z); blds.add(b);
+        const t = .05, y = h + .07, bw = .42, bd = .66, rot = b.rotation.y;
         const band = new T3.Group(); band.position.set(b.position.x, y, b.position.z); band.rotation.y = rot;
         [[0, -bd / 2 + t / 2, bw, t], [0, bd / 2 - t / 2, bw, t], [-bw / 2 + t / 2, 0, t, bd], [bw / 2 - t / 2, 0, t, bd]].forEach(([px, pz, w, d]) => { const m = new T3.Mesh(new T3.BoxGeometry(w, .05, d), bandM); m.position.set(px, 0, pz); band.add(m); });
         blds.add(band);
         const crown = new T3.Mesh(new T3.BoxGeometry(bw * .55, .22, bd * .4), bandM); crown.position.set(b.position.x, h + .16, b.position.z); crown.rotation.y = rot; blds.add(crown);
       }
-      const beam = new T3.Mesh(new T3.CylinderGeometry(1.3, 1.55, 22, 32, 1, true), new T3.MeshBasicMaterial({ map: beamTex(), color: 0xffc46b, transparent: true, opacity: 0, blending: T3.AdditiveBlending, depthWrite: false, side: T3.DoubleSide })); beam.position.y = 11; beam.renderOrder = 3; g.add(beam);
-      const glow = new T3.Sprite(new T3.SpriteMaterial({ map: glowTex(), color: 0xffc46b, blending: T3.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 })); glow.scale.set(6.5, 6.5, 1); glow.position.y = 1.4; g.add(glow);
-      const ring = new T3.Mesh(new T3.RingGeometry(1.75, 1.88, 48), new T3.MeshBasicMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), transparent: true, opacity: 0, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .05; g.add(ring);
-      const ring0 = new T3.Mesh(new T3.RingGeometry(1.75, 1.95, 48), new T3.MeshBasicMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), transparent: true, opacity: 0, depthWrite: false })); ring0.rotation.x = -Math.PI / 2; ring0.position.y = .06; g.add(ring0);
-      const sq = new T3.LineSegments(new T3.EdgesGeometry(new T3.PlaneGeometry(3.5, 3.0)), new T3.LineDashedMaterial({ color: new T3.Color("#9a6a1f").convertSRGBToLinear(), dashSize: .14, gapSize: .1, transparent: true, opacity: 0 })); sq.rotation.x = -Math.PI / 2; sq.position.y = .05; sq.computeLineDistances(); g.add(sq);
-      /* 클릭 대상: 동 묶음 전체를 덮는 보이지 않는 박스 */
-      const hit = new T3.Mesh(new T3.BoxGeometry(3.6, top + 1, 3.2), new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.y = (top + 1) / 2; hit.userData.id = c.id; g.add(hit);
+      const beam = new T3.Mesh(new T3.CylinderGeometry(.75, .9, 9, 32, 1, true), new T3.MeshBasicMaterial({ map: beamTex(), color: 0xffc46b, transparent: true, opacity: 0, blending: T3.AdditiveBlending, depthWrite: false, side: T3.DoubleSide })); beam.position.y = 4.6; beam.renderOrder = 3; g.add(beam);
+      const glow = new T3.Sprite(new T3.SpriteMaterial({ map: glowTex(), color: 0xffc46b, blending: T3.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 })); glow.scale.set(3.6, 3.6, 1); glow.position.y = 1; g.add(glow);
+      const ring = new T3.Mesh(new T3.RingGeometry(1.05, 1.13, 48), new T3.MeshBasicMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), transparent: true, opacity: 0, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .05; g.add(ring);
+      const sq = new T3.LineSegments(new T3.EdgesGeometry(new T3.PlaneGeometry(2.2, 1.9)), new T3.LineDashedMaterial({ color: new T3.Color("#9a6a1f").convertSRGBToLinear(), dashSize: .14, gapSize: .1, transparent: true, opacity: 0 })); sq.rotation.x = -Math.PI / 2; sq.position.y = .05; sq.computeLineDistances(); g.add(sq);
+      const hit = new T3.Mesh(new T3.BoxGeometry(1.9, 4.2, 1.6), new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.y = 1.8; hit.userData.id = c.id; g.add(hit);
       const lbl = document.createElement("button"); lbl.className = "clabel"; lbl.setAttribute("aria-label", c.name + " 카드 열기");
       lbl.addEventListener("click", () => this.select(c.id, true)); $("#lblLayer").appendChild(lbl);
-      this.units[c.id] = { c, g, blds, wallM, roofM, bandM, em, glow, beam, ring, ring0, top, sq, hit, lbl, cur: 1.2, tgt: 1.2, delay: 0, light: "browse", lift: 0 };
+      this.units[c.id] = { c, g, blds, wallM, roofM, bandM, rimM, em, glow, beam, ring, sq, hit, lbl, cur: 1.2, tgt: 1.2, delay: 0, light: "browse", lift: 0 };
     });
   },
   applyMode(animate) {
@@ -425,29 +442,75 @@ const MapView = {
       u.tgt = { browse: 1.0, on: 3.0, dim: 1.0, off: 0 }[light];
       if (animate && light !== "browse") u.cur = 0;
       const off = light === "off";
-      u.wallM.color.set(off ? new T3.Color("#c3c6c4").convertSRGBToLinear() : new T3.Color("#ffffff"));
-      u.bandM.color.set(new T3.Color(off ? "#9DB5B1" : "#1f6b4f").convertSRGBToLinear());
+      u.baseWall = off ? "#b4b8b7" : "#ffffff"; u.baseBand = off ? "#9DB5B1" : "#1f6b4f";
       const ev = S.evals[id];
       u.lbl.className = "clabel" + (light === "on" ? " is-on" : light === "dim" ? " is-dim" : light === "off" ? " is-off" : "");
       u.lbl.innerHTML = (light !== "browse" ? `<i>${LIGHT_ICON[light]}</i>` : `<i class="b">●</i>`) + esc(u.c.name.replace("(샘플)", ""));
     });
-    this.nightT = S.mode === "match" ? 1 : 0;
+    this.nightT = S.mode === "match" ? 1 : 0; this.paintSel();
     if (S.sel && $("#panelR").classList.contains("is-open")) openCard(S.sel);
+  },
+  /* 단지마다 선택 색이 달라요: [벽, 띠·바닥] */
+  /* 구마다 같은 선택 색 (서로 잘 구분되게): [벽, 띠·바닥·라벨] */
+  GU_PAL: { 달서구: ["#ffb36b", "#d9600f"], 북구: ["#7fb8ff", "#1d5fd1"], 동구: ["#c39bff", "#7034d6"], 수성구: ["#6fe0b0", "#0d8f5c"], 서구: ["#ff8fa8", "#d12e5a"], 중구: ["#ffe066", "#b38600"], 남구: ["#6fd9e8", "#0b8a9c"] },
+  paintSel() {
+    const cardOn = document.body.classList.contains("card-open");
+    Object.entries(this.units).forEach(([id, u]) => {
+      const sel = id === S.sel, hide = !!S.sel && cardOn && !sel;
+      u.g.visible = !hide; u.lbl.style.display = (hide || (sel && cardOn)) ? "none" : "";
+      const pal = this.GU_PAL[u.c.district] || ["#8fd6ad", "#0f7a4a"];
+      u.wallM.color.set(new T3.Color(sel ? pal[0] : (u.baseWall || "#ffffff")).convertSRGBToLinear());
+      u.bandM.color.set(new T3.Color(sel ? pal[1] : (u.baseBand || "#1f6b4f")).convertSRGBToLinear());
+      u.rimM.color.set(new T3.Color(sel ? pal[1] : "#d9e8de").convertSRGBToLinear());
+      u.lbl.style.background = sel ? pal[1] : ""; u.lbl.style.color = sel ? "#fff" : "";
+    });
+  },
+  /* P(월드 좌표)가 화면 (dx, dy)에 오도록 하는 카메라 target 계산 */
+  placeAt(P, Z, dx, dy) {
+    const W = innerWidth, H = innerHeight, cam = this.cam;
+    const save = { p: cam.position.clone(), q: cam.quaternion.clone() };
+    cam.position.copy(P).add(new T3.Vector3(20, 20, 20)); cam.lookAt(P); cam.updateMatrixWorld();
+    const r = new T3.Vector3().setFromMatrixColumn(cam.matrixWorld, 0), u = new T3.Vector3().setFromMatrixColumn(cam.matrixWorld, 1), d = new T3.Vector3(-1, -1, -1).normalize();
+    cam.position.copy(save.p); cam.quaternion.copy(save.q);
+    const T = P.clone().addScaledVector(r, (W / 2 - dx) / Z).addScaledVector(u, (dy - H / 2) / Z);
+    return T.addScaledVector(d, -T.y / d.y);
+  },
+  /* 카드에 가리지 않는 지도 영역의 가운데로 단지를 옮기며 줌인 */
+  flyTo(c) {
+    const W = innerWidth, H = innerHeight, Z = Math.max(this.zoom, 46), pr = $("#panelR");
+    let dx = W / 2, dy = (140 + H) / 2;
+    if (isMobile()) { const top = pr.offsetTop || H * .5; dy = (150 + top) / 2; }
+    else if (pr.offsetWidth) dx = Math.max(160, pr.offsetLeft / 2);
+    const T = this.placeAt(new T3.Vector3(c.map_x, 1.7, c.map_z), Z, dx, dy);
+    this.fly(T.x, T.z, Z);
+  },
+  /* 단지 8곳이 모두 보이게 줌아웃 (왼쪽 패널·상단 바를 피해서) */
+  overview(animate) {
+    const W = innerWidth, H = innerHeight, pl = $("#panelL"), mob = isMobile();
+    const left = !mob && pl && !pl.hidden && pl.offsetWidth ? pl.offsetLeft + pl.offsetWidth + 24 : 24, right = W - 24;
+    const top = mob ? (pl && !pl.hidden && pl.offsetHeight ? pl.getBoundingClientRect().bottom + 16 : 190) : 150, bottom = H - (mob ? 130 : 90);
+    const sx = c => (c.map_x - c.map_z) / Math.SQRT2, sy = c => -(c.map_x + c.map_z) / Math.sqrt(6);
+    const xs = COMPLEX.map(sx), ys = COMPLEX.map(sy), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const hTop = 4.6 * Math.sqrt(2 / 3);
+    const Z = clamp(Math.min((right - left) / (x1 - x0 + 3), (bottom - top) / (y1 - y0 + hTop + 2)), 6, 40);
+    const mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + hTop / 2;
+    const P = new T3.Vector3((Math.SQRT2 * mx - Math.sqrt(6) * my) / 2, 0, (-Math.SQRT2 * mx - Math.sqrt(6) * my) / 2);
+    const T = this.placeAt(P, Z, (left + right) / 2, (top + bottom) / 2);
+    if (animate) this.fly(T.x, T.z, Z); else { this.target.set(T.x, 0, T.z); this.zoom = Z; this.fly0 = null; }
   },
   lift() { Object.entries(this.units).forEach(([id, u]) => u.liftT = (id === S.hover || id === S.sel) ? .05 : 0); },
   fly(x, z, zoom) { this.fly0 = { x, z, zoom: zoom || this.zoom, t: 0, fx: this.target.x, fz: this.target.z, fzoom: this.zoom }; },
   select(id, fly) {
-    if (id && !this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
     S.sel = id; this.lift(); this.showLines(id);
-    if (!id) { if (this.home) { this.fly(this.home.x, this.home.z, this.home.zoom); this.home = null; } return; }
+    if (!id) { this.paintSel(); if (this.ok && fly !== false) this.overview(true); return; }
     if (location.hash !== "#map") location.hash = "#map";
-    /* 동 중간 높이가 화면 가운데 오게: 등각 시점에서 높이 H는 바닥 (x-H, z-H)와 겹쳐 보여요 */
-    const u = this.units[id], c = u.c, m = u.top * .45; if (fly) this.fly(c.map_x - m + (isMobile() ? 0 : 1.6), c.map_z - m + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
-    openCard(id);
+    const c = this.units[id].c;
+    openCard(id); this.paintSel();
+    if (fly) this.flyTo(c);
   },
   showLines(id) {
     while (this.lines.children.length) { const o = this.lines.children.pop(); o.geometry && o.geometry.dispose(); }
-    $$(".ilabel", $("#lblLayer")).forEach(e => e.remove());
+    $$(".ilabel,.score-badge", $("#lblLayer")).forEach(e => e.remove());
     this.lineFor = id; this.lineT = 0;
     this.marks.forEach(m => { m.userData.sp.scale.setScalar(.48); m.userData.sp.material.opacity = id ? .35 : .7; });
     if (!id) return;
@@ -457,15 +520,16 @@ const MapView = {
       const curve = new T3.QuadraticBezierCurve3(a, mid, b), tube = new T3.TubeGeometry(curve, 40, .04, 6, false);
       const m = new T3.Mesh(tube, new T3.MeshBasicMaterial({ color: new T3.Color(CAT_DARK[n.category]).convertSRGBToLinear() })); m.userData.count = tube.index.count; tube.setDrawRange(0, 0); this.lines.add(m);
       const mk = this.marks.find(g => g.userData.i.id === n.infra_id); if (mk) { mk.userData.sp.scale.setScalar(.72); mk.userData.sp.material.opacity = 1; }
-      const el = document.createElement("span"); el.className = "ilabel"; el.innerHTML = `<i style="background:${CAT_DARK[n.category]}"></i>${esc(n.name)} · ${n.walk_min != null ? "도보 " + n.walk_min + "분" : "차 " + n.drive_min + "분"}`; el.style.opacity = 0; el._p = b.clone(); $("#lblLayer").appendChild(el);
+      const el = document.createElement("span"); el.className = "ilabel"; el.innerHTML = `<i style="background:${CAT_DARK[n.category]}"></i>${esc(n.name.replace(/\(샘플\)/g, ""))} · ${n.walk_min != null ? "도보 " + n.walk_min + "분" : "차 " + n.drive_min + "분"}`; el.style.opacity = 0; el._p = b.clone(); $("#lblLayer").appendChild(el);
     });
+    if (0) { const sb = document.createElement("span"); sb.className = "score-badge"; sb.textContent = `${c.infra_score.label} ${c.infra_score.score}`; sb._p = new T3.Vector3(c.map_x, 0, c.map_z + 1); $("#lblLayer").appendChild(sb); }
   },
   project(v) { const p = v.clone().project(this.cam); return { x: (p.x + 1) / 2 * innerWidth, y: (1 - p.y) / 2 * innerHeight }; },
   tick(dt, time) {
     if (VIEW !== "map" && VIEW !== "input") return;
     if (this.fly0) { const f = this.fly0; f.t = Math.min(1, f.t + dt / .6); const k = 1 - Math.pow(1 - f.t, 3); this.target.set(f.fx + (f.x - f.fx) * k, 0, f.fz + (f.z - f.fz) * k); this.zoom = f.fzoom + (f.zoom - f.fzoom) * k; if (f.t >= 1) this.fly0 = null; }
     const off = new T3.Vector3(20, 20, 20); this.cam.position.copy(this.target).add(off); this.cam.lookAt(this.target); this.cam.zoom = this.zoom; this.cam.updateProjectionMatrix();
-    this.sun.position.copy(this.target).add(new T3.Vector3(10, 15, 3)); this.sun.target.position.copy(this.target);
+    { const q = new T3.Vector3(Math.round(this.target.x / 2) * 2, 0, Math.round(this.target.z / 2) * 2); if (!this._sq || !this._sq.equals(q)) { this._sq = q; this.sun.position.copy(q).add(new T3.Vector3(10, 15, 3)); this.sun.target.position.copy(q); } }
     const now = performance.now() / 1000;
     this.night += (this.nightT - this.night) * Math.min(1, dt * 2.5); const n = this.night;
     this.hemi.intensity = .8 - .42 * n; this.sun.intensity = 1.35 - .8 * n;
@@ -473,32 +537,26 @@ const MapView = {
     this.r.setClearColor(this._cc.copy(this._c0).lerp(this._c1, n), 1);
     Object.values(this.units).forEach(u => {
       if (now >= u.delay) u.cur += (u.tgt - u.cur) * Math.min(1, dt * 6);
+      const isSel = S.sel === u.c.id && document.body.classList.contains("card-open");
       let e = u.cur;
-      if (u.light === "dim") e = .3 + 1.3 * (.5 + .5 * Math.sin(time * Math.PI * 2 / 3));
+      if (u.light === "dim") e = .75 + .25 * (.5 + .5 * Math.sin(time * Math.PI * 2 / 2.8));
+      if (isSel) e = Math.min(e, .7);
       u.wallM.emissiveIntensity = e * (now >= u.delay ? 1 : 0);
-      u.beam.material.opacity = u.light === "on" ? (.22 + .08 * Math.sin(time * 2.4)) * Math.min(1, u.cur / 3) : 0;
-      u.glow.material.opacity = u.light === "on" ? .8 * Math.min(1, u.cur / 3) : u.light === "dim" ? .25 * (e / 1.4) : u.light === "browse" ? .18 : 0;
-      if (u.light === "on" && !REDUCED) { const p = (time % 1.8) / 1.8; u.ring.scale.setScalar(.8 + p * .6); u.ring.material.opacity = .7 * (1 - p); } else u.ring.material.opacity = 0;
-      u.ring0.material.opacity = u.light === "on" ? .9 : 0;
+      u.beam.material.opacity = u.light === "on" && !isSel ? .2 * Math.min(1, u.cur / 3) : 0;
+      u.glow.material.opacity = isSel ? 0 : u.light === "on" ? .55 * Math.min(1, u.cur / 3) : u.light === "dim" ? .18 : u.light === "browse" ? .12 : 0;
+      u.ring.scale.setScalar(1); u.ring.material.opacity = u.light === "on" && !isSel ? .45 : 0;
       u.sq.material.opacity = u.light === "dim" ? .5 : 0;
       u.lift = (u.lift || 0) + ((u.liftT || 0) - (u.lift || 0)) * Math.min(1, dt * 10); u.blds.position.y = u.lift;
-      const p = this.project(new T3.Vector3(u.c.map_x, u.top + .6, u.c.map_z)); const far = this.zoom < 18; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
+      const p = this.project(new T3.Vector3(u.c.map_x, 4.3, u.c.map_z)); const far = this.zoom < 18; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
       u.lbl.style.left = p.x + "px"; u.lbl.style.top = p.y + "px"; u.lbl.classList.toggle("is-dot", far); const focus = this.lineFor && S.sel; u.lbl.classList.toggle("is-faint", !!focus && focus !== u.c.id);
     });
     const near = this.zoom >= 30;
     this.lines.visible = near;
     if (this.lineFor) {
-      if (!this.fly0) this.lineT = Math.min(1, this.lineT + dt / .4); /* 줌인이 끝난 뒤에 선을 그려요 */
+      this.lineT = Math.min(1, this.lineT + dt / .4);
       this.lines.children.forEach(m => m.geometry.setDrawRange(0, Math.floor(m.userData.count * this.lineT / 3) * 3));
     }
-    /* 시설 라벨: 겹치면 위아래로 밀어내요 */
-    const placed = [];
-    $$(".ilabel", $("#lblLayer")).map(el => ({ el, p: this.project(el._p), w: el.offsetWidth + 6, h: el.offsetHeight + 4 })).sort((a, b) => a.p.y - b.p.y).forEach(o => {
-      let y = o.p.y;
-      for (let k = 0; k < placed.length; k++) { const q = placed[k]; if (Math.abs(o.p.x - q.x) < (o.w + q.w) / 2 && Math.abs(y - q.y) < (o.h + q.h) / 2) { y = q.y + (o.h + q.h) / 2 + 1; k = -1; } } /* +1: 소수점 오차로 같은 자리에서 다시 겹치지 않게 */
-      placed.push({ x: o.p.x, y, w: o.w, h: o.h });
-      const el = o.el; el.style.left = o.p.x + "px"; el.style.top = y + "px"; el.style.opacity = near && this.lineT >= 1 ? 1 : 0; el.style.visibility = near ? "visible" : "hidden";
-    });
+    $$(".ilabel,.score-badge", $("#lblLayer")).forEach(el => { const p = this.project(el._p); el.style.left = p.x + "px"; el.style.top = p.y + "px"; el.style.opacity = near && this.lineT >= 1 ? 1 : 0; el.style.visibility = near ? "visible" : "hidden"; });
     this.r.render(this.scene, this.cam);
   }
 };
@@ -568,7 +626,7 @@ const House = {
           drag.it.cx = Math.round((p.x + this.L.W / 2) * 10) / 10; drag.it.cz = Math.round((p.z + this.L.D / 2) * 10) / 10; this.placeMesh(drag.it); return;
         }
         if (this.cam === "bird") { this.orbit.th -= dx * .006; this.orbit.ph = clamp(this.orbit.ph - dy * .005, Math.PI / 2 - 70 * Math.PI / 180, Math.PI / 2 - 25 * Math.PI / 180); }
-        else if (this.cam === "inside") { if (this.lookTo) this.lookTo.t = 1; this.look.yaw -= dx * .005; this.look.pitch = clamp(this.look.pitch - dy * .004, -.9, .6); }
+        else if (this.cam === "inside") { this.look.yaw -= dx * .005; this.look.pitch = clamp(this.look.pitch - dy * .004, -.9, .6); }
       },
       up: () => {
         if (!drag) return; const it = drag.it;
@@ -584,8 +642,6 @@ const House = {
     $$("[data-cam]").forEach(b => b.addEventListener("click", () => this.setCam(b.dataset.cam)));
     $$("[data-hv]").forEach(b => b.addEventListener("click", () => { this.tab = b.dataset.hv; this.renderSide(); }));
     $("#hvBack").onclick = () => { location.hash = "#map"; };
-    const sideBtn = document.createElement("button"); sideBtn.className = "btn btn--sm hv-side-open"; sideBtn.id = "hvSideOpen"; sideBtn.textContent = "가구 패널 열기"; $("#houseView").appendChild(sideBtn);
-    sideBtn.onclick = () => $("#houseView").classList.remove("side-closed");
     $("#selRot").onclick = () => this.rotateSel(); $("#selDel").onclick = () => this.removeSel();
     const loop = () => { if ($("#houseView").classList.contains("is-on")) this.tick(); requestAnimationFrame(loop); }; requestAnimationFrame(loop);
   },
@@ -607,7 +663,7 @@ const House = {
   build() {
     if (this.root) { this.scene.remove(this.root); this.root.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
     const L = this.L, root = this.root = new T3.Group(); root.position.set(-L.W / 2, 0, -L.D / 2); this.scene.add(root);
-    const base = box(L.W + .5, .22, L.D + .5, mat("#e7e4dc")); base.position.set(L.W / 2, -.115, L.D / 2) /* 윗면이 바닥(0.004)보다 아래 */; root.add(base);
+    const base = box(L.W + .5, .22, L.D + .5, mat("#e7e4dc")); base.position.set(L.W / 2, -.1, L.D / 2); root.add(base);
     L.rooms.forEach(r => { const f = new T3.Mesh(new T3.PlaneGeometry(r.w, r.d), mat(r.type === "bath" ? "#e4e5e1" : r.type === "hall" || r.type === "dress" ? "#dcd6cb" : "#d9bf98", { roughness: .75 })); f.rotation.x = -Math.PI / 2; f.position.set(r.x + r.w / 2, .004, r.z + r.d / 2); f.receiveShadow = true; root.add(f); });
     this.walls = new T3.Group(); this.front = new T3.Group(); root.add(this.walls); root.add(this.front);
     const wm = mat("#f6f3ec"), capM = mat("#1f6b4f", { roughness: .6 }), glass = new T3.MeshStandardMaterial({ color: 0xcfe0dc, transparent: true, opacity: .3, depthWrite: false });
@@ -691,22 +747,11 @@ const House = {
       const rooms = this.L.rooms.filter(r => !["bath", "hall", "dress"].includes(r.type));
       rb.innerHTML = rooms.map(r => `<button class="chip" data-room="${r.id}">${esc(r.name)}</button>`).join("");
       $$("[data-room]").forEach(b => b.onclick = () => this.goRoom(b.dataset.room));
-      this.goRoom((rooms.find(r => r.type === "living") || rooms[0]).id, true);
+      this.goRoom((rooms.find(r => r.type === "living") || rooms[0]).id);
     }
-    $("#houseView").classList.toggle("side-closed", c === "inside");
     this.camT = 0; this.labels();
   },
-  goRoom(id, now) {
-    const r = this.L.rooms.find(x => x.id === id), m = Math.min(.45, r.w / 4, r.d / 4), cx = r.x + r.w / 2, cz = r.z + r.d / 2;
-    /* 긴 방향으로 맞은편을 봐요. 서는 자리에 키 큰 가구(1.4m 넘음)가 있으면 반대쪽에 서요 */
-    const opts = r.w >= r.d ? [[r.x + m, cz, -Math.PI / 2], [r.x + r.w - m, cz, Math.PI / 2], [cx, r.z + m, Math.PI], [cx, r.z + r.d - m, 0]] : [[cx, r.z + m, Math.PI], [cx, r.z + r.d - m, 0], [r.x + m, cz, -Math.PI / 2], [r.x + r.w - m, cz, Math.PI / 2]];
-    const free = ([x, z]) => !this.items.some(it => it.h > 1.4 && Math.abs(x - it.cx) < it.w / 2 + .3 && Math.abs(z - it.cz) < it.d / 2 + .3);
-    const [x, z, yaw] = opts.find(free) || opts[0];
-    let dy = yaw - this.look.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
-    this.lookTo = { fx: this.look.x, fz: this.look.z, fy: this.look.yaw, fp: this.look.pitch, x, z, yaw: this.look.yaw + dy, pitch: -.18, t: now ? 1 : 0 };
-    if (now) Object.assign(this.look, { x, z, yaw, pitch: -.18 });
-    $$("[data-room]").forEach(b => b.classList.toggle("is-on", b.dataset.room === id));
-  },
+  goRoom(id) { const r = this.L.rooms.find(x => x.id === id); this.look.x = r.x + r.w / 2; this.look.z = r.z + r.d / 2; this.look.yaw = r.type === "living" ? Math.PI : 0; this.look.pitch = -.12; $$("[data-room]").forEach(b => b.classList.toggle("is-on", b.dataset.room === id)); },
   curCam() { return this.cam === "plan" ? this.ortho : this.persp; },
   resize() {
     if (!this.ok) return; const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); this.persp.aspect = w / h; this.persp.updateProjectionMatrix();
@@ -738,10 +783,9 @@ const House = {
       if (cam.fov !== 38) { cam.fov = 38; cam.updateProjectionMatrix(); }
       cam.setViewOffset(innerWidth, innerHeight, mob ? 0 : 190, mob ? innerHeight * .22 : 0, innerWidth, innerHeight);
     } else {
-      const f = this.lookTo; if (f && f.t < 1) { f.t = Math.min(1, f.t + 1 / 60 / .8); const k = 1 - Math.pow(1 - f.t, 3); Object.assign(this.look, { x: f.fx + (f.x - f.fx) * k, z: f.fz + (f.z - f.fz) * k, yaw: f.fy + (f.yaw - f.fy) * k, pitch: f.fp + (f.pitch - f.fp) * k }); }
-      cam = this.persp; cam.clearViewOffset(); cam.up.set(0, 1, 0); cam.position.set(this.look.x - L.W / 2, 1.6, this.look.z - L.D / 2); cam.rotation.set(this.look.pitch, this.look.yaw, 0); if (cam.fov !== 70) { cam.fov = 70; cam.updateProjectionMatrix(); }
+      cam = this.persp; cam.clearViewOffset(); cam.up.set(0, 1, 0); cam.position.set(this.look.x - L.W / 2, 1.6, this.look.z - L.D / 2); cam.rotation.set(this.look.pitch, this.look.yaw, 0); if (cam.fov !== 72) { cam.fov = 72; cam.updateProjectionMatrix(); }
     }
-    $$(".rlabel,.dimlabel", $("#hvLbl")).forEach(el => { const p = new T3.Vector3(+el.dataset.x - L.W / 2, this.cam === "bird" && el.classList.contains("rlabel") ? L.H * .55 : .05, +el.dataset.z - L.D / 2).project(cam); el.style.left = (p.x + 1) / 2 * innerWidth + "px"; el.style.top = (1 - p.y) / 2 * innerHeight + "px"; el.style.display = (el.classList.contains("dimlabel") && this.cam !== "plan") ? "none" : ""; });
+    $$(".rlabel,.dimlabel", $("#hvLbl")).forEach(el => { const p = new T3.Vector3(+el.dataset.x - L.W / 2, .05, +el.dataset.z - L.D / 2).project(cam); el.style.left = (p.x + 1) / 2 * innerWidth + "px"; el.style.top = (1 - p.y) / 2 * innerHeight + "px"; el.style.display = (el.classList.contains("dimlabel") && this.cam !== "plan") ? "none" : ""; });
     this.r.render(this.scene, cam);
   }
 };

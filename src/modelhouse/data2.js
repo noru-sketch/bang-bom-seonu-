@@ -33,13 +33,14 @@ const RIVERS = [
 const MOUNTS = [[[0, 33], [26, 33.5], [30, 36], [30, 40], [0, 40]], [[41, 20], [44, 18], [48, 17], [48, 40], [38, 40], [39, 30]], [[36, 0], [48, 0], [48, 4.6], [40, 3.6]]];
 const LAKES = [[27.6, 25.2, 1.6, 1.0]];
 const DISTRICTS = [["달서구", 9.3, 23.3], ["북구", 17.6, 6.0], ["동구", 23.2, 9.0], ["수성구", 29.2, 16.7], ["서구", 12.0, 10.6]];
-const SUPPLY_KO = { cr_reits_jeonse: "CR리츠 전세", lh_dundeun: "LH 든든전세" };
-/* 단지 카드 "왜 이 집?" 한 줄. built: 준공 연도(null = 확인 전), below: 주변 시세 대비 낮은 비율. 시세 비교는 모두 샘플 값 */
-const LANDLORD_KO = { cr_reits_jeonse: "임대인 리츠(CR리츠)", lh_dundeun: "임대인 LH" };
-const WHY = { c01: { built: null, below: 10 }, c02: { built: 2024, below: 12 }, c03: { built: 2023, below: 10 }, c04: { built: 2024, below: 8 }, c05: { built: 2025, below: 9 }, c06: { built: 2023, below: 11 }, c07: { built: 2024, below: 13 }, c08: { built: 2025, below: 7 } };
+const SUPPLY_KO = { cr_reits_jeonse: "CR리츠 전세", lh_dundeun: "LH 든든전세", lh_rent: "LH 청년 매입임대(월세)" };
+/* 왜 이 집? 한 줄 (준공 연도·시세 비교는 샘플) */
+const LANDLORD_KO = { cr_reits_jeonse: "임대인 리츠(CR리츠)", lh_dundeun: "임대인 LH", lh_rent: "임대인 LH" };
+const WHY = { c01: { built: 2024, below: 10 }, c02: { built: 2024, below: 12 }, c03: { built: 2023, below: 10 }, c04: { built: 2024, below: 8 }, c05: { built: 2025, below: 9 }, c06: { built: 2023, below: 11 }, c07: { built: 2024, below: 13 }, c08: { built: 2025, below: 7 } };
 const APPLY_LINKS = {
   cr_reits_jeonse: [{ label: "단지 임대 공고 (공급사 안내)", url: null }],
-  lh_dundeun: [{ label: "LH청약플러스", url: "https://apply.lh.or.kr" }]
+  lh_dundeun: [{ label: "LH청약플러스", url: "https://apply.lh.or.kr" }],
+  lh_rent: [{ label: "LH청약플러스", url: "https://apply.lh.or.kr" }]
 };
 
 /* 정책 안내 요약 (CONSULT_SPEC 3장 형식 · 시연용, PM이 공고 확인 후 교체) */

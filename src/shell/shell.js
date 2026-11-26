@@ -52,39 +52,79 @@ function observeReveals() { $$(".page.is-active .reveal:not(.is-in)").forEach(el
 const countIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return; countIO.unobserve(e.target);
   const el = e.target, to = +el.dataset.count, t0 = performance.now(), dur = REDUCED ? 0 : 1400;
-  const step = t => { const k = dur ? clamp((t - t0) / dur, 0, 1) : 1; const dp = (el.dataset.count.split(".")[1] || "").length; el.textContent = (to * (1 - Math.pow(1 - k, 3))).toLocaleString("ko-KR", { minimumFractionDigits: dp, maximumFractionDigits: dp }); if (k < 1) requestAnimationFrame(step); };
+  const step = t => { const k = dur ? clamp((t - t0) / dur, 0, 1) : 1; el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))).toLocaleString("ko-KR"); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }), { threshold: .5 }) : null;
 $$("[data-count]").forEach(el => countIO ? countIO.observe(el) : el.textContent = (+el.dataset.count).toLocaleString("ko-KR"));
 const vidIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { const v = e.target; if (e.intersectionRatio >= .35) { if (v.ended) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); } else if (!v.ended) v.pause(); }), { threshold: [0, .35, .6] }) : null;
 $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
 
-/* 비포/애프터 슬라이더 */
+/* 비포/애프터: 화면에 들어올 때마다 한 번 왔다갔다 (스크롤은 막지 않아요) */
 (function () {
   const ba = $("#ba"); if (!ba) return;
-  const range = $(".ba__range", ba); let done = false, touched = false;
+  const range = $(".ba__range", ba); let touched = false, run = 0;
   const set = p => { ba.style.setProperty("--p", p + "%"); range.value = p; };
-  range.addEventListener("input", () => { touched = true; done = true; set(+range.value); });
-  const io = new IntersectionObserver(es => {
-    if (!es[0].isIntersecting || done) return; io.disconnect(); done = true;
-    if (REDUCED) { set(50); return; }
-    const t0 = performance.now();
-    const step = t => { if (touched) return; const s = (t - t0) / 1000; let p; if (s < 1.8) { const k = s / 1.8; p = 100 - 100 * (k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2); } else { const k = clamp((s - 1.8) / .8, 0, 1); p = 50 * (1 - Math.pow(1 - k, 3)); } set(p); if (s < 2.6) requestAnimationFrame(step); else set(50); };
+  range.addEventListener("input", () => { touched = true; set(+range.value); });
+  const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  const sweep = () => {
+    if (touched) return; if (REDUCED) { set(50); return; }
+    const id = ++run, t0 = performance.now();
+    const step = t => { if (touched || id !== run) return; const s = (t - t0) / 1000; let p;
+      if (s < .4) p = 100; else if (s < 2.0) p = 100 - 100 * ease((s - .4) / 1.6); else if (s < 2.4) p = 0; else p = 50 * ease(clamp((s - 2.4) / 1.1, 0, 1));
+      set(p); if (s < 3.5) requestAnimationFrame(step); };
     requestAnimationFrame(step);
-  }, { threshold: .5 });
-  io.observe(ba);
+  };
+  new IntersectionObserver(es => { if (es[0].isIntersecting) sweep(); else if (!touched) { run++; set(100); } }, { threshold: .55 }).observe(ba);
 })();
 
-/* How it helps 탭 */
-let zzI = 0;
-function setZZ(i) {
-  const n = $$(".zz-tab").length; zzI = (i + n) % n;
-  $$(".zz-tab").forEach((b, k) => { b.classList.toggle("is-on", k === zzI); b.setAttribute("aria-selected", k === zzI); });
-  $$(".zz--tabbed .zz__row").forEach((r, k) => r.classList.toggle("is-on", k === zzI));
-  const on = $$(".zz-tab")[zzI]; if (on && on.parentElement.scrollWidth > on.parentElement.clientWidth) on.parentElement.scrollTo({ left: on.offsetLeft - 18, behavior: REDUCED ? "auto" : "smooth" });
-}
-$$(".zz-tab").forEach(b => b.addEventListener("click", () => setZZ(+b.dataset.zz)));
-$("#zzPrev").addEventListener("click", () => setZZ(zzI - 1)); $("#zzNext").addEventListener("click", () => setZZ(zzI + 1));
+/* 홈 풀페이지 스크롤: 한 번 굴리면 한 섹션. 영상·애니메이션이 끝나길 기다리지 않아요 */
+(function () {
+  const dots = $("#fpDots"); if (!dots) return;
+  const panels = () => [...$$("#page-home .fp"), $(".footer")];
+  const topOf = (el, k, n) => k === n - 1 ? document.documentElement.scrollHeight - innerHeight : Math.round(el.getBoundingClientRect().top + scrollY);
+  const on = () => current === "home" && innerWidth > 900 && innerHeight >= 560 && !document.body.classList.contains("menu-open");
+  const idx = () => { const ps = panels(), n = ps.length; let k = 0; ps.forEach((p, j) => { if (topOf(p, j, n) <= scrollY + innerHeight * .45) k = j; }); return k; };
+  let busy = false, lastWheel = 0, raf = 0;
+  const go = k => {
+    const ps = panels(), n = ps.length; k = clamp(k, 0, n - 1);
+    const from = scrollY, to = topOf(ps[k], k, n), t0 = performance.now(), dur = REDUCED ? 1 : 760;
+    busy = true; cancelAnimationFrame(raf); paint(k);
+    const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const step = t => { const x = clamp((t - t0) / dur, 0, 1); scrollTo(0, from + (to - from) * ease(x)); if (x < 1) raf = requestAnimationFrame(step); else release(); };
+    raf = requestAnimationFrame(step);
+  };
+  const release = () => { if (performance.now() - lastWheel > 160) busy = false; else setTimeout(release, 60); };
+  const paint = k => {
+    const ps = panels(); $$("button", dots).forEach((b, j) => b.classList.toggle("is-on", j === k));
+    dots.classList.toggle("is-light", k === 0 || (ps[k] && (ps[k].classList.contains("fp--dark") || ps[k].classList.contains("footer"))));
+    $("#nav").classList.toggle("is-dark", current === "home" && !!ps[k] && ps[k].classList.contains("fp--dark") && !document.body.classList.contains("menu-open"));
+  };
+  dots.innerHTML = panels().map((p, j) => `<button type="button" aria-label="${p.dataset.fp || "끝"}로 이동"><span>${p.dataset.fp || "끝"}</span></button>`).join("");
+  $$("button", dots).forEach((b, j) => b.addEventListener("click", () => go(j)));
+  addEventListener("wheel", e => {
+    if (!on() || e.ctrlKey) return;
+    const tr = e.target.closest && e.target.closest(".plans__track"); if (tr && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault(); lastWheel = performance.now();
+    if (busy || Math.abs(e.deltaY) < 4) return;
+    go(idx() + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+  addEventListener("keydown", e => {
+    if (!on() || /INPUT|TEXTAREA|SELECT/.test((e.target.tagName || "")) || e.target.isContentEditable) return;
+    const m = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 }[e.key];
+    if (e.key === "Home" || e.key === "End") { e.preventDefault(); go(e.key === "Home" ? 0 : panels().length - 1); return; }
+    if (m && !(e.key === " " && e.target.closest("button,a"))) { e.preventDefault(); if (!busy) go(idx() + m); }
+  });
+  let ty = null;
+  addEventListener("touchstart", e => { ty = on() ? e.touches[0].clientY : null; }, { passive: true });
+  addEventListener("touchmove", e => { if (ty !== null && on()) e.preventDefault(); }, { passive: false });
+  addEventListener("touchend", e => { if (ty === null) return; const d = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(d) > 40 && !busy) go(idx() + (d > 0 ? 1 : -1)); });
+  const top = $("#toTop");
+  top.addEventListener("click", () => { if (on()) go(0); else scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); });
+  const syncTop = () => top.classList.toggle("is-on", current === "home" && scrollY + innerHeight >= document.documentElement.scrollHeight - 160);
+  const sync = () => { document.body.classList.toggle("fp-on", on()); syncTop(); if (current !== "home") $("#nav").classList.remove("is-dark"); if (!busy) paint(idx()); };
+  addEventListener("scroll", sync, { passive: true }); addEventListener("resize", sync); addEventListener("hashchange", () => setTimeout(sync, 50));
+  window.BBfp = { sync }; sync();
+})();
 
 /* 평형 갤러리 (모델하우스 집 보기 구조) */
 (function () {

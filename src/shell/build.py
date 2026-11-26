@@ -33,7 +33,7 @@ body.app-mode .nav{background:rgba(243,242,238,.82);color:var(--ink);-webkit-bac
 #mh .btn{height:48px;padding:0 24px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:15px;letter-spacing:-.02em}
 #mh .btn:hover{background:#000;filter:none}
 #mh .btn--sm{height:40px;padding:0 16px;font-size:14px}
-#mh .btn--ghost{background:#fff;color:var(--ink);border:1px solid var(--card-line)}
+#mh .btn--ghost{background:#fff;color:var(--ink);border:1px solid var(--card-line);-webkit-backdrop-filter:none;backdrop-filter:none}
 #mh .btn--ghost:hover{background:var(--gray)}
 #mh .btn--dark{background:var(--ink)}
 #mh .chip{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--card-line);background:#fff;font-size:14px;font-weight:500}
@@ -116,6 +116,7 @@ body.card-open #mh .pills-r{display:none}
 #mh .clabel.is-on i{color:#7ED6A8}#mh .clabel.is-dim i{color:#FFD48A}
 #mh .clabel.is-off{background:#5f625d}
 #mh .ilabel{background:rgba(255,255,255,.94);border:1px solid rgba(20,23,20,.08);font-size:11px;padding:4px 9px;box-shadow:0 4px 12px rgba(20,23,20,.08);transition:opacity .2s}
+#mh .score-badge{border:1px solid rgba(20,23,20,.08);color:var(--green);font-size:12px;padding:4px 10px}
 
 /* 정보 입력 = 방봄 페이지 */
 #mh #vInput{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;display:block;padding:calc(72px + 48px) var(--pad-x) 96px;z-index:40}
@@ -187,10 +188,6 @@ body.card-open #mh .pills-r{display:none}
 #mh .toast{background:var(--ink)}
 #mh .why-line{margin-top:10px;font-size:13px;color:var(--sub);line-height:1.5}
 #mh .why-line b{color:var(--green);font-weight:600;margin-right:4px}
-#mh .hv-side-open{position:absolute;right:var(--pad-x);top:120px;z-index:4;display:none}
-#mh #houseView.side-closed .hv-side{display:none}
-#mh #houseView.side-closed .hv-side-open{display:inline-flex;align-items:center}
-#mh #houseView.side-closed .rooms-bar{max-width:calc(100% - 32px)}
 
 
 /* ── 2차 디렉팅 ── */
@@ -204,11 +201,14 @@ body.card-open #mh .pills-r{display:none}
 #mh .clabel.is-dot{width:14px;height:14px;padding:0;background:var(--green);border:2px solid #fff}#mh .clabel.is-dot::after{display:none}
 #mh .map-hint{position:fixed;left:50%;bottom:52px;transform:translateX(-50%);z-index:18;font-size:13px;font-weight:600;color:var(--ink);background:rgba(255,255,255,.82);border:1px solid rgba(20,23,20,.08);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:9px 16px;border-radius:999px;white-space:nowrap;pointer-events:none;transition:opacity .25s}
 body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
-#mh .cc-plan{position:relative;margin:-24px -24px 20px;aspect-ratio:16/10;background:#fcfbf9;border-bottom:1px solid var(--line);border-radius:16px 16px 0 0;overflow:hidden}
+#mh .cc-plan{position:relative;margin:0 -24px 20px;aspect-ratio:16/10;background:#fcfbf9;border-bottom:1px solid var(--line);border-radius:16px 16px 0 0;overflow:hidden}
 #mh .cc-plan svg{position:absolute;inset:0;width:100%;height:100%;padding:14px}
 #mh .cc-plan-tag{position:absolute;left:14px;bottom:12px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid var(--line);color:var(--sub)}
 #mh .panel-r .x{position:absolute;top:14px;right:14px;z-index:2;background:rgba(255,255,255,.92)}
-#mh .panel-r{overflow:auto;padding-bottom:0}
+#mh .panel-r{overflow:hidden;padding-bottom:0;padding-top:0;display:flex;flex-direction:column}
+#mh .cc-src{margin-top:10px;font-size:12px;color:var(--sub)}
+#mh .cc-src a{color:var(--green);text-decoration:underline;text-underline-offset:3px}
+#mh .panel-r .cc{overflow:auto;min-height:0;flex:1 1 auto;margin:0 -24px;padding:0 24px}
 #mh .cc-btns{position:sticky;bottom:0;background:var(--card);margin:20px -24px 0;padding:14px 24px 20px;border-top:1px solid var(--line);z-index:1}
 #mh .form-wrap{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,5vw,80px);align-items:start;max-width:1200px}
 #mh .form-head{position:sticky;top:120px;margin:0}
@@ -227,7 +227,34 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 #mh .panel-l .pl-x{position:absolute;top:12px;right:12px;width:32px;height:32px}
 #mh .panel-l .jp{padding-right:28px}
 #mh .map-hint{right:auto}
-@media (max-width:820px){#mh .pl-toggle{top:172px;width:40px;height:40px}#mh .panel-l{top:220px}}
+@media (max-width:900px){#mh .pl-toggle{top:172px;width:40px;height:40px}body.app-mode #mh .panel-l{top:222px}}
+
+/* 한 문항씩 입력 */
+#mh .form.is-step .fgrid{display:block;min-height:188px}
+#mh .form.is-step .fgrid>.f{display:none}
+#mh .form.is-step .fgrid>.f.is-cur{display:block;animation:stIn .28s ease}
+@keyframes stIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#mh .stp{display:flex;align-items:center;gap:12px;margin:20px 0 28px}
+#mh .stp__bar{flex:1;height:4px;border-radius:4px;background:var(--gray);overflow:hidden}
+#mh .stp__bar i{display:block;height:100%;width:12.5%;background:var(--ink);border-radius:4px;transition:width .3s ease}
+#mh #stpNo{font-size:13px;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums;min-width:40px;text-align:right}
+#mh .form.is-step .f label,#mh .form.is-step .f .lb{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:22px;font-weight:600;letter-spacing:-.03em;line-height:1.35;margin-bottom:20px}
+#mh .form.is-step .f label small,#mh .form.is-step .f .lb small{font-size:14px;font-weight:400;color:var(--sub);letter-spacing:0}
+#mh .form.is-step .in{position:relative;display:block;width:100%}
+#mh .form.is-step .in input{width:100%;height:64px;padding:0 84px 0 20px;font-size:24px;font-weight:500;border-radius:14px;font-variant-numeric:tabular-nums}
+#mh .form.is-step .in span{position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--sub);pointer-events:none}
+#mh .form.is-step .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;height:auto;padding:0;background:none}
+#mh .form.is-step .seg button{height:64px;border-radius:14px;border:1px solid var(--card-line);background:#fff;font-size:18px;font-weight:600;color:var(--ink)}
+#mh .form.is-step .seg button.is-on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:none}
+#mh .form.is-step .err{margin-top:10px;min-height:20px}
+#mh .form.is-step .form-btns{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:28px}
+#mh .form.is-step .form-btns .btn{height:56px;width:100%;justify-content:center}
+#mh .form.is-step .form-btns .btn:disabled{opacity:.35;pointer-events:none}
+#mh .form-foot{margin-top:16px;text-align:center}
+#mh .form input[type=number]{-moz-appearance:textfield;appearance:textfield}
+#mh .form input[type=number]::-webkit-inner-spin-button,#mh .form input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#mh .link-btn{font-size:14px;color:var(--sub);text-decoration:underline;text-underline-offset:4px}
+#mh .link-btn:hover{color:var(--ink)}
 @media (max-width:900px){
   #mh .hv-side{top:auto;left:0;right:0;bottom:0;width:auto;height:46vh;border-radius:20px 20px 0 0}
   #mh .hv-hint{display:none}
@@ -336,7 +363,7 @@ mb=mb.replace('<div class="toast" id="toast" role="status"></div>','<div class="
 mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>','')
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
 b=R(b,'<li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>','<li>단지 공개 보도 · 뉴시스·뉴스1<span>2026.9</span></li>\n          <li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>')
-b=R(b,'<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n','<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n')
+b=R(b,'<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n','')
 # 탭바 4칸
 h=h.replace('.tabbar{display:grid;grid-template-columns:repeat(5,1fr);','.tabbar{display:grid;grid-template-columns:repeat(4,1fr);')
 
@@ -344,6 +371,9 @@ h=h.replace('.tabbar{display:grid;grid-template-columns:repeat(5,1fr);','.tabbar
 mjs=open(M+'data.js',encoding='utf-8').read()+open(M+'data2.js',encoding='utf-8').read()+open(M+'geo.js',encoding='utf-8').read()+open(M+'engine.js',encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists };','')+open(M+'house.js',encoding='utf-8').read()+open(os.path.join(HERE,'app_bb.js'),encoding='utf-8').read()
 shell=open(os.path.join(HERE,'shell.js'),encoding='utf-8').read()
 tail='<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>\n<script>\n{\n'+mjs+'\n}\n</script>\n<script>\n'+shell+'\nBB.route();\n</script>\n</body>\n</html>\n'
+_i=b.index('<section class="page" id="page-home"'); _j=b.index('<!-- ═══════════════ #guide')
+b=b[:_i]+open(os.path.join(HERE,'home.html'),encoding='utf-8').read()+b[_j:]
+h=h.replace('</head>','<style>\n'+open(os.path.join(HERE,'home.css'),encoding='utf-8').read()+'\n</style>\n</head>',1)
 out=h+b.replace('</body>','').replace('</html>','')+tail
 open(os.path.join(HERE,'../../index.html'),'w',encoding='utf-8').write(out)
 print('ok', len(out))
