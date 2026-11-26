@@ -72,7 +72,13 @@ function setMode(m) { S.mode = m; MapView.applyMode(true); renderTop("map"); ren
 
 /* ─── 왼쪽 패널 / 범례 / 숫자 알약 ─── */
 let jpOpen = false, plOpen = true;
-function syncPl() { const b = $("#plToggle"); /* 휴대폰에서는 한 줄 요약이라 접기 단추(−) 없이 늘 보여 준다 */ const vis = VIEW === "map" && (plOpen || isPhone()) && !document.body.classList.contains("card-open"); $("#panelL").hidden = !vis; b.hidden = VIEW !== "map"; b.textContent = plOpen ? "−" : "+"; b.setAttribute("aria-expanded", plOpen); b.setAttribute("aria-label", plOpen ? "패널 닫기" : "패널 열기"); }
+function syncPl() {
+  /* 패널 안 X 가 닫기다. 위의 단추는 패널이 닫혔거나 단지 카드가 덮고 있을 때만 작게 "열기"로 보인다. 휴대폰은 한 줄 요약이라 늘 보인다 */
+  const b = $("#plToggle"), cardOn = document.body.classList.contains("card-open");
+  const vis = VIEW === "map" && (plOpen || isPhone()) && !cardOn; $("#panelL").hidden = !vis;
+  b.hidden = VIEW !== "map" || isPhone() || (plOpen && !cardOn);
+  b.textContent = S.mode === "match" && S.pr ? "내 판정 열기" : "안내 열기"; b.setAttribute("aria-expanded", vis); b.setAttribute("aria-label", "패널 열기");
+}
 
 /* 청년월세 지원이 소득 때문에 미충족일 때 덧붙이는 설명. 판정은 engine.js 그대로이고 여기서는 기준을 풀어 쓸 뿐이다 (출처: 정책브리핑) */
 const RENT_SRC = "https://www.korea.kr/news/policyNewsView.do?newsId=148971987";
@@ -96,7 +102,7 @@ function openHints(P) {
 function renderPanels() {
   const v = VIEW || "map";
   const onMap = v === "map";
-  $("#legend").hidden = !onMap; $("#mapHint").hidden = !onMap || !MapView.ok; $("#pillsR").hidden = true;
+  $("#legend").hidden = !onMap;  $("#pillsR").hidden = true;
   /* 지도를 떠나면 카드를 닫고, 고른 단지의 선과 주변 시설 이름표도 지운다 (돌아왔을 때 닫힌 카드와 어긋나지 않게). S.sel 은 집 보기가 쓰므로 둔다 */
   if (!onMap) { closeCard(); if (MapView.ok) MapView.showLines(null); }
   if (S.mode === "match" && S.pr) {
@@ -598,7 +604,7 @@ const MapView = {
   },
   buildUnsold() {
     /* 대구시 공개 미분양 목록: 작은 회색-주황 점. 판정 없음, 마우스 올림 라벨 없음(클릭만) */
-    const m = mat("#c99a6b"), geo = new T3.CylinderGeometry(.32, .32, .22, 16); geo.translate(0, .11, 0);
+    const m = mat("#e2d2bd"), geo = new T3.CylinderGeometry(.2, .2, .14, 16); geo.translate(0, .07, 0);
     const hg = new T3.CylinderGeometry(.6, .6, .8, 8); hg.translate(0, .4, 0);
     const same = {}; /* 동 중심 근사로 같은 자리에 겹친 점은 작은 원으로 벌려 각각 누를 수 있게 */
     this.uPos = UNSOLD_LIST.map(u => { const key = u.lat + "," + u.lng, i = same[key] = (same[key] || 0) + 1, a = i * 2.4, r = i > 1 ? .75 * Math.sqrt(i - 1) : 0;
@@ -896,7 +902,7 @@ addEventListener("keydown", e => {
   if (Consult.isOpen) Consult.close();
   else if (p.classList.contains("is-open")) { const u = MapView.units[S.sel], back = p.contains(document.activeElement); closeCard(); MapView.select(null); if (back && u) u.lbl.focus({ preventScroll: true }); }
 });
-$("#plToggle").onclick = () => { plOpen = !plOpen; if (plOpen && document.body.classList.contains("card-open")) { closeCard(); MapView.select(null); } syncPl(); };
+$("#plToggle").onclick = () => { plOpen = true; if (plOpen && document.body.classList.contains("card-open")) { closeCard(); MapView.select(null); } syncPl(); };
 window.MH = {
   route(v) { if (v === "map" && S.profile && S.mode !== "match" && !route.seen) S.mode = "match"; route.seen = true; route(v); if (v === "map" && MapView.ok) MapView.applyMode(false); },
   browse() { S.mode = "browse"; if (location.hash === "#map") { route("map"); MapView.applyMode(false); } else location.hash = "#map"; },

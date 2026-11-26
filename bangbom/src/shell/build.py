@@ -240,9 +240,9 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 @media (max-width:980px){#mh .form-wrap{grid-template-columns:minmax(0,1fr)}#mh .form-head{position:static}#mh .gets{display:none}}
 @media (max-width:820px){body.app-mode #mh .map-hint{bottom:108px;font-size:12px}}
 
-#mh .pl-toggle{position:fixed;left:var(--pad-x);top:144px;z-index:22;width:44px;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-size:22px;font-weight:500;line-height:1;display:grid;place-items:center;box-shadow:0 6px 16px rgba(20,23,20,.18)}
+#mh .pl-toggle{position:fixed;left:var(--pad-x);top:144px;z-index:22;height:40px;padding:0 16px;border-radius:999px;background:var(--ink);color:#fff;font-size:14px;font-weight:600;line-height:1;display:inline-flex;align-items:center;box-shadow:0 6px 18px rgba(20,23,20,.18)}
 #mh .pl-toggle:hover{background:#000}
-#mh .panel-l{top:196px;max-height:calc(100vh - 266px)}
+#mh .panel-l{top:144px;max-height:calc(100vh - 214px)}
 #mh .panel-l .pl-x{position:absolute;top:12px;right:12px;width:32px;height:32px}
 #mh .panel-l .jp{padding-right:28px}
 #mh .map-hint{right:auto}
@@ -379,6 +379,8 @@ mb=re.sub(r'<header class="top">\s*<a href="#start".*?</a>','<header class="top"
 mb=re.sub(r'<!-- S0 시작 -->.*?<!-- S1 정보 입력 -->','<!-- S1 정보 입력 -->',mb,flags=re.S)
 mb=mb.replace('<button type="button" class="btn btn--ghost" id="formBack">둘러보기로</button>','<button type="button" class="btn btn--ghost" id="formBack">그냥 둘러보기</button>')
 mb=mb.replace('<div class="toast" id="toast" role="status"></div>','<div class="toast" id="mhToast" role="status"></div>')
+# 지도 아래 안내("단지를 누르면 …")는 왼쪽 패널과 겹쳐서 뺀다. 면책 한 줄(.notice)은 남긴다
+mb=re.sub(r'<p class="map-hint" id="mapHint">.*?</p>\s*','',mb,count=1,flags=re.S)
 # 입력 화면 예시 단추 하나 더: 김지훈 예시에서 모은 돈만 1,000만 원(부족 금액 예시). 누르면 app_bb.js 의 #fillShort 가 채운다
 FORM_Q='''<form class="card form qform" id="form" novalidate aria-labelledby="fTitle">
     <div class="persona"><button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button><button type="button" class="chip" id="fillShort">모은 돈이 부족할 때 · 1,000만</button><span class="sample">시연용</span></div>

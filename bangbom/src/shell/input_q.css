@@ -37,3 +37,5 @@
 #mh .jp-open b{display:block;font-size:14px;margin-bottom:6px}
 #mh .jp-open ul{margin:0;padding-left:18px;font-size:13px;line-height:1.6}
 #mh .jp-open p{margin-top:6px;font-size:13px;color:var(--sub)}
+/* 지도: PC 에서 단지 카드가 열리면 24시간 상담 단추가 카드(오른쪽 360px)와 겹치지 않게 카드 왼쪽으로 비킨다 */
+@media (min-width:821px){body.card-open #mh .fab{right:calc(var(--pad-x) + 360px + 16px)}}
