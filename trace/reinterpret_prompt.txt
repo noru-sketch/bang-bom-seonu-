@@ -1,0 +1,5 @@
+Redraw this street map as an ORIGINAL top-down (90° overhead) miniature city illustration for a real-estate web app.
+Keep the same layout: road network, river, parks, mountains and block positions must stay where they are so it can be overlaid on a map.
+Style: soft matte clay-miniature look, warm light-grey city blocks (#D9DAD7) with gentle shadows, pale grey roads (#D3D5D1), muted sage parks (#C9D8C5), soft blue-grey river (#D5E2E1), no harsh outlines.
+In the exact center, draw one slightly larger cream apartment complex (#FFF1D6) of 3-4 tall towers with a thin teal (#2E7D74) roof line, so it is the only warm-colored element.
+Remove ALL text, street names, numbers, labels, icons, pins, logos and map UI. No letters anywhere. Square image, no border.

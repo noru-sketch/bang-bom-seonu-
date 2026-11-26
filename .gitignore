@@ -2,4 +2,8 @@
 *.env
 __pycache__/
 node_modules/
-trace/
+trace/refs/
+trace/art/
+*.pyc
+.claude/settings.local.json
+.vscode/
