@@ -78,3 +78,5 @@ body.app-mode .fp-dots{display:none}
 body.app-mode .to-top{display:none}
 @media (max-width:900px){.to-top{bottom:calc(var(--tab-h) + 16px);right:16px}}
 @media (prefers-reduced-motion:reduce){.fp-dots button,.to-top{transition:none}}
+/* 맨 위로 단추가 푸터 맨 아래 줄(저작권)을 가리지 않게 PC 에서는 푸터 아래 여백을 늘린다 (휴대폰은 mobile_home.css) */
+@media (min-width:901px){.footer{padding-bottom:112px}}
