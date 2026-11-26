@@ -79,12 +79,12 @@ $$("[data-count]").forEach(el => countIO ? countIO.observe(el) : el.textContent 
 const vidIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { const v = e.target; if (e.intersectionRatio >= .35) { if (v.ended) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); } else if (!v.ended) v.pause(); }), { threshold: [0, .35, .6] }) : null;
 $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
 
-/* 비포/애프터 슬라이더 */
+/* 비포/애프터 슬라이더: 화면에 들어올 때마다 한 번 왔다갔다(sweep). 사용자가 한 번 만지면 그 뒤로는 움직이지 않는다 */
 (function () {
   const ba = $("#ba"); if (!ba) return;
-  const range = $(".ba__range", ba); let done = false, touched = false;
+  const range = $(".ba__range", ba); let touched = false, run = 0;
   const set = p => { ba.style.setProperty("--p", p + "%"); range.value = p; };
-  range.addEventListener("input", () => { touched = true; done = true; set(+range.value); });
+  range.addEventListener("input", () => { touched = true; set(+range.value); });
   /* 터치 화면(pointer:coarse)에서는 CSS가 range 의 pointer-events 를 꺼서 여기로 온다: 사진 어디를 잡아도 선이 따라오고,
      세로로 밀면 브라우저가 페이지를 내리며(pointercancel) 선은 그대로 둔다. 마우스 화면에서는 지금처럼 range 입력이 처리한다 */
   let pid = null, x0 = 0, moved = false;
@@ -94,18 +94,24 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
     if (e.pointerId !== pid) return;
     if (!moved && Math.abs(e.clientX - x0) < 6) return;
     if (!moved) { moved = true; try { ba.setPointerCapture(pid); } catch (err) {} }
-    touched = true; done = true; set(at(e.clientX));
+    touched = true; set(at(e.clientX));
   });
-  ba.addEventListener("pointerup", e => { if (e.pointerId !== pid) return; if (!moved) { touched = true; done = true; set(at(e.clientX)); } pid = null; });
+  ba.addEventListener("pointerup", e => { if (e.pointerId !== pid) return; if (!moved) { touched = true; set(at(e.clientX)); } pid = null; });
   ba.addEventListener("pointercancel", e => { if (e.pointerId === pid) pid = null; });
-  const io = new IntersectionObserver(es => {
-    if (!es[0].isIntersecting || done) return; io.disconnect(); done = true;
-    if (REDUCED) { set(50); return; }
-    const t0 = performance.now();
-    const step = t => { if (touched) return; const s = (t - t0) / 1000; let p; if (s < 1.8) { const k = s / 1.8; p = 100 - 100 * (k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2); } else { const k = clamp((s - 1.8) / .8, 0, 1); p = 50 * (1 - Math.pow(1 - k, 3)); } set(p); if (s < 2.6) requestAnimationFrame(step); else set(50); };
+  const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  /* 놓은 후(100) 잠깐 → 놓기 전(0)까지 밀고 → 잠깐 → 가운데(50). 돌아가는 중에 화면을 벗어나면 멈추고(run 이 바뀜) 처음 자리로 */
+  const sweep = () => {
+    if (touched) return; if (REDUCED) { set(50); return; }
+    const id = ++run, t0 = performance.now();
+    const step = t => {
+      if (touched || id !== run) return;
+      const s = (t - t0) / 1000;
+      const p = s < .4 ? 100 : s < 2 ? 100 - 100 * ease((s - .4) / 1.6) : s < 2.4 ? 0 : 50 * ease(clamp((s - 2.4) / 1.1, 0, 1));
+      set(p); if (s < 3.5) requestAnimationFrame(step);
+    };
     requestAnimationFrame(step);
-  }, { threshold: .5 });
-  io.observe(ba);
+  };
+  new IntersectionObserver(es => { if (es[0].isIntersecting) sweep(); else if (!touched) { run++; set(100); } }, { threshold: .55 }).observe(ba);
 })();
 
 /* How it helps 탭 */
