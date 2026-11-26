@@ -411,6 +411,7 @@ _fi=mb.index('<form class="card form" id="form"'); _fj=mb.index('</form>',_fi)+l
 mb=mb[:_fi]+FORM_Q+mb[_fj:]
 # 입력 화면 왼쪽 설명: 미분양 전용처럼 읽히지 않게
 mb=R(mb,'<span>들어갈 수 있는 미분양 단지만 밝게</span>','<span>요건이 맞는 단지를 밝게</span>')
+mb=R(mb,'<p class="lead">나이, 소득, 모은 돈만 넣으면 대출·지원 요건을 세 단계로 따져서 지도에 불을 켜요.</p>','<p class="lead">질문 8개에 하나씩 답하면 대출·지원 요건을 따져서, 요건이 맞는 단지에 불을 켜요.</p>')
 mb=re.sub(r'\s*<nav class="fsteps m-only" id="fSteps".*?</nav>','',mb,count=1,flags=re.S)
 mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>','')
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
