@@ -7,6 +7,7 @@ import adviceHandler from '../api/advice.js'
 import furnitureHandler from '../api/furniture.js'
 import styleHandler from '../api/style.js'
 import floorplanHandler from '../api/floorplan.js'
+import homeplanHandler, { HOMEPLAN_FALLBACK_NOTE, HOMEPLAN_NOTE } from '../api/homeplan.js'
 import renderPhotoHandler from '../api/render-photo.js'
 import healthHandler from '../api/health.js'
 import { AI_RATE_LIMIT, AI_TIMEOUT_MS, AiError, askJson, resetAiRateLimit, setAiClient, withDeadline } from '../server/ai.js'
@@ -32,6 +33,7 @@ const ENDPOINTS = [
   { path: '/api/furniture', handler: furnitureHandler, body: { text: '슈퍼싱글 침대, 1200 책상' } },
   { path: '/api/style', handler: styleHandler, body: { text: '따뜻한 우드 미드센추리' } },
   { path: '/api/floorplan', handler: floorplanHandler, body: { imageBase64: PNG, areaPyeong: 6 } },
+  { path: '/api/homeplan', handler: homeplanHandler, body: { imageBase64: PNG } },
   { path: '/api/render-photo', handler: renderPhotoHandler, body: { snapshotBase64: PNG, styleName: '웜 미니멀', timeOfDay: 'noon' } },
 ]
 
@@ -324,7 +326,7 @@ test('/api/floorplan: 기본 답은 평수 어림값이고, AI 답은 방 크기
 test('/api/render-photo: AI가 있어도 항상 받은 그림을 그대로 돌려줘요', async () => {
   const { client, calls } = fakeAi({ imageUrlOrBase64: 'https://example.com/x.png' })
   setAiClient(client)
-  const data = await (await post(renderPhotoHandler, '/api/render-photo', ENDPOINTS[4].body)).json()
+  const data = await (await post(renderPhotoHandler, '/api/render-photo', ENDPOINTS[5].body)).json()
   assert.equal(data.imageUrlOrBase64, PNG)
   assert.equal(data.isFallback, true)
   // AI가 만든 그림이 아니므로 "AI 연출 이미지"라고 하지 않는다
@@ -538,4 +540,27 @@ test('AI 실패 기록에는 까닭 코드만 남고 열쇠와 프롬프트는 �
     assert.equal(line.includes(FAKE_KEY), false)
     assert.equal(line.includes('비밀스러운'), false)
   }
+})
+
+test('/api/homeplan: AI가 없으면 표준 구조를 쓰라는 기본 답, AI 답은 코드가 검사한 집 구조예요', async () => {
+  const fallback = await (await post(homeplanHandler, '/api/homeplan', { imageBase64: PNG })).json()
+  assert.deepEqual(fallback, { layout: null, note: HOMEPLAN_FALLBACK_NOTE, isFallback: true })
+
+  const { client, calls } = fakeAi({ widthCm: 840, depthCm: 740, entrySide: 'E', rooms: [
+    { type: 'living', xCm: 290, yCm: 300, widthCm: 300, depthCm: 440 },
+    { type: 'bed', xCm: 0, yCm: 300, widthCm: 290, depthCm: 440 },
+    { type: 'garage', xCm: 0, yCm: 0, widthCm: 200, depthCm: 200 },
+  ] })
+  setAiClient(client)
+  const good = await (await post(homeplanHandler, '/api/homeplan', { imageBase64: PNG })).json()
+  assert.equal(good.isFallback, false)
+  assert.equal(good.note, HOMEPLAN_NOTE)
+  assert.equal(good.layout.W, 8.4)
+  assert.deepEqual(good.layout.rooms.map((/** @type {{ id: string }} */ r) => r.id), ['liv', 'r1'])
+  assert.match(JSON.stringify(calls[0].params.messages), /"type":"image"/)
+
+  setAiClient(fakeAi({ widthCm: 800, depthCm: 600, entrySide: 'N', rooms: [] }).client)
+  const empty = await (await post(homeplanHandler, '/api/homeplan', { imageBase64: PNG })).json()
+  assert.equal(empty.isFallback, true)
+  assert.equal(empty.layout, null)
 })
