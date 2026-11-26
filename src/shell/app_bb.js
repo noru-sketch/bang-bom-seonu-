@@ -764,6 +764,7 @@ const Consult = {
     if (!/^https?:$/.test(location.protocol) || !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
     try { const r = await fetch("/api/health", { cache: "no-store" }); const j = await r.json(); this.llm = !!j.llm; } catch (e) { this.llm = false; }
     const tag = $("#drMode"); if (tag) tag.textContent = this.llm ? "AI 안내" : "기본 안내";
+    const note = $("#drNoteMode"); if (note) note.textContent = this.llm ? "AI가 판정 결과를 바탕으로 설명해요." : "지금은 기본 안내 모드예요.";
   },
   async ask(q) {
     this.say(q, null, true);

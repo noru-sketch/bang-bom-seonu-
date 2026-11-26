@@ -315,7 +315,7 @@ faq_new='''<div class="faq">
         <details><summary>월 부담은 어떻게 계산해요?<i aria-hidden="true"></i></summary><p>월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원이에요. 같이 받을 수 없는 지원(예: 버팀목 대출과 대구 이자지원)은 더하지 않고, "지원 모두 받으면 / 하나도 못 받으면" 범위를 같이 보여줘요.</p></details>
         <details><summary>데이터는 어디서 오나요?<i aria-hidden="true"></i></summary><p>미분양 통계는 국토교통부 주택통계를 쓰고 출처와 기준일을 적어요. 이름 끝에 (샘플)이 붙은 단지와 시설, 금리·지원 기준은 시연용 가정치예요.</p></details>
         <details><summary>지도와 평면도는 어디서 가져왔나요?<i aria-hidden="true"></i></summary><p>지도는 실제 배치를 참고해 단순한 블록으로 직접 그렸고, 지도 화면을 복사하지 않았어요. 평면도도 공고 평면도 원본 이미지를 쓰지 않고 표준 구조로 단순화해 그렸어요.</p></details>
-        <details><summary>24시간 상담은 AI가 판정하나요?<i aria-hidden="true"></i></summary><p>판정은 규칙이 하고, 상담은 그 결과를 쉬운 말로 설명만 해요. 판정을 바꾸거나 새 숫자를 만들지 않고, 링크는 공식 주소만 붙여요. 지금은 시연용 안내 모드예요.</p></details>
+        <details><summary>24시간 상담은 AI가 판정하나요?<i aria-hidden="true"></i></summary><p>판정은 규칙이 하고, 상담은 그 결과를 쉬운 말로 설명만 해요. 판정을 바꾸거나 새 숫자를 만들지 않고, 링크는 공식 주소만 붙여요. AI를 쓸 수 없을 때는 정해진 기본 안내로 답해요.</p></details>
         <details><summary>무료인가요?<i aria-hidden="true"></i></summary><p>네, 지금 시연 버전은 모두 무료예요. 입력한 값은 서버로 보내지 않고 이 브라우저에만 남아요.</p></details>
       </div>'''
 b=b.replace(faq_old,faq_new)
