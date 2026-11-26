@@ -7,3 +7,4 @@ trace/art/
 *.pyc
 .claude/settings.local.json
 .vscode/
+trace/osm/

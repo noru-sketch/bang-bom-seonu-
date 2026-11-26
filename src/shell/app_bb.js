@@ -319,6 +319,20 @@ const MapView = {
       const me = new T3.Mesh(g, new T3.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false })); me.position.set(x, .03, z); me.renderOrder = 4; this.scene.add(me); this.guLabels.push(me);
     });
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(mk);
+    this.buildArt();
+  },
+  buildArt() {
+    /* 단지 주변 바닥 지도: OpenStreetMap 데이터로 다시 그린 그림(img/map, 8x8 단위). 가장자리는 둥글게 흐려지게 */
+    const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d");
+    const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, "#fff"); g.addColorStop(.6, "#fff"); g.addColorStop(1, "#000");
+    x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+    const fade = new T3.CanvasTexture(c), loader = new T3.TextureLoader();
+    COMPLEX.forEach(u => loader.load(`img/map/${u.id}.jpg`, tex => {
+      tex.encoding = T3.sRGBEncoding; tex.anisotropy = 8;
+      const top = u.id === "c01", geo = new T3.PlaneGeometry(8, 8); geo.rotateX(-Math.PI / 2);
+      const m = new T3.Mesh(geo, new T3.MeshStandardMaterial({ map: tex, alphaMap: fade, transparent: true, depthWrite: false, roughness: 1, metalness: 0 }));
+      m.position.set(u.map_x, top ? .02 : .018, u.map_z); m.renderOrder = top ? 2 : 1; m.receiveShadow = true; this.decor.add(m);
+    }, undefined, () => {})); /* 파일로 열면(file://) 그림이 안 올라와도 기본 지도는 그대로 */
   },
   buildCity() {
     /* 도심 격자 블록 (예시, 실제 건물 아님): 미분양 단지보다 낮고 무채색으로 */
@@ -326,7 +340,7 @@ const MapView = {
     for (let gx = -11; gx < 34; gx++) for (let gz = -12; gz < 40; gz++) {
       const cx = gx * CW + CW / 2, cz = gz * CD + CD / 2;
       if (!inGeo(cx, cz, GEO.urban) || rnd() < .3) continue;
-      const free = (x, z, pad) => !this.blocked(x, z, pad) && inGeo(x, z, GEO.urban);
+      const free = (x, z, pad) => !this.blocked(x, z, pad) && inGeo(x, z, GEO.urban) && !COMPLEX.some(u => Math.hypot(x - u.map_x, z - u.map_z) < 3.2); /* 바닥 지도 위에는 예시 블록을 두지 않음 */
       const kind = rnd(), dense = Math.max(0, 1 - Math.hypot(cx - 18, cz - 13) / 22);
       if (kind < .36 + dense * .2) {
         const rows = 2 + Math.floor(rnd() * 2), hgt = .3 + rnd() * .28 + dense * .2;
