@@ -115,27 +115,22 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
   new IntersectionObserver(es => { if (es[0].isIntersecting) sweep(); else if (!touched) { run++; set(100); } }, { threshold: .55 }).observe(ba);
 })();
 
-/* 홈 풀페이지 스크롤: 휠·키보드·터치 밀기 한 번에 한 화면(홈 .hs 6화면 + 푸터). 영상·애니메이션이 끝나길 기다리지 않는다.
-   - 화면보다 긴 화면(해결 1·2·3 등)은 그 안에서 굴린 만큼 내려가고(화면 끝을 넘지 않음), 끝에 닿은 뒤 새로 굴리면 다음 화면으로 간다.
-     넘치는 길이가 섹션 아래 여백(48px)보다 작으면 잘리는 내용이 없으니 한 화면으로 본다.
+/* 홈 풀페이지 스크롤: 휠·키보드·터치 밀기 한 번에 한 화면(홈 .hs 화면들 + 푸터). 영상·애니메이션이 끝나길 기다리지 않는다.
+   - PC 에서는 홈의 모든 화면이 한 화면 높이(100dvh) 안에 들어가게 짜여 있어서(home.css), 화면 안에서 내려가는 일은 없다.
    - 900px 이하이거나 높이 560px 미만이면 끄고 일반 스크롤. 메뉴가 열려 있어도 끈다.
    - 시작하기의 단지 가로 목록(.plans__track)에서 옆으로 미는 것은 막지 않는다 */
 (function () {
   const dots = $("#fpDots"), top = $("#toTop"); if (!dots || !top) return;
-  const SLACK = 48, LINE = 16;
+  const LINE = 16;
   const panels = () => [...$$("#page-home .hs"), $(".footer")];
   const nameOf = p => p.dataset.hs || "끝";
   const isDark = p => !!p && (p.classList.contains("hero") || p.classList.contains("footer"));
   const on = () => current === "home" && innerWidth > 900 && innerHeight >= 560 && !document.body.classList.contains("menu-open");
   const maxY = () => document.documentElement.scrollHeight - innerHeight;
-  /* k 번째 화면이 차지하는 스크롤 범위 [a, b]. 길지 않은 화면은 a === b */
-  const span = k => {
-    const ps = panels(), p = ps[k], t = Math.round(p.getBoundingClientRect().top + scrollY), h = p.offsetHeight;
-    const a = Math.min(t, maxY()), b = h - innerHeight > SLACK ? Math.min(t + h - innerHeight, maxY()) : a;
-    return [a, k === ps.length - 1 ? maxY() : b];
-  };
-  const idx = () => { const ps = panels(); let k = 0; ps.forEach((p, j) => { if (span(j)[0] <= scrollY + innerHeight * .45) k = j; }); return k; };
-  let busy = false, raf = 0, lastWheel = 0, gestureAt = 0;
+  /* k 번째 화면의 맨 위 스크롤 위치. 마지막(푸터)은 페이지 끝 */
+  const topOf = k => { const ps = panels(); return k === ps.length - 1 ? maxY() : Math.min(Math.round(ps[k].getBoundingClientRect().top + scrollY), maxY()); };
+  const idx = () => { const ps = panels(); let k = 0; ps.forEach((p, j) => { if (topOf(j) <= scrollY + innerHeight * .45) k = j; }); return k; };
+  let busy = false, raf = 0, lastWheel = 0;
   const paint = k => {
     const ps = panels(); $$("button", dots).forEach((b, j) => { b.classList.toggle("is-on", j === k); b.toggleAttribute("aria-current", j === k); });
     dots.classList.toggle("is-light", isDark(ps[k]));
@@ -149,27 +144,16 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
     if (!dur) { scrollTo(0, to); busy = false; return; }
     raf = requestAnimationFrame(step);
   };
-  /* 다른 화면으로: 아래로 갈 때는 그 화면 맨 위, 위로 갈 때는 그 화면 맨 아래(긴 화면이면 끝부분)로 */
-  const go = (k, up) => { const n = panels().length; k = clamp(k, 0, n - 1); const [a, b] = span(k); animate(up ? b : a, k); };
-  /* dy 만큼 내리려 한다. 긴 화면 안이면 그 안에서만 움직이고 true, 끝에 닿아 있으면 false */
-  const inner = dy => {
-    const k = idx(), [a, b] = span(k); if (a === b) return false;
-    if ((dy > 0 && scrollY >= b - 1) || (dy < 0 && scrollY <= a + 1)) return false;
-    cancelAnimationFrame(raf); busy = false; scrollTo(0, clamp(scrollY + dy, a, b)); return true;
-  };
-  /* 한 번의 몸짓(휠·키·밀기): 긴 화면 안이면 그만큼 내리고, 아니면 한 화면 넘긴다 */
-  const move = (dy, fresh) => {
-    if (inner(dy)) { gestureAt = performance.now(); return; }
-    if (busy || !fresh) return;
-    go(idx() + (dy > 0 ? 1 : -1), dy < 0);
-  };
+  const go = k => { const n = panels().length; k = clamp(k, 0, n - 1); animate(topOf(k), k); };
+  /* 한 번의 몸짓(휠·키·밀기) = 한 화면. 넘기는 중이거나 트랙패드 관성으로 이어 오는 휠(fresh 아님)은 세지 않는다 */
+  const move = (dy, fresh) => { if (busy || !fresh) return; go(idx() + (dy > 0 ? 1 : -1)); };
   dots.innerHTML = panels().map(p => `<button type="button" aria-label="${nameOf(p)}(으)로 이동"><span>${nameOf(p)}</span></button>`).join("");
   $$("button", dots).forEach((b, j) => b.addEventListener("click", () => go(j)));
   addEventListener("wheel", e => {
     if (!on() || e.ctrlKey) return;
     const tr = e.target.closest && e.target.closest(".plans__track"); if (tr && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
     e.preventDefault();
-    const now = performance.now(), fresh = now - lastWheel > 220 && now - gestureAt > 220; lastWheel = now;
+    const now = performance.now(), fresh = now - lastWheel > 220; lastWheel = now;
     if (Math.abs(e.deltaY) < 2) return;
     move(e.deltaY * (e.deltaMode === 1 ? LINE : e.deltaMode === 2 ? innerHeight : 1), fresh);
   }, { passive: false });
@@ -181,17 +165,17 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
     if (!d) return; e.preventDefault(); move(d, true);
   });
   let t0 = null;
-  addEventListener("touchstart", e => { t0 = on() ? { x: e.touches[0].clientX, y: e.touches[0].clientY, y1: e.touches[0].clientY, track: !!(e.target.closest && e.target.closest(".plans__track")), side: false } : null; }, { passive: true });
+  addEventListener("touchstart", e => { t0 = on() ? { x: e.touches[0].clientX, y: e.touches[0].clientY, track: !!(e.target.closest && e.target.closest(".plans__track")), side: false } : null; }, { passive: true });
   addEventListener("touchmove", e => {
     if (!t0 || !on()) return;
     const x = e.touches[0].clientX, y = e.touches[0].clientY;
     if (t0.track && Math.abs(x - t0.x) > Math.abs(y - t0.y)) { t0.side = true; return; }   /* 단지 목록 옆으로 밀기는 그대로 */
-    e.preventDefault(); if (inner(t0.y1 - y)) gestureAt = performance.now(); t0.y1 = y;  /* 긴 화면 안에서는 손가락을 따라 내려간다 */
+    e.preventDefault();
   }, { passive: false });
   addEventListener("touchend", e => {
     if (!t0) return; const s = t0; t0 = null; if (s.side) return;
     const d = s.y - e.changedTouches[0].clientY;
-    if (Math.abs(d) > 40 && performance.now() - gestureAt > 120) move(d > 0 ? 1 : -1, true);
+    if (Math.abs(d) > 40) move(d, true);
   });
   top.addEventListener("click", () => { if (on()) go(0); else scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); });
   const sync = () => {

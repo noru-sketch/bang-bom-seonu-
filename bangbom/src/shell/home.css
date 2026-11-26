@@ -32,8 +32,6 @@
 .pb-why__list li > p:last-child{font-size:16px;line-height:1.5}
 .pb-close{margin-top:var(--s5);font-size:clamp(22px,2.1vw,30px);line-height:1.4;letter-spacing:-.04em}
 .pb-more{margin-top:var(--s3);font-size:13px;line-height:1.6;color:var(--sub)}
-.pb-src{margin-top:var(--s1);font-size:13px;line-height:1.7;color:var(--sub)}
-.pb-src span{margin-left:10px}
 .pb-src a{text-decoration:underline;text-underline-offset:2px}
 @media (max-width:820px){
   #home-problem.section{padding:56px 0 48px}
@@ -46,7 +44,6 @@
   .pb-why__num{min-width:104px;font-size:32px}
   .pb-why__list li > p:last-child{font-size:15px}
   .pb-close{margin-top:var(--s4);font-size:21px}
-  .pb-src span{display:block;margin-left:0}
 }
 /* 3. 해결 1: 01 조건 → 02 하나씩 따지기 → 03 같이 못 받는 것 거르기, 칸 사이 화살표. 아래에 결과(작은 집 8채) */
 #homeSupport.hs__body{margin-top:var(--s4)}
@@ -118,7 +115,6 @@
 .hc__media .hi{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-30px 0 0 -22px;filter:drop-shadow(0 2px 6px rgba(20,23,20,.25))}
 .hc__media .hi path{stroke-width:1.8}.hc__media .hi--off path,.hc__media .hi--dim path{fill:#fff}.hc__media .hi--dim .hi__half{fill:var(--jd-dim)}
 .hc__media .tag-example{top:12px;right:auto;left:12px;bottom:auto}
-.hc__osm{position:absolute;right:8px;bottom:6px;font-size:10px;color:var(--sub);background:rgba(255,255,255,.75);padding:1px 6px;border-radius:999px}
 .hc .plan-card__name{margin-top:2px;line-height:1.35}
 .hc__cost{font-size:14px;color:#3d413d}
 .hc__cost b{font-weight:600;color:var(--ink)}
@@ -132,6 +128,61 @@
   .hc .plan-card__media{height:auto;aspect-ratio:16/10}
   .hs-start__cta{margin-top:var(--s3)}
 }
+/* ═══════ PC 한 화면: 홈의 모든 화면(.hs)은 한 화면 높이(100dvh) 안에 다 들어간다 ═══════
+   기준 크기 1366×768 · 1440×800 · 1680×780 · 1920×960 에서 넘침 0. 여백·제목·숫자·그림 높이는 화면 높이(vh)에 맞춰 줄고, 글자는 13px 밑으로 내려가지 않는다.
+   휴대폰(900px 이하)은 일반 스크롤이라 이 규칙을 쓰지 않는다 */
+@media (min-width:901px){
+  #page-home{--hs-pt:calc(var(--nav-h) + clamp(12px,3.2vh,40px));--hs-pb:clamp(12px,3.2vh,40px);--hs-gap:clamp(12px,3vh,40px)}
+  #page-home .hs.section{box-sizing:border-box;min-height:100vh;height:100vh;height:100dvh;display:flex;align-items:center;padding:var(--hs-pt) 0 var(--hs-pb)}
+  #page-home .hs.section > .container{width:100%}
+  #page-home .hs .title{font-size:clamp(26px,min(3.2vw,5.4vh),44px)}
+  #page-home .hs .eyebrow{font-size:clamp(17px,2.6vh,22px)}
+  #page-home .hs__head .eyebrow{margin-bottom:clamp(2px,.6vh,8px)}
+  #page-home .tag-example,#page-home .jd,.sf__or span,.sf__drop em,.hc__cost small{font-size:13px}
+  /* 문제 */
+  .pb-big{margin-top:var(--hs-gap)}
+  .pb-big__item{padding-top:clamp(12px,2.6vh,32px)}
+  .pb-num{font-size:clamp(56px,min(7vw,11.4vh),104px)}
+  .pb-num small{font-size:clamp(18px,3vh,26px)}
+  .pb-lbl{margin-top:clamp(6px,1.4vh,16px);font-size:clamp(16px,2.5vh,21px)}
+  .pb-why{margin-top:var(--hs-gap);padding-top:clamp(10px,2.2vh,24px)}
+  .pb-why__list{margin-top:clamp(4px,1vh,16px)}
+  .pb-why__num{font-size:clamp(28px,5vh,40px)}
+  .pb-close{margin-top:var(--hs-gap);font-size:clamp(20px,3.6vh,30px)}
+  .pb-more{margin-top:clamp(8px,1.6vh,24px)}
+  /* 해결 1 */
+  #homeSupport.hs__body{margin-top:var(--hs-gap)}
+  .sf__step{padding:clamp(12px,2.4vh,24px)}
+  .sf__h .tag-example{top:clamp(12px,2.4vh,24px);right:clamp(12px,2.4vh,24px)}
+  .sf__chips{margin-top:clamp(10px,2vh,24px)}
+  .sf__list{margin-top:clamp(4px,1vh,16px)}
+  .sf__list li{padding:clamp(4px,.9vh,8px) 0}
+  .sf__pair{margin-top:clamp(10px,2vh,24px)}
+  .sf__keep,.sf__drop{padding:clamp(6px,1.2vh,10px) 14px}
+  .sf__or{height:clamp(24px,4vh,32px)}
+  .sf-result{margin-top:var(--hs-gap)}
+  .hi{width:clamp(24px,4.4vh,34px);height:clamp(24px,4.4vh,34px)}
+  .sf-foot{margin-top:clamp(8px,2vh,24px)}
+  /* 해결 2 (세 화면): 그림·영상은 남은 높이에 맞춰 줄어든다. 큰 제목은 첫 화면에만 */
+  .hs--house .hs__body{margin-top:var(--hs-gap)}
+  .hs--house .zz__media{max-height:calc(100dvh - var(--hs-pt) - var(--hs-pb))}
+  #home-house .zz__media{max-height:calc(100dvh - var(--hs-pt) - var(--hs-pb) - var(--hs-gap) - clamp(72px,12vh,110px))}
+  .hs--house .zz__text p{margin-top:clamp(8px,1.6vh,16px)}
+  .hs--house .zz__text .link,.hs--house .hs__links{margin-top:clamp(12px,2.4vh,24px)}
+  /* 시작하기 */
+  #home-start .plans__track{margin-top:var(--hs-gap)}
+  .hc .plan-card__media{aspect-ratio:auto;height:clamp(120px,24vh,230px)}
+  .plans__btns{margin-top:clamp(8px,1.6vh,24px)}
+  .hs-start__cta{margin-top:clamp(8px,2vh,48px);gap:clamp(8px,1.4vh,16px)}
+}
+/* 문제 화면 출처: 접어 두고, 펼치면 위로 떠서 열린다(화면 높이를 넘기지 않음). 링크·기준일은 그대로 */
+.pb-src{position:relative;margin-top:var(--s1);font-size:13px;line-height:1.7;color:var(--sub)}
+.pb-src summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.pb-src summary::-webkit-details-marker{display:none}
+.pb-src summary span{font-weight:500;text-decoration:none;color:var(--sub)}
+.pb-src > p{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:5;margin:0;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(20,23,20,.12)}
+.pb-src > p span{display:block;margin:0}
+@media (max-width:900px){.pb-src > p{position:static;margin-top:8px;box-shadow:none}}
 /* ═══════ 풀페이지 스크롤 (shell.js) · 예전 hyewon 홈에서 옮김 ═══════ */
 /* 오른쪽 섹션 점: 풀페이지가 켜졌을 때만(body.fp-on) 보인다. 어두운 화면(히어로·푸터)에서는 밝게 */
 .fp-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:14px}

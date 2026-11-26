@@ -1130,8 +1130,6 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 .pb-why__list li > p:last-child{font-size:16px;line-height:1.5}
 .pb-close{margin-top:var(--s5);font-size:clamp(22px,2.1vw,30px);line-height:1.4;letter-spacing:-.04em}
 .pb-more{margin-top:var(--s3);font-size:13px;line-height:1.6;color:var(--sub)}
-.pb-src{margin-top:var(--s1);font-size:13px;line-height:1.7;color:var(--sub)}
-.pb-src span{margin-left:10px}
 .pb-src a{text-decoration:underline;text-underline-offset:2px}
 @media (max-width:820px){
   #home-problem.section{padding:56px 0 48px}
@@ -1144,7 +1142,6 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
   .pb-why__num{min-width:104px;font-size:32px}
   .pb-why__list li > p:last-child{font-size:15px}
   .pb-close{margin-top:var(--s4);font-size:21px}
-  .pb-src span{display:block;margin-left:0}
 }
 /* 3. 해결 1: 01 조건 → 02 하나씩 따지기 → 03 같이 못 받는 것 거르기, 칸 사이 화살표. 아래에 결과(작은 집 8채) */
 #homeSupport.hs__body{margin-top:var(--s4)}
@@ -1216,7 +1213,6 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 .hc__media .hi{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-30px 0 0 -22px;filter:drop-shadow(0 2px 6px rgba(20,23,20,.25))}
 .hc__media .hi path{stroke-width:1.8}.hc__media .hi--off path,.hc__media .hi--dim path{fill:#fff}.hc__media .hi--dim .hi__half{fill:var(--jd-dim)}
 .hc__media .tag-example{top:12px;right:auto;left:12px;bottom:auto}
-.hc__osm{position:absolute;right:8px;bottom:6px;font-size:10px;color:var(--sub);background:rgba(255,255,255,.75);padding:1px 6px;border-radius:999px}
 .hc .plan-card__name{margin-top:2px;line-height:1.35}
 .hc__cost{font-size:14px;color:#3d413d}
 .hc__cost b{font-weight:600;color:var(--ink)}
@@ -1230,6 +1226,61 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
   .hc .plan-card__media{height:auto;aspect-ratio:16/10}
   .hs-start__cta{margin-top:var(--s3)}
 }
+/* ═══════ PC 한 화면: 홈의 모든 화면(.hs)은 한 화면 높이(100dvh) 안에 다 들어간다 ═══════
+   기준 크기 1366×768 · 1440×800 · 1680×780 · 1920×960 에서 넘침 0. 여백·제목·숫자·그림 높이는 화면 높이(vh)에 맞춰 줄고, 글자는 13px 밑으로 내려가지 않는다.
+   휴대폰(900px 이하)은 일반 스크롤이라 이 규칙을 쓰지 않는다 */
+@media (min-width:901px){
+  #page-home{--hs-pt:calc(var(--nav-h) + clamp(12px,3.2vh,40px));--hs-pb:clamp(12px,3.2vh,40px);--hs-gap:clamp(12px,3vh,40px)}
+  #page-home .hs.section{box-sizing:border-box;min-height:100vh;height:100vh;height:100dvh;display:flex;align-items:center;padding:var(--hs-pt) 0 var(--hs-pb)}
+  #page-home .hs.section > .container{width:100%}
+  #page-home .hs .title{font-size:clamp(26px,min(3.2vw,5.4vh),44px)}
+  #page-home .hs .eyebrow{font-size:clamp(17px,2.6vh,22px)}
+  #page-home .hs__head .eyebrow{margin-bottom:clamp(2px,.6vh,8px)}
+  #page-home .tag-example,#page-home .jd,.sf__or span,.sf__drop em,.hc__cost small{font-size:13px}
+  /* 문제 */
+  .pb-big{margin-top:var(--hs-gap)}
+  .pb-big__item{padding-top:clamp(12px,2.6vh,32px)}
+  .pb-num{font-size:clamp(56px,min(7vw,11.4vh),104px)}
+  .pb-num small{font-size:clamp(18px,3vh,26px)}
+  .pb-lbl{margin-top:clamp(6px,1.4vh,16px);font-size:clamp(16px,2.5vh,21px)}
+  .pb-why{margin-top:var(--hs-gap);padding-top:clamp(10px,2.2vh,24px)}
+  .pb-why__list{margin-top:clamp(4px,1vh,16px)}
+  .pb-why__num{font-size:clamp(28px,5vh,40px)}
+  .pb-close{margin-top:var(--hs-gap);font-size:clamp(20px,3.6vh,30px)}
+  .pb-more{margin-top:clamp(8px,1.6vh,24px)}
+  /* 해결 1 */
+  #homeSupport.hs__body{margin-top:var(--hs-gap)}
+  .sf__step{padding:clamp(12px,2.4vh,24px)}
+  .sf__h .tag-example{top:clamp(12px,2.4vh,24px);right:clamp(12px,2.4vh,24px)}
+  .sf__chips{margin-top:clamp(10px,2vh,24px)}
+  .sf__list{margin-top:clamp(4px,1vh,16px)}
+  .sf__list li{padding:clamp(4px,.9vh,8px) 0}
+  .sf__pair{margin-top:clamp(10px,2vh,24px)}
+  .sf__keep,.sf__drop{padding:clamp(6px,1.2vh,10px) 14px}
+  .sf__or{height:clamp(24px,4vh,32px)}
+  .sf-result{margin-top:var(--hs-gap)}
+  .hi{width:clamp(24px,4.4vh,34px);height:clamp(24px,4.4vh,34px)}
+  .sf-foot{margin-top:clamp(8px,2vh,24px)}
+  /* 해결 2 (세 화면): 그림·영상은 남은 높이에 맞춰 줄어든다. 큰 제목은 첫 화면에만 */
+  .hs--house .hs__body{margin-top:var(--hs-gap)}
+  .hs--house .zz__media{max-height:calc(100dvh - var(--hs-pt) - var(--hs-pb))}
+  #home-house .zz__media{max-height:calc(100dvh - var(--hs-pt) - var(--hs-pb) - var(--hs-gap) - clamp(72px,12vh,110px))}
+  .hs--house .zz__text p{margin-top:clamp(8px,1.6vh,16px)}
+  .hs--house .zz__text .link,.hs--house .hs__links{margin-top:clamp(12px,2.4vh,24px)}
+  /* 시작하기 */
+  #home-start .plans__track{margin-top:var(--hs-gap)}
+  .hc .plan-card__media{aspect-ratio:auto;height:clamp(120px,24vh,230px)}
+  .plans__btns{margin-top:clamp(8px,1.6vh,24px)}
+  .hs-start__cta{margin-top:clamp(8px,2vh,48px);gap:clamp(8px,1.4vh,16px)}
+}
+/* 문제 화면 출처: 접어 두고, 펼치면 위로 떠서 열린다(화면 높이를 넘기지 않음). 링크·기준일은 그대로 */
+.pb-src{position:relative;margin-top:var(--s1);font-size:13px;line-height:1.7;color:var(--sub)}
+.pb-src summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.pb-src summary::-webkit-details-marker{display:none}
+.pb-src summary span{font-weight:500;text-decoration:none;color:var(--sub)}
+.pb-src > p{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:5;margin:0;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 30px rgba(20,23,20,.12)}
+.pb-src > p span{display:block;margin:0}
+@media (max-width:900px){.pb-src > p{position:static;margin-top:8px;box-shadow:none}}
 /* ═══════ 풀페이지 스크롤 (shell.js) · 예전 hyewon 홈에서 옮김 ═══════ */
 /* 오른쪽 섹션 점: 풀페이지가 켜졌을 때만(body.fp-on) 보인다. 어두운 화면(히어로·푸터)에서는 밝게 */
 .fp-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:14px}
@@ -1660,7 +1711,7 @@ body.house-mode #mh .fab{display:none}
 <main id="main">
 
 <!-- ═══════════════ #home ═══════════════ -->
-<!-- 홈 5화면: 히어로 → 문제 → 해결 1 → 해결 2 → 시작하기. 해결 3(계약 전 확인)은 홈에서 빼고 단지 카드의 체크리스트로 대신한다(팀 결정). build.py 가 p2_body.html 의 #page-home 자리에 이 파일을 끼워 넣는다 -->
+<!-- 홈: 히어로 → 문제 → 해결 1 → 해결 2(지도 · 평면도·3D · 가구 세 화면) → 시작하기. 해결 3(계약 전 확인)은 홈에서 빼고 단지 카드의 체크리스트로 대신한다(팀 결정). build.py 가 p2_body.html 의 #page-home 자리에 이 파일을 끼워 넣는다 -->
 <!-- 지금은 뼈대만 있다. 근거 카드·판정 예시·체크리스트는 다음 단계에서 채운다 (docs/인수인계_혜원.md 3번) -->
 <section class="page" id="page-home" data-page="home" aria-label="홈">
 
@@ -1711,14 +1762,18 @@ body.house-mode #mh .fab{display:none}
       </div>
       <p class="hs__close pb-close reveal">집은 있는데, 내 조건에 맞는 집과 지원을 한 번에 보여주는 곳이 없어요.</p>
       <p class="pb-more">2019~2024년 대구 청년 3만 5,700명 순유출<sup class="pb-ref">⑤</sup> · 1인당 지역내총생산과 1인당 가계 처분가능소득 모두 전국 평균 아래<sup class="pb-ref">⑥</sup> · 연 소득 2,400만 원 미만 청년 중 청년정책을 자세히 아는 사람 7.1%<sup class="pb-ref">④</sup></p>
-      <p class="pb-src">출처
+      <!-- 출처는 접어 둔다. 펼치면 화면 위로 떠서 열려 한 화면 높이를 넘기지 않는다 (링크·기준일은 그대로) -->
+      <details class="pb-src">
+        <summary>출처 보기 <span>①~⑥</span></summary>
+        <p>
         <span>① 국가데이터처 국내인구이동통계, 동북지방통계청 분석 · <a href="https://kbmaeil.com/article/20260730500246" target="_blank" rel="noopener">경북매일 2026.7.30</a></span>
         <span>② 국토교통부 주택통계 · 2026.9 기준</span>
         <span>③ 보도 기준 · <a href="https://www.hankyung.com/article/202607243355H" target="_blank" rel="noopener">한국경제 2026.7.24</a></span>
         <span>④ 청년정책 플랫폼 설문(521명) · <a href="https://view.asiae.co.kr/article/2026022011075035575" target="_blank" rel="noopener">아시아경제 2026.2.20</a></span>
         <span>⑤ 동북지방데이터청 · <a href="https://kbmaeil.com/article/20261027500130" target="_blank" rel="noopener">경북매일 2026.10.27</a></span>
         <span>⑥ 국가데이터처 · <a href="https://mobile.newsis.com/view/NISX20260703_0003695527" target="_blank" rel="noopener">뉴시스 2026.7.3</a></span>
-      </p>
+        </p>
+      </details>
     </div>
   </div>
 
@@ -1734,15 +1789,15 @@ body.house-mode #mh .fab{display:none}
     </div>
   </div>
 
-  <!-- 4. 해결 2 -->
-  <div class="section section--gray hs" id="home-house" data-hs="지도·집 보기">
+  <!-- 4. 해결 2: PC 풀페이지에서 한 화면씩 보이도록 세 화면으로 나눈다 (① 지도 영상 ② 평면도 → 3D → 방 ③ 가구 전후 비교). 큰 제목은 ①에만 -->
+  <!-- 4-1. 지도 영상 (2.5D 지도 + 편의시설 연결선, vid/match.mp4) -->
+  <div class="section section--gray hs hs--house" id="home-house" data-hs="지도">
     <div class="container">
       <div class="hs__head reveal">
         <span class="eyebrow">Solution 02</span>
         <h2 class="title">지도에서 고르고, 방 안까지 들어가 봐요</h2>
       </div>
-      <!-- 2.5D 지도 + 편의시설 연결선(vid/match.mp4), 평면도 → 3D → 방 하나하나, 가구 전·후 비교(img/furn_before.jpg · furn_after.jpg) -->
-      <div class="hs__body zz" id="homeHouse">
+      <div class="hs__body zz">
         <div class="zz__row">
           <div class="zz__media reveal">
             <video muted playsinline preload="none" poster="img/match.jpg" data-autoplay aria-label="불이 켜진 단지를 누르면 다른 단지는 사라지고 주변 시설까지 선이 이어지는 방봄 지도 화면"><source src="vid/match.mp4" type="video/mp4"></video>
@@ -1755,6 +1810,14 @@ body.house-mode #mh .fab{display:none}
             <a href="#map" class="link" data-go="browse">지도 둘러보기 →</a>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4-2. 평면도 → 3D → 방 + 아이 눈높이 링크 -->
+  <div class="section section--white hs hs--house" id="home-flow" data-hs="평면도·3D">
+    <div class="container">
+      <div class="zz">
         <div class="zz__row is-rev zz__row--wide">
           <div class="zz__media zz__media--plain reveal">
             <!-- 나노바나나 프로로 만든 그림 (src/tools/make_images.py). 실제 단지 도면이 아니다 -->
@@ -1762,7 +1825,7 @@ body.house-mode #mh .fab{display:none}
             <span class="tag-example">AI 연출 이미지</span>
           </div>
           <div class="zz__text reveal">
-            <p class="zz__no">02 · Plan to room</p>
+            <p class="zz__no">Solution 02 · Plan to room</p>
             <h3 class="zz__title">평면도에서 3D로, 방 안까지</h3>
             <p>단지를 고르면 평면도가 먼저 보이고, 누르면 3D로 바뀌어요. 방을 하나 고르면 그 방 안으로 들어가 눈높이로 둘러볼 수 있어요.</p>
             <p>아이 눈높이(90cm)로 보면 아이 얼굴 높이에 닿는 가구 모서리를 빨간 점으로 짚어 줘요. 참고값 (법적·안전 기준 아님)</p>
@@ -1772,6 +1835,14 @@ body.house-mode #mh .fab{display:none}
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4-3. 가구 전후 비교 (img/furn_before.jpg · furn_after.jpg) -->
+  <div class="section section--gray hs hs--house" id="home-furn" data-hs="가구 놓기">
+    <div class="container">
+      <div class="zz">
         <div class="zz__row">
           <div class="zz__media reveal">
             <div class="ba" id="ba">
@@ -1786,7 +1857,7 @@ body.house-mode #mh .fab{display:none}
             <span class="tag-example">예시 이미지</span>
           </div>
           <div class="zz__text reveal">
-            <p class="zz__no">03 · Furniture</p>
+            <p class="zz__no">Solution 02 · Furniture</p>
             <h3 class="zz__title">우리 집 가구도 미리 놓아 봐요</h3>
             <p>가구를 놓아 보면 부딪히는 곳과 지나다닐 통로를 먼저 알려줘요.</p>
             <span class="zz__hint">← 사진을 좌우로 밀어서 비교해보세요 →</span>
@@ -1811,7 +1882,7 @@ body.house-mode #mh .fab{display:none}
         <button class="round-btn" id="plansNext" aria-label="다음 단지"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
       </div>
       <div class="hs__cta hs-start__cta reveal">
-        <p class="hs-start__note">김지훈 예시 조건 기준이에요. 내 조건을 넣으면 순서가 바뀌어요.</p>
+        <p class="hs-start__note">김지훈 예시 조건 기준이에요. 내 조건을 넣으면 순서가 바뀌어요.<br>카드 그림은 단지 주변 지도예요 · 지도: © OpenStreetMap contributors (재해석 이미지)</p>
         <a href="#input" class="btn" data-go="input">내 조건 넣기 →</a>
       </div>
     </div>
@@ -4585,7 +4656,7 @@ ${labels}
       const cost = main == null ? `<p class="hc__cost is-none">모은 돈이 모자라 월 부담은 계산하지 않았어요</p>`
         : `<p class="hc__cost">월 부담 약 <b>${man1(main)}만 원</b>${e.net_monthly == null ? `<small>지원을 모두 받으면</small>` : ""}</p>`;
       return `<button class="plan-card hc" data-cid="${c.id}" aria-label="${esc(name)} 집 보기">
-        <div class="plan-card__media hc__media"><img src="img/map/${c.id}.jpg" alt="" loading="lazy">${house(e.light, LIGHT_KO[e.light])}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span><span class="hc__osm">© OpenStreetMap</span></div>
+        <div class="plan-card__media hc__media"><img src="img/map/${c.id}.jpg" alt="" loading="lazy">${house(e.light, LIGHT_KO[e.light])}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span></div>
         ${jd(e.light)}
         <p class="plan-card__name">${esc(name)}</p>
         <p class="plan-card__meta">${esc(c.district)} · ${esc(SUPPLY_KO[c.supply_type] || "")} · ${c.area_m2}㎡</p>
@@ -4862,27 +4933,22 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
   new IntersectionObserver(es => { if (es[0].isIntersecting) sweep(); else if (!touched) { run++; set(100); } }, { threshold: .55 }).observe(ba);
 })();
 
-/* 홈 풀페이지 스크롤: 휠·키보드·터치 밀기 한 번에 한 화면(홈 .hs 6화면 + 푸터). 영상·애니메이션이 끝나길 기다리지 않는다.
-   - 화면보다 긴 화면(해결 1·2·3 등)은 그 안에서 굴린 만큼 내려가고(화면 끝을 넘지 않음), 끝에 닿은 뒤 새로 굴리면 다음 화면으로 간다.
-     넘치는 길이가 섹션 아래 여백(48px)보다 작으면 잘리는 내용이 없으니 한 화면으로 본다.
+/* 홈 풀페이지 스크롤: 휠·키보드·터치 밀기 한 번에 한 화면(홈 .hs 화면들 + 푸터). 영상·애니메이션이 끝나길 기다리지 않는다.
+   - PC 에서는 홈의 모든 화면이 한 화면 높이(100dvh) 안에 들어가게 짜여 있어서(home.css), 화면 안에서 내려가는 일은 없다.
    - 900px 이하이거나 높이 560px 미만이면 끄고 일반 스크롤. 메뉴가 열려 있어도 끈다.
    - 시작하기의 단지 가로 목록(.plans__track)에서 옆으로 미는 것은 막지 않는다 */
 (function () {
   const dots = $("#fpDots"), top = $("#toTop"); if (!dots || !top) return;
-  const SLACK = 48, LINE = 16;
+  const LINE = 16;
   const panels = () => [...$$("#page-home .hs"), $(".footer")];
   const nameOf = p => p.dataset.hs || "끝";
   const isDark = p => !!p && (p.classList.contains("hero") || p.classList.contains("footer"));
   const on = () => current === "home" && innerWidth > 900 && innerHeight >= 560 && !document.body.classList.contains("menu-open");
   const maxY = () => document.documentElement.scrollHeight - innerHeight;
-  /* k 번째 화면이 차지하는 스크롤 범위 [a, b]. 길지 않은 화면은 a === b */
-  const span = k => {
-    const ps = panels(), p = ps[k], t = Math.round(p.getBoundingClientRect().top + scrollY), h = p.offsetHeight;
-    const a = Math.min(t, maxY()), b = h - innerHeight > SLACK ? Math.min(t + h - innerHeight, maxY()) : a;
-    return [a, k === ps.length - 1 ? maxY() : b];
-  };
-  const idx = () => { const ps = panels(); let k = 0; ps.forEach((p, j) => { if (span(j)[0] <= scrollY + innerHeight * .45) k = j; }); return k; };
-  let busy = false, raf = 0, lastWheel = 0, gestureAt = 0;
+  /* k 번째 화면의 맨 위 스크롤 위치. 마지막(푸터)은 페이지 끝 */
+  const topOf = k => { const ps = panels(); return k === ps.length - 1 ? maxY() : Math.min(Math.round(ps[k].getBoundingClientRect().top + scrollY), maxY()); };
+  const idx = () => { const ps = panels(); let k = 0; ps.forEach((p, j) => { if (topOf(j) <= scrollY + innerHeight * .45) k = j; }); return k; };
+  let busy = false, raf = 0, lastWheel = 0;
   const paint = k => {
     const ps = panels(); $$("button", dots).forEach((b, j) => { b.classList.toggle("is-on", j === k); b.toggleAttribute("aria-current", j === k); });
     dots.classList.toggle("is-light", isDark(ps[k]));
@@ -4896,27 +4962,16 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
     if (!dur) { scrollTo(0, to); busy = false; return; }
     raf = requestAnimationFrame(step);
   };
-  /* 다른 화면으로: 아래로 갈 때는 그 화면 맨 위, 위로 갈 때는 그 화면 맨 아래(긴 화면이면 끝부분)로 */
-  const go = (k, up) => { const n = panels().length; k = clamp(k, 0, n - 1); const [a, b] = span(k); animate(up ? b : a, k); };
-  /* dy 만큼 내리려 한다. 긴 화면 안이면 그 안에서만 움직이고 true, 끝에 닿아 있으면 false */
-  const inner = dy => {
-    const k = idx(), [a, b] = span(k); if (a === b) return false;
-    if ((dy > 0 && scrollY >= b - 1) || (dy < 0 && scrollY <= a + 1)) return false;
-    cancelAnimationFrame(raf); busy = false; scrollTo(0, clamp(scrollY + dy, a, b)); return true;
-  };
-  /* 한 번의 몸짓(휠·키·밀기): 긴 화면 안이면 그만큼 내리고, 아니면 한 화면 넘긴다 */
-  const move = (dy, fresh) => {
-    if (inner(dy)) { gestureAt = performance.now(); return; }
-    if (busy || !fresh) return;
-    go(idx() + (dy > 0 ? 1 : -1), dy < 0);
-  };
+  const go = k => { const n = panels().length; k = clamp(k, 0, n - 1); animate(topOf(k), k); };
+  /* 한 번의 몸짓(휠·키·밀기) = 한 화면. 넘기는 중이거나 트랙패드 관성으로 이어 오는 휠(fresh 아님)은 세지 않는다 */
+  const move = (dy, fresh) => { if (busy || !fresh) return; go(idx() + (dy > 0 ? 1 : -1)); };
   dots.innerHTML = panels().map(p => `<button type="button" aria-label="${nameOf(p)}(으)로 이동"><span>${nameOf(p)}</span></button>`).join("");
   $$("button", dots).forEach((b, j) => b.addEventListener("click", () => go(j)));
   addEventListener("wheel", e => {
     if (!on() || e.ctrlKey) return;
     const tr = e.target.closest && e.target.closest(".plans__track"); if (tr && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
     e.preventDefault();
-    const now = performance.now(), fresh = now - lastWheel > 220 && now - gestureAt > 220; lastWheel = now;
+    const now = performance.now(), fresh = now - lastWheel > 220; lastWheel = now;
     if (Math.abs(e.deltaY) < 2) return;
     move(e.deltaY * (e.deltaMode === 1 ? LINE : e.deltaMode === 2 ? innerHeight : 1), fresh);
   }, { passive: false });
@@ -4928,17 +4983,17 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
     if (!d) return; e.preventDefault(); move(d, true);
   });
   let t0 = null;
-  addEventListener("touchstart", e => { t0 = on() ? { x: e.touches[0].clientX, y: e.touches[0].clientY, y1: e.touches[0].clientY, track: !!(e.target.closest && e.target.closest(".plans__track")), side: false } : null; }, { passive: true });
+  addEventListener("touchstart", e => { t0 = on() ? { x: e.touches[0].clientX, y: e.touches[0].clientY, track: !!(e.target.closest && e.target.closest(".plans__track")), side: false } : null; }, { passive: true });
   addEventListener("touchmove", e => {
     if (!t0 || !on()) return;
     const x = e.touches[0].clientX, y = e.touches[0].clientY;
     if (t0.track && Math.abs(x - t0.x) > Math.abs(y - t0.y)) { t0.side = true; return; }   /* 단지 목록 옆으로 밀기는 그대로 */
-    e.preventDefault(); if (inner(t0.y1 - y)) gestureAt = performance.now(); t0.y1 = y;  /* 긴 화면 안에서는 손가락을 따라 내려간다 */
+    e.preventDefault();
   }, { passive: false });
   addEventListener("touchend", e => {
     if (!t0) return; const s = t0; t0 = null; if (s.side) return;
     const d = s.y - e.changedTouches[0].clientY;
-    if (Math.abs(d) > 40 && performance.now() - gestureAt > 120) move(d > 0 ? 1 : -1, true);
+    if (Math.abs(d) > 40) move(d, true);
   });
   top.addEventListener("click", () => { if (on()) go(0); else scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); });
   const sync = () => {

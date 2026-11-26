@@ -1,0 +1,230 @@
+[
+ {
+  "W": 1366,
+  "H": 768,
+  "vh": 768,
+  "fp": true,
+  "r": [
+   {
+    "hs": "처음",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "문제",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pb-more:2019~2024년 대"
+   },
+   {
+    "hs": "지원 찾기",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시"
+   },
+   {
+    "hs": "지도",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "평면도·3D",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:AI 연출 이미지"
+   },
+   {
+    "hs": "가구 놓기",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pill-label pill-label--l:놓기 전"
+   },
+   {
+    "hs": "시작하기",
+    "h": 768,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 단지"
+   }
+  ]
+ },
+ {
+  "W": 1440,
+  "H": 800,
+  "vh": 800,
+  "fp": true,
+  "r": [
+   {
+    "hs": "처음",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "문제",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pb-more:2019~2024년 대"
+   },
+   {
+    "hs": "지원 찾기",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시"
+   },
+   {
+    "hs": "지도",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "평면도·3D",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:AI 연출 이미지"
+   },
+   {
+    "hs": "가구 놓기",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pill-label pill-label--l:놓기 전"
+   },
+   {
+    "hs": "시작하기",
+    "h": 800,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 단지"
+   }
+  ]
+ },
+ {
+  "W": 1680,
+  "H": 780,
+  "vh": 780,
+  "fp": true,
+  "r": [
+   {
+    "hs": "처음",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "문제",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pb-more:2019~2024년 대"
+   },
+   {
+    "hs": "지원 찾기",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시"
+   },
+   {
+    "hs": "지도",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "평면도·3D",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:AI 연출 이미지"
+   },
+   {
+    "hs": "가구 놓기",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pill-label pill-label--l:놓기 전"
+   },
+   {
+    "hs": "시작하기",
+    "h": 780,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 단지"
+   }
+  ]
+ },
+ {
+  "W": 1920,
+  "H": 960,
+  "vh": 960,
+  "fp": true,
+  "r": [
+   {
+    "hs": "처음",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "문제",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pb-more:2019~2024년 대"
+   },
+   {
+    "hs": "지원 찾기",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시"
+   },
+   {
+    "hs": "지도",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 영상"
+   },
+   {
+    "hs": "평면도·3D",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:AI 연출 이미지"
+   },
+   {
+    "hs": "가구 놓기",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "pill-label pill-label--l:놓기 전"
+   },
+   {
+    "hs": "시작하기",
+    "h": 960,
+    "over": 0,
+    "minF": 13,
+    "minEl": "tag-example:예시 단지"
+   }
+  ]
+ }
+]

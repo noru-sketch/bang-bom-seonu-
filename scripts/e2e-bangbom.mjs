@@ -273,8 +273,8 @@ async function run(cdp) {
     })
     await check(`${P} 8. 홈 "아이 눈높이 90cm로 보기" → 집 보기 3D 아이 눈높이: 시트 접힘, 끌어서 둘러보기, 바닥 눌러 옮겨 가기`, async () => {
       await fresh('#home')
-      // 홈 6화면: 링크는 4번 화면(해결 2 · #home-house)의 "평면도에서 3D로" 줄에 있다. 손가락으로 민 것처럼 링크가 화면 가운데 오도록 내린다
-      await ev(`(() => { const a = ${q('#home-house a[data-eye="child"]')}; scrollTo(0, a.getBoundingClientRect().top + scrollY - innerHeight / 2) })()`); await sleep(1000)
+      // 홈: 링크는 해결 2의 두 번째 화면(#home-flow, 평면도 → 3D → 방)의 "평면도에서 3D로" 줄에 있다. 손가락으로 민 것처럼 링크가 화면 가운데 오도록 내린다
+      await ev(`(() => { const a = ${q('#home-flow a[data-eye="child"]')}; scrollTo(0, a.getBoundingClientRect().top + scrollY - innerHeight / 2) })()`); await sleep(1000)
       const link = await ev(`__q.rect('a[data-eye="child"]')`)
       // 집 보기는 고른 방을 주소 뒤에 붙인다(#house/liv). 그래서 '#house' 로 시작하는지만 본다
       await tap(q('a[data-eye="child"]'), '아이 눈높이 90cm로 보기'); await waitFor(`location.hash.startsWith('#house')`, '#house', 6000)

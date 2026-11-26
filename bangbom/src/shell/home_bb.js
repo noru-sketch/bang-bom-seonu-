@@ -65,7 +65,7 @@
       const cost = main == null ? `<p class="hc__cost is-none">모은 돈이 모자라 월 부담은 계산하지 않았어요</p>`
         : `<p class="hc__cost">월 부담 약 <b>${man1(main)}만 원</b>${e.net_monthly == null ? `<small>지원을 모두 받으면</small>` : ""}</p>`;
       return `<button class="plan-card hc" data-cid="${c.id}" aria-label="${esc(name)} 집 보기">
-        <div class="plan-card__media hc__media"><img src="img/map/${c.id}.jpg" alt="" loading="lazy">${house(e.light, LIGHT_KO[e.light])}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span><span class="hc__osm">© OpenStreetMap</span></div>
+        <div class="plan-card__media hc__media"><img src="img/map/${c.id}.jpg" alt="" loading="lazy">${house(e.light, LIGHT_KO[e.light])}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span></div>
         ${jd(e.light)}
         <p class="plan-card__name">${esc(name)}</p>
         <p class="plan-card__meta">${esc(c.district)} · ${esc(SUPPLY_KO[c.supply_type] || "")} · ${c.area_m2}㎡</p>
