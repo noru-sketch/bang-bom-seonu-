@@ -320,7 +320,7 @@ b=R(b,'''          <span class="eyebrow">Plans</span>
         </div>
         <p class="muted small">누르면 평면도·3D로 집 안을 보고 가구를 놓아볼 수 있어요.</p>''')
 # 링크들
-b=R(b,'<a href="#sim" class="link" data-go-mode="fix">고친 우리 집 보기 →</a>','<a href="#house" class="link">평면도·3D로 집 보기 →</a>')
+b=R(b,'<a href="#sim" class="link" data-go-mode="fix">고친 우리 집 보기 →</a>','<a href="#house" class="link">가구 배치하러 가기 →</a>')
 b=R(b,'<a href="#sim" class="link" data-go-mode="move">새 집에 가구 놓아보기 →</a>','<a href="#house" class="link">새 집에 가구 놓아보기 →</a>')
 # 아이 눈높이: 집 보기를 열면서 눈높이를 아이(90cm)로 맞춘다. shell.js 가 [data-eye] 를 누르면 MH.setEye(값)을 부른다
 b=R(b,'<a href="#sim" class="link" data-go-eye="1">90cm로 걸어보기 →</a>','<a href="#house" class="link" data-eye="child">아이 눈높이 90cm로 보기 →</a>')
