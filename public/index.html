@@ -1096,56 +1096,109 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
   /* 휴대폰에서 왼쪽 카드가 접기 단추(−)와 겹치지 않게 단추 아래에 둔다 */
   #mh .panel-l{top:220px}
 }
-/* ═══════ 홈 6화면 (문제 → 해결) · 뼈대 ═══════ */
+/* ═══════ 홈 5화면 (히어로 → 문제 → 해결 1 → 해결 2 → 시작하기) ═══════ */
 /* 섹션 틀은 p1_head.html 의 .section / .container 를 그대로 쓴다. 여기는 6화면에만 필요한 것만 둔다 */
 .hs__head{max-width:720px}
 .hs__body{margin-top:var(--s6)}
 .hs__body:empty{display:none}
 .hs__close{margin-top:var(--s6);font-size:clamp(18px,1.6vw,22px);font-weight:600;letter-spacing:-.03em;line-height:1.5}
 .hs__cta{margin-top:var(--s6);display:flex;justify-content:center}
-/* 2. 문제: 근거 카드 4개. 카드 틀(.card)·큰 숫자(.stat__num)는 p1_head.html 것을 그대로 쓴다 */
-.hp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3)}
-.hp{display:flex;flex-direction:column;padding:var(--s4) var(--s3)}
-.hp__k{font-size:14px;font-weight:600;color:var(--sub)}
-.hp .stat__num{margin:var(--s2) 0 0}
-.hp__t{margin:var(--s2) 0 0;font-weight:600;line-height:1.55}
-.hp__more{margin:var(--s1) 0 0;font-size:14px;color:var(--sub)}
-.hp__src{list-style:none;margin:auto 0 0;padding:var(--s3) 0 0;font-size:12px;line-height:1.5;color:var(--sub)}
-.hp__src li{padding-top:var(--s1);border-top:1px solid var(--line)}
-.hp__src li + li{margin-top:var(--s1)}
-.hp__src a{text-decoration:underline;text-underline-offset:2px}
-@media (max-width:1100px){.hp-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:820px){.hp-grid{grid-template-columns:1fr;gap:var(--s2)}.hp{padding:var(--s3)}}
-/* 3. 해결 1: 판정 미리보기 카드 + 세 단계 설명. 줄 배치는 .zz__row 를 그대로 쓴다 */
-.hsu{padding:var(--s4)}
-.hsu__head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s2)}
-.hsu__who{font-weight:600;line-height:1.5}
-.hsu__list{list-style:none;margin:var(--s3) 0 0;padding:0;border-top:1px solid var(--line)}
-.hsu__list li{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
-.hsu__sum{margin-top:var(--s3);font-weight:600}
-.hsu__sum b{color:var(--green)}
-.hsu__clash{margin-top:var(--s2);padding:12px 14px;border-radius:12px;background:var(--gray);font-size:14px;line-height:1.55}
-.hsu__clash b{display:block;font-size:12px;color:var(--sub)}
-.hsu__foot{margin-top:var(--s2);font-size:13px;color:var(--sub)}
-.hsu__steps{list-style:none;margin:0;padding:0;counter-reset:hsu}
-.hsu__steps li{position:relative;padding:0 0 var(--s3) 44px;color:#3d413d;counter-increment:hsu}
-.hsu__steps li::before{content:counter(hsu,decimal-leading-zero);position:absolute;left:0;top:0;font-family:var(--en);font-style:italic;font-size:20px;color:var(--green);line-height:1.4}
-.hsu__steps b{display:block;color:var(--ink);font-size:18px;font-weight:600;letter-spacing:-0.03em}
-/* 5. 해결 3: 방봄이 확인한 것 / 직접 확인할 것 / 기관이 정하는 것 */
-.hck-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
-.hck{padding:var(--s4) var(--s3)}
-.hck__k{font-size:14px;font-weight:600;color:var(--green)}
-.hck__t{margin-top:var(--s1);font-size:18px;font-weight:600;letter-spacing:-0.03em;line-height:1.45}
-.hck ul{list-style:none;margin:var(--s3) 0 0;padding:0;border-top:1px solid var(--line)}
-.hck li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.55}
-.hck__supply li{display:flex;justify-content:space-between;gap:var(--s2)}
-.hck__supply span{color:var(--sub);font-size:14px;text-align:right}
-.hck__list li{position:relative;padding-left:26px}
-.hck__list li::before{content:"";position:absolute;left:0;top:15px;width:14px;height:14px;border:1.5px solid var(--ink);border-radius:4px}
-.hck__by li{color:#3d413d}
-.hck__note{margin-top:var(--s2);font-size:13px;color:var(--sub)}
-@media (max-width:1100px){.hck-grid{grid-template-columns:1fr 1fr}}
-@media (max-width:820px){.hck-grid{grid-template-columns:1fr;gap:var(--s2)}.hsu,.hck{padding:var(--s3)}.hsu__head{flex-direction:column-reverse}}
+/* 판정 표시: 모든 홈 화면에서 같은 기호·색. 색만으로 구분하지 않게 모양(채움·반 채움·테두리)과 글자를 같이 쓴다 */
+:root{--jd-on:#1f6b4f;--jd-dim:#c7891d;--jd-off:#a9a7a0}
+.jd{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.jd i,.jd-dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;box-sizing:border-box;vertical-align:-1px}
+.jd--on{background:var(--green-soft);color:var(--jd-on)}.jd--on i,.jd-dot--on{background:var(--jd-on)}
+.jd--dim{background:#fbf1de;color:#835a10}.jd--dim i,.jd-dot--dim{border:1.5px solid var(--jd-dim);background:linear-gradient(90deg,var(--jd-dim) 50%,transparent 50%)}
+.jd--off{background:var(--gray);color:var(--sub)}.jd--off i,.jd-dot--off{border:1.5px solid var(--jd-off);background:transparent}
+/* 2. 문제: 큰 숫자 두 개를 맞대고(테두리·배경 없이), 아래에 이유 두 줄. PC 1440×900 한 화면에 들어가게 위아래 여백을 줄인다 */
+#home-problem.section{padding:calc(var(--nav-h) + 40px) 0 48px}
+.pb-big{display:grid;grid-template-columns:1fr 1fr;margin-top:var(--s5);border-top:1px solid var(--line)}
+.pb-big__item{padding:var(--s4) var(--s4) 0 0}
+.pb-big__item + .pb-big__item{padding-left:var(--s5);border-left:1px solid var(--line)}
+.pb-num{display:flex;align-items:baseline;gap:6px;color:var(--green);font-weight:500;font-size:clamp(64px,7vw,100px);line-height:1;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.pb-num small{font-size:clamp(20px,1.8vw,26px);font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.pb-ref{font-size:15px;font-weight:600;color:var(--sub);letter-spacing:0;line-height:1;vertical-align:super;margin-left:2px}
+.pb-num .pb-ref{align-self:flex-start;margin-top:.3em}
+.pb-lbl{margin-top:var(--s2);font-size:clamp(18px,1.5vw,21px);font-weight:600;letter-spacing:-.03em}
+.pb-sub{margin-top:4px;font-size:14px;color:var(--sub)}
+.pb-why{margin-top:var(--s5);padding-top:var(--s3);border-top:1px solid var(--line)}
+.pb-why__t{font-size:15px;font-weight:600;color:var(--sub);letter-spacing:-.02em}
+.pb-why__list{list-style:none;margin:var(--s2) 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:var(--s1) var(--s5)}
+.pb-why__list li{display:flex;align-items:center;gap:var(--s3)}
+.pb-why__num{flex:none;min-width:150px;font-size:40px;font-weight:500;line-height:1.1;letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums}
+.pb-why__num small{font-size:18px;font-weight:600;margin-left:2px}
+.pb-why__list li > p:last-child{font-size:16px;line-height:1.5}
+.pb-close{margin-top:var(--s5);font-size:clamp(22px,2.1vw,30px);line-height:1.4;letter-spacing:-.04em}
+.pb-more{margin-top:var(--s3);font-size:13px;line-height:1.6;color:var(--sub)}
+.pb-src{margin-top:var(--s1);font-size:13px;line-height:1.7;color:var(--sub)}
+.pb-src span{margin-left:10px}
+.pb-src a{text-decoration:underline;text-underline-offset:2px}
+@media (max-width:820px){
+  #home-problem.section{padding:56px 0 48px}
+  .pb-big{grid-template-columns:1fr;margin-top:var(--s3)}
+  .pb-big__item{padding:var(--s3) 0}
+  .pb-big__item + .pb-big__item{padding-left:0;border-left:0;border-top:1px solid var(--line)}
+  .pb-num{font-size:60px}
+  .pb-why{margin-top:var(--s2)}
+  .pb-why__list{grid-template-columns:1fr;gap:var(--s2)}
+  .pb-why__num{min-width:104px;font-size:32px}
+  .pb-why__list li > p:last-child{font-size:15px}
+  .pb-close{margin-top:var(--s4);font-size:21px}
+  .pb-src span{display:block;margin-left:0}
+}
+/* 3. 해결 1: 01 조건 → 02 하나씩 따지기 → 03 같이 못 받는 것 거르기, 칸 사이 화살표. 아래에 결과(작은 집 8채) */
+#homeSupport.hs__body{margin-top:var(--s4)}
+.sf{display:grid;grid-template-columns:1fr 32px 1fr 32px 1fr;align-items:stretch}
+.sf__step{position:relative;padding:var(--s3);border-radius:var(--r-photo);background:var(--card);border:1px solid var(--line);min-width:0}
+.sf__h{display:flex;align-items:baseline;gap:10px;padding-right:56px}
+.sf__h .tag-example{position:absolute;top:var(--s3);right:var(--s3)}
+.sf__no{font-family:var(--en);font-style:italic;font-size:20px;color:var(--green);line-height:1}
+.sf__h b{font-size:18px;font-weight:600;letter-spacing:-.03em}
+.sf__arrow{align-self:center;justify-self:center;width:14px;height:14px;border-top:1.5px solid var(--sub);border-right:1.5px solid var(--sub);transform:rotate(45deg)}
+.sf__chips{list-style:none;margin:var(--s3) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.sf__chips li{height:36px;padding:0 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:14px;font-weight:600;display:inline-flex;align-items:center;white-space:nowrap}
+.sf__note{margin-top:var(--s2);font-size:13px;color:var(--sub)}
+.sf__list{list-style:none;margin:var(--s2) 0 0;padding:0}
+.sf__list li{display:flex;align-items:center;justify-content:space-between;gap:var(--s1);padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.4}
+.sf__list li:last-child{border-bottom:0}
+.sf__pair{margin-top:var(--s3)}
+.sf__keep,.sf__drop{padding:10px 14px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:14px;font-weight:600;line-height:1.4}
+.sf__drop{display:flex;align-items:center;justify-content:space-between;gap:var(--s1);color:var(--sub);font-weight:500}
+.sf__drop em{flex:none;font-style:normal;font-size:12px;font-weight:600;color:var(--sub);padding:3px 8px;border-radius:999px;background:var(--gray)}
+.sf__or{position:relative;height:32px;display:flex;align-items:center;justify-content:center}
+.sf__or::before{content:"";position:absolute;top:0;bottom:0;left:50%;border-left:1.5px dashed #b9b7b0}
+.sf__or span{position:relative;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.sf-result{margin-top:var(--s4);display:flex;align-items:center;flex-wrap:wrap;gap:var(--s2) var(--s4)}
+.sf-result__t{font-size:clamp(20px,1.8vw,24px);font-weight:600;letter-spacing:-.03em}
+.sf-result__houses{display:flex;gap:6px}
+.hi{width:34px;height:34px;flex:none}
+.hi path{fill:none;stroke-width:1.6;stroke-linejoin:round}
+.hi--on path{fill:var(--jd-on);stroke:var(--jd-on)}
+.hi--dim path{stroke:var(--jd-dim)}.hi--dim .hi__half{fill:var(--jd-dim);stroke:none}
+.hi--off path{stroke:var(--jd-off)}
+.sf-result__n{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:16px;color:var(--sub)}
+.sf-result__n span{display:inline-flex;align-items:center;gap:6px}
+.sf-result__n b{color:var(--ink);font-size:20px;font-weight:600}
+.sf-foot{margin-top:var(--s3);display:flex;flex-wrap:wrap;align-items:center;gap:var(--s1) var(--s3);font-size:15px;color:#3d413d}
+.sf-foot .link{margin-top:0}
+@media (max-width:1100px){.sf{grid-template-columns:1fr;gap:0}.sf__arrow{transform:rotate(135deg);margin:10px 0}}
+@media (max-width:820px){
+  #home-support.section{padding:56px 0 48px}
+  #homeSupport.hs__body{margin-top:var(--s3)}
+  .sf__step{padding:var(--s2)}
+  .sf__h .tag-example{top:var(--s2);right:var(--s2)}
+  .sf__chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-top:var(--s2)}
+  .sf__chips::-webkit-scrollbar{display:none}
+  .sf__chips li{flex:none}
+  .sf__note{margin-top:var(--s1)}
+  .sf__list{margin-top:var(--s1)}
+  .sf__list li{padding:6px 0;font-size:13px}
+  .sf__pair{margin-top:var(--s2)}
+  .sf-result{margin-top:var(--s3);gap:var(--s1) var(--s2)}
+  .hi{width:28px;height:28px}
+  .sf-result__houses{gap:4px}
+  .sf-foot{font-size:14px}
+}
 /* 4. 해결 2: 바탕이 밝은 그림(평면도 → 3D → 방)은 회색 바탕 대신 카드 바탕과 선을 쓴다 */
 .zz__media--plain{background:var(--card);border:1px solid var(--line)}
 /* 세 단계 그림은 넓은 칸(7fr)에 둔다. 휴대폰에서는 p1_head.html 의 .zz__row.is-rev 규칙(한 칸)이 이긴다 */
@@ -1153,6 +1206,30 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 .zz__media--plain > img{object-fit:contain}
 .hs__links{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);margin-top:var(--s3)}
 .hs__links .link{margin-top:0}
+/* 5. 시작하기: 단지 카드. 그림은 지도 바닥에 까는 단지 주변 지도(img/map/<id>.jpg, OpenStreetMap 재해석)이고 가운데 작은 집이 단지 자리.
+   PC 1440 에서 4장이 한 줄에 보이고(가로 넘김 유지), 휴대폰은 1.2장이 보인다 */
+.hs-start__desc{margin-top:var(--s1);color:var(--sub);font-size:15px}
+#home-start .plans__track{margin-top:var(--s4)}
+.plan-card.hc{flex:0 0 calc((min(100vw, var(--max)) - 2 * var(--pad-x) - 3 * var(--s3)) / 4);min-width:240px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.hc .plan-card__media{width:100%;aspect-ratio:4/3;margin-bottom:6px}
+.hc__media img{transform:scale(1.7);transform-origin:50% 50%;filter:saturate(.85)}
+.hc__media .hi{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-30px 0 0 -22px;filter:drop-shadow(0 2px 6px rgba(20,23,20,.25))}
+.hc__media .hi path{stroke-width:1.8}.hc__media .hi--off path,.hc__media .hi--dim path{fill:#fff}.hc__media .hi--dim .hi__half{fill:var(--jd-dim)}
+.hc__media .tag-example{top:12px;right:auto;left:12px;bottom:auto}
+.hc__osm{position:absolute;right:8px;bottom:6px;font-size:10px;color:var(--sub);background:rgba(255,255,255,.75);padding:1px 6px;border-radius:999px}
+.hc .plan-card__name{margin-top:2px;line-height:1.35}
+.hc__cost{font-size:14px;color:#3d413d}
+.hc__cost b{font-weight:600;color:var(--ink)}
+.hc__cost small{margin-left:6px;font-size:12px;color:var(--sub)}
+.hc__cost.is-none{color:var(--sub)}
+.hs-start__cta{flex-direction:column;align-items:center;gap:var(--s2)}
+.hs-start__note{font-size:13px;color:var(--sub);text-align:center}
+@media (max-width:820px){
+  #home-start .plans__track{margin-top:var(--s3)}
+  .plan-card.hc{flex-basis:calc((100vw - 2 * var(--pad-x)) / 1.2);min-width:0}
+  .hc .plan-card__media{height:auto;aspect-ratio:16/10}
+  .hs-start__cta{margin-top:var(--s3)}
+}
 /* ═══════ 풀페이지 스크롤 (shell.js) · 예전 hyewon 홈에서 옮김 ═══════ */
 /* 오른쪽 섹션 점: 풀페이지가 켜졌을 때만(body.fp-on) 보인다. 어두운 화면(히어로·푸터)에서는 밝게 */
 .fp-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:14px}
@@ -1583,7 +1660,7 @@ body.house-mode #mh .fab{display:none}
 <main id="main">
 
 <!-- ═══════════════ #home ═══════════════ -->
-<!-- 홈 6화면: 히어로 → 문제 → 해결 1·2·3 → 시작하기. build.py 가 p2_body.html 의 #page-home 자리에 이 파일을 끼워 넣는다 -->
+<!-- 홈 5화면: 히어로 → 문제 → 해결 1 → 해결 2 → 시작하기. 해결 3(계약 전 확인)은 홈에서 빼고 단지 카드의 체크리스트로 대신한다(팀 결정). build.py 가 p2_body.html 의 #page-home 자리에 이 파일을 끼워 넣는다 -->
 <!-- 지금은 뼈대만 있다. 근거 카드·판정 예시·체크리스트는 다음 단계에서 채운다 (docs/인수인계_혜원.md 3번) -->
 <section class="page" id="page-home" data-page="home" aria-label="홈">
 
@@ -1605,56 +1682,43 @@ body.house-mode #mh .fab{display:none}
     <div class="scroll-cue" aria-hidden="true">Scroll<i></i></div>
   </div>
 
-  <!-- 2. 문제 -->
+  <!-- 2. 문제: 큰 숫자 두 개(떠나는 청년 · 빈 집) → 왜 혼자 찾기 어려울까요(두 줄) → 마무리 → 보충 한 줄 → 출처 한 줄.
+       숫자·출처는 docs/인수인계_혜원.md 3번 표 그대로. 숫자 옆 작은 번호가 맨 아래 출처 번호다. 보도 숫자에는 "보도 기준" -->
   <div class="section section--white hs" id="home-problem" data-hs="문제">
     <div class="container">
       <div class="hs__head reveal">
         <span class="eyebrow">Why it's hard</span>
-        <h2 class="title">대구에서 집 구하기가 유독 어려운 이유</h2>
+        <h2 class="title">청년은 떠나고, 집은 비어 있어요</h2>
       </div>
-      <!-- 근거 카드 4개(떠나는 청년 · 약한 벌이 · 모르는 정책 · 빈 집). 카드마다 출처와 기준일, 보도 숫자는 "보도 기준" -->
-      <!-- 숫자·출처는 docs/인수인계_혜원.md 3번 표 그대로. 확인 안 된 숫자는 넣지 않는다 -->
-      <div class="hs__body hp-grid" id="homeProblemCards">
-        <article class="card hp reveal">
-          <span class="hp__k">떠나는 청년</span>
-          <p class="stat__num">67.6<small>%</small></p>
-          <p class="hp__t">2026년 6월 대구를 떠난 822명 중 556명이 20~39세였어요.</p>
-          <p class="hp__more">2019년부터 2024년까지 대구에서 빠져나간 청년은 3만 5,700명이에요.</p>
-          <ul class="hp__src">
-            <li>국가데이터처 국내인구이동통계, 동북지방통계청 분석 · <a href="https://kbmaeil.com/article/20260730500246" target="_blank" rel="noopener">경북매일 2026.7.30</a></li>
-            <li>동북지방데이터청 · <a href="https://kbmaeil.com/article/20261027500130" target="_blank" rel="noopener">경북매일 2026.10.27</a></li>
-          </ul>
-        </article>
-        <article class="card hp reveal">
-          <span class="hp__k">약한 벌이</span>
-          <p class="stat__num">58.5<small>%</small></p>
-          <p class="hp__t">대구 고용률은 전국 시·도 중 가장 낮아요. (보도 기준)</p>
-          <p class="hp__more">1인당 지역내총생산과 1인당 가계 처분가능소득도 모두 전국 평균보다 낮아요.</p>
-          <ul class="hp__src">
-            <li>보도 기준 · <a href="https://www.hankyung.com/article/202607243355H" target="_blank" rel="noopener">한국경제 2026.7.24</a></li>
-            <li>국가데이터처 · <a href="https://mobile.newsis.com/view/NISX20260703_0003695527" target="_blank" rel="noopener">뉴시스 2026.7.3</a></li>
-          </ul>
-        </article>
-        <article class="card hp reveal">
-          <span class="hp__k">모르는 정책</span>
-          <p class="stat__num">84.5<small>%</small></p>
-          <p class="hp__t">청년 열 명 중 여덟 명은 청년정책 계획을 들어 본 적만 있거나 전혀 몰라요.</p>
-          <p class="hp__more">연 소득 2,400만 원 미만 청년 중 자세히 아는 사람은 7.1%뿐이에요.</p>
-          <ul class="hp__src">
-            <li>청년정책 플랫폼 설문(521명) · <a href="https://view.asiae.co.kr/article/2026022011075035575" target="_blank" rel="noopener">아시아경제 2026.2.20</a></li>
-          </ul>
-        </article>
-        <article class="card hp reveal">
-          <span class="hp__k">빈 집</span>
-          <p class="stat__num">3,077<small>세대</small></p>
-          <p class="hp__t">그런데 대구에는 다 지어 놓고도 비어 있는 집이 이만큼 있어요.</p>
-          <p class="hp__more">준공 후 미분양 기준이고, 전국 시·도 중 가장 많아요.</p>
-          <ul class="hp__src">
-            <li>국토교통부 주택통계 · 2026.9 기준</li>
-          </ul>
-        </article>
+      <div class="pb-big reveal">
+        <div class="pb-big__item">
+          <p class="pb-num"><b data-count="67.6">67.6</b><small>%</small><sup class="pb-ref">①</sup></p>
+          <p class="pb-lbl">대구를 떠난 사람 중 20~39세</p>
+          <p class="pb-sub">2026년 6월, 822명 중 556명</p>
+        </div>
+        <div class="pb-big__item">
+          <p class="pb-num"><b data-count="3077">3,077</b><small>세대</small><sup class="pb-ref">②</sup></p>
+          <p class="pb-lbl">다 짓고도 비어 있는 집</p>
+          <p class="pb-sub">준공 후 미분양, 전국 시·도 중 가장 많아요</p>
+        </div>
       </div>
-      <p class="hs__close reveal">집은 있는데, 내 조건에 맞는 집과 지원을 한 번에 보여주는 곳이 없어요.</p>
+      <div class="pb-why reveal">
+        <h3 class="pb-why__t">왜 혼자 찾기 어려울까요?</h3>
+        <ul class="pb-why__list">
+          <li><p class="pb-why__num">58.5<small>%</small><sup class="pb-ref">③</sup></p><p>고용률, 전국 시·도 중 가장 낮아요 (보도 기준)</p></li>
+          <li><p class="pb-why__num">84.5<small>%</small><sup class="pb-ref">④</sup></p><p>청년 열 명 중 여덟 명은 청년정책을 잘 몰라요</p></li>
+        </ul>
+      </div>
+      <p class="hs__close pb-close reveal">집은 있는데, 내 조건에 맞는 집과 지원을 한 번에 보여주는 곳이 없어요.</p>
+      <p class="pb-more">2019~2024년 대구 청년 3만 5,700명 순유출<sup class="pb-ref">⑤</sup> · 1인당 지역내총생산과 1인당 가계 처분가능소득 모두 전국 평균 아래<sup class="pb-ref">⑥</sup> · 연 소득 2,400만 원 미만 청년 중 청년정책을 자세히 아는 사람 7.1%<sup class="pb-ref">④</sup></p>
+      <p class="pb-src">출처
+        <span>① 국가데이터처 국내인구이동통계, 동북지방통계청 분석 · <a href="https://kbmaeil.com/article/20260730500246" target="_blank" rel="noopener">경북매일 2026.7.30</a></span>
+        <span>② 국토교통부 주택통계 · 2026.9 기준</span>
+        <span>③ 보도 기준 · <a href="https://www.hankyung.com/article/202607243355H" target="_blank" rel="noopener">한국경제 2026.7.24</a></span>
+        <span>④ 청년정책 플랫폼 설문(521명) · <a href="https://view.asiae.co.kr/article/2026022011075035575" target="_blank" rel="noopener">아시아경제 2026.2.20</a></span>
+        <span>⑤ 동북지방데이터청 · <a href="https://kbmaeil.com/article/20261027500130" target="_blank" rel="noopener">경북매일 2026.10.27</a></span>
+        <span>⑥ 국가데이터처 · <a href="https://mobile.newsis.com/view/NISX20260703_0003695527" target="_blank" rel="noopener">뉴시스 2026.7.3</a></span>
+      </p>
     </div>
   </div>
 
@@ -1733,34 +1797,21 @@ body.house-mode #mh .fab{display:none}
     </div>
   </div>
 
-  <!-- 5. 해결 3 -->
-  <div class="section section--white hs" id="home-check" data-hs="계약 전 확인">
-    <div class="container">
-      <div class="hs__head reveal">
-        <span class="eyebrow">Solution 03</span>
-        <h2 class="title">계약 전에 확인할 것까지</h2>
-      </div>
-      <!-- 공급 주체(LH · CR리츠 · 민간)와 보증 안내 표시 + 체크리스트(계약금 전 은행 사전 상담, 등기부, 임대인, 보증서) -->
-      <div class="hs__body" id="homeCheck"></div>
-    </div>
-  </div>
-
-  <!-- 6. 시작하기 -->
+  <!-- 5. 시작하기: 단지 카드(home_bb.js 가 김지훈 예시 조건의 판정·월 부담과 함께 채운다). 요건 충족 → 확인 필요 → 미충족 순 -->
   <div class="section hs" id="home-start" data-hs="시작하기">
     <div class="container">
-      <div class="plans__head reveal">
-        <div>
-          <span class="eyebrow">Start</span>
-          <h2 class="title">대구 단지, 평면부터 둘러보세요</h2>
-        </div>
-        <p class="muted small">누르면 평면도·3D로 집 안을 보고 가구를 놓아볼 수 있어요.</p>
+      <div class="hs__head hs-start__head reveal">
+        <span class="eyebrow">Start</span>
+        <h2 class="title">어디부터 볼지 골라보세요</h2>
+        <p class="hs-start__desc">누르면 평면도·3D로 집 안을 보고 가구를 놓아볼 수 있어요.</p>
       </div>
       <div class="plans__track" id="plansTrack"></div>
       <div class="plans__btns">
         <button class="round-btn" id="plansPrev" aria-label="이전 단지"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
         <button class="round-btn" id="plansNext" aria-label="다음 단지"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
       </div>
-      <div class="hs__cta reveal">
+      <div class="hs__cta hs-start__cta reveal">
+        <p class="hs-start__note">김지훈 예시 조건 기준이에요. 내 조건을 넣으면 순서가 바뀌어요.</p>
         <a href="#input" class="btn" data-go="input">내 조건 넣기 →</a>
       </div>
     </div>
@@ -4467,81 +4518,81 @@ ${labels}
   close() { this.on = false; this.shown = null; }
 };
 
-/* ═══════ 홈 6화면 채우기 (해결 1 · 해결 3) ═══════
-   build.py 가 app_bb.js 바로 뒤에 붙인다. 같은 { } 범위라 RULES·COMPLEXES·profileResult·evaluate·appliedLists·PERSONA 를 그대로 쓴다.
-   판정·개수·이유는 모두 판정 코드가 계산한 값이다. 이 파일에 숫자를 직접 적지 않는다 */
+/* ═══════ 홈 5화면 채우기 (해결 1 · 시작하기) ═══════
+   build.py 가 app_bb.js 안 표시 줄 자리에 끼워 넣는다. 같은 { } 범위라 RULES·COMPLEXES·profileResult·evaluate·appliedLists·PERSONA 를 그대로 쓴다.
+   판정·개수·이유·월 부담은 모두 판정 코드(engine.js)가 계산한 값이다. 이 파일에 숫자를 직접 적지 않는다 */
 (function homeFill() {
-  const sup = $("#homeSupport"), chk = $("#homeCheck");
-  if (!sup && !chk) return;
+  const sup = $("#homeSupport"), track = $("#plansTrack");
+  if (!sup && !track) return;
   const P = PERSONA, pr = profileResult(P);
   const evs = COMPLEXES.map(c => ({ c, e: evaluate(P, c, pr) }));
   const n = { on: 0, dim: 0, off: 0 }; evs.forEach(x => n[x.e.light]++);
-  const ST_CLASS = { eligible: "st--ok", needs_check: "st--check", ineligible: "st--no" };
+  /* 판정 표시는 홈 어디서나 같다: ● 요건 충족 / ◐ 확인 필요 / ○ 미충족 (home.css 의 .jd) */
+  const ST_JD = { eligible: "on", needs_check: "dim", ineligible: "off" }, ORDER = { on: 0, dim: 1, off: 2 };
+  const jd = (k, label) => `<span class="jd jd--${k}"><i aria-hidden="true"></i>${esc(label || LIGHT_KO[k])}</span>`;
+  const won = v => Number(v).toLocaleString("ko-KR");
+  /* 작은 집 그림: ● 채움 / ◐ 왼쪽 절반 채움 / ○ 테두리만 */
+  const house = (k, title) => `<svg class="hi hi--${k}" viewBox="0 0 24 24" role="img" aria-label="${esc(title)}">${k === "dim" ? `<path class="hi__half" d="M3.5 11 12 4.2V20H3.5z"/>` : ""}<path d="M3.5 11 12 4.2l8.5 6.8V20h-17z"/></svg>`;
 
-  /* 3. 해결 1: 예시 페르소나 판정 미리보기 */
+  /* 3. 해결 1: 01 조건 → 02 하나씩 따지기 → 03 같이 못 받는 것 거르기 → 결과(단지 8곳) */
   if (sup) {
-    const rows = [...pr.loans, ...pr.policies].map(x =>
-      `<li><span class="hsu__name">${esc(x.name)}</span><span class="st ${ST_CLASS[x.status]}">${esc(ST_KO[x.status])}</span></li>`).join("");
-    /* 같이 못 받는 지원: 판정 코드가 "둘 중 하나만"으로 걸러 낸 첫 사례 */
+    const chips = [`${won(P.age)}세`, `월 실수령 ${won(P.monthly_income)}만`, `모은 돈 ${won(P.assets)}만`, `월 예산 ${won(P.monthly_budget)}만`];
+    const items = [...pr.loans, ...pr.policies].map((x, i) => ({ x, k: ST_JD[x.status], i })).sort((a, b) => ORDER[a.k] - ORDER[b.k] || a.i - b.i);
+    /* 같이 못 받는 지원: 판정 코드가 "둘 중 하나만"으로 걸러 낸 첫 단지에서, 계산에 쓴 쪽과 빠진 쪽 */
     let clash = null;
-    for (const { c, e } of evs) { const na = appliedLists(c, e, pr).not_applied.find(x => /하나만/.test(x.reason)); if (na) { clash = na; break; } }
-    const won = v => (v / 1).toLocaleString("ko-KR");
+    for (const { c, e } of evs) {
+      const al = appliedLists(c, e, pr), na = al.not_applied.find(x => /하나만/.test(x.reason));
+      const kept = na && al.applied.find(x => x.id === "youth_beotimok" || x.id === "hf_youth_guarantee");
+      if (na && kept) { clash = { kept, drop: na }; break; }
+    }
+    const lights = evs.slice().sort((a, b) => ORDER[a.e.light] - ORDER[b.e.light]);
     sup.innerHTML = `
-      <div class="zz__row">
-        <div class="card hsu reveal">
-          <div class="hsu__head">
-            <p class="hsu__who">김지훈(27) · 월 실수령 ${won(P.monthly_income)}만 · 모은 돈 ${won(P.assets)}만 · 월 예산 ${won(P.monthly_budget)}만</p>
-            <span class="tag-example">예시</span>
+      <div class="sf reveal">
+        <div class="sf__step">
+          <div class="sf__h"><span class="sf__no">01</span><b>조건만 넣으면</b><span class="tag-example">예시</span></div>
+          <ul class="sf__chips" aria-label="김지훈 예시 조건">${chips.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+          <p class="sf__note">김지훈 예시 조건이에요.</p>
+        </div>
+        <span class="sf__arrow" aria-hidden="true"></span>
+        <div class="sf__step">
+          <div class="sf__h"><span class="sf__no">02</span><b>하나씩 따져서</b></div>
+          <ul class="sf__list">${items.map(({ x, k }) => `<li><span>${esc(x.name)}</span>${jd(k, ST_KO[x.status])}</li>`).join("")}</ul>
+        </div>
+        <span class="sf__arrow" aria-hidden="true"></span>
+        <div class="sf__step">
+          <div class="sf__h"><span class="sf__no">03</span><b>같이 못 받는 건 걸러요</b></div>
+          ${clash ? `<div class="sf__pair">
+            <p class="sf__keep">${esc(clash.kept.name)}</p>
+            <p class="sf__or"><span>둘 중 하나</span></p>
+            <p class="sf__drop"><s>${esc(clash.drop.name)}</s><em>빠짐</em></p>
           </div>
-          <ul class="hsu__list">${rows}</ul>
-          <p class="hsu__sum">대구 단지 ${COMPLEXES.length}곳 중 <b>● ${LIGHT_KO.on} ${n.on}</b> · ◐ ${LIGHT_KO.dim} ${n.dim} · ○ ${LIGHT_KO.off} ${n.off}</p>
-          ${clash ? `<p class="hsu__clash"><b>같이 못 받는 지원</b>${esc(clash.name)} · ${esc(clash.reason)}</p>` : ""}
-          <p class="hsu__foot">최종 판정은 은행과 기관이 해요. 방봄은 요건을 미리 따져 볼 뿐이에요.</p>
+          <p class="sf__note">빠진 쪽은 월 부담 계산에 넣지 않아요.</p>` : `<p class="sf__note">이 조건에서는 같이 못 받는 지원이 없어요.</p>`}
         </div>
-        <div class="zz__text reveal">
-          <ol class="hsu__steps">
-            <li><b>조건만 넣으면</b>나이, 소득, 모은 돈을 넣으면 대출과 지원을 하나씩 따져서 요건 충족 · 확인 필요 · 미충족으로 알려줘요.</li>
-            <li><b>같이 못 받는 지원은 걸러요</b>둘 중 하나만 받을 수 있는 지원은 미리 빼고, 실제로 받을 수 있는 조합으로 월 부담을 계산해요.</li>
-            <li><b>모르는 건 24시간 상담으로</b>궁금한 게 생기면 지도와 집 보기 화면에서 상담을 열어 물어보세요. 판정과 숫자는 규칙대로 계산한 값만 보여줘요.</li>
-          </ol>
-          <a href="#input" class="link">내 조건 넣고 판정 보기 →</a>
-        </div>
-      </div>`;
+      </div>
+      <div class="sf-result reveal">
+        <p class="sf-result__t">대구 단지 ${COMPLEXES.length}곳 중</p>
+        <div class="sf-result__houses">${lights.map(({ c, e }) => house(e.light, `${c.name.replace("(예시)", "").trim()} · ${LIGHT_KO[e.light]}`)).join("")}</div>
+        <p class="sf-result__n"><span><i class="jd-dot jd-dot--on" aria-hidden="true"></i>${LIGHT_KO.on} <b>${n.on}</b></span><span><i class="jd-dot jd-dot--dim" aria-hidden="true"></i>${LIGHT_KO.dim} <b>${n.dim}</b></span><span><i class="jd-dot jd-dot--off" aria-hidden="true"></i>${LIGHT_KO.off} <b>${n.off}</b></span></p>
+      </div>
+      <p class="sf-foot reveal">모르는 건 24시간 상담으로 물어보세요. <a href="#input" class="link">내 조건 넣고 판정 보기 →</a></p>`;
   }
 
-  /* 5. 해결 3: 방봄이 확인한 것 / 직접 확인할 것 / 기관이 정하는 것 */
-  if (chk) {
-    const byType = {}; COMPLEXES.forEach(c => { byType[c.supply_type] = (byType[c.supply_type] || 0) + 1; });
-    /* 공급 주체: 단지 자료에 있는 것(LH·CR리츠)은 개수까지, 민간은 지금 목록에 없어서 확인할 점만 적는다 */
-    const supply = Object.keys(byType).map(t =>
-      `<li><b>${esc(SUPPLY_KO[t] || t)}</b><span>${esc(LANDLORD_KO[t] || "")} · ${byType[t]}곳</span></li>`).join("")
-      + `<li><b>민간 임대</b><span>임대인 개인·법인 · 지금 목록에는 없어요</span></li>`;
-    const gf = RULES.badges.guarantee_fee;
-    /* 체크리스트 순서: 계약금 전 은행 사전 상담 → (해제 특약) → 등기부 → 임대인 → 보증서. 앞의 다섯 줄은 판정 자료(RULES) 그대로, 보증서 한 줄만 홈에서 더한다 */
-    const mine = [...RULES.fixed_checklist, ...RULES.safety_checklist, "보증에 가입했다면 보증서를 받아 두고, 이름·주소·보증금이 계약서와 같은지 확인하세요"]
-      .map(t => `<li>${esc(t)}</li>`).join("");
-    const by = [];
-    [...RULES.loans, RULES.market_loan, ...RULES.policies].forEach(x => { if (x.approval_by && !by.includes(x.approval_by)) by.push(x.approval_by); });
-    chk.innerHTML = `
-      <div class="hck-grid">
-        <div class="card hck reveal">
-          <span class="hck__k">방봄이 확인한 것</span>
-          <p class="hck__t">단지마다 공급 주체와 임대인을 먼저 보여줘요.</p>
-          <ul class="hck__supply">${supply}</ul>
-          <p class="hck__note"><b>보증 안내</b> ${esc(gf.text)} <a href="${esc(gf.source_url)}" target="_blank" rel="noopener">출처 ↗</a></p>
-          <p class="hck__note">민간 임대는 임대인이 보증에 가입했는지 계약 전에 꼭 확인하세요. 단지별 보증 안내와 공고 링크는 단지 카드에서 같이 볼 수 있어요.</p>
-        </div>
-        <div class="card hck reveal">
-          <span class="hck__k">직접 확인할 것</span>
-          <p class="hck__t">계약 전에 이것만은 꼭 챙겨요.</p>
-          <ul class="hck__list">${mine}</ul>
-        </div>
-        <div class="card hck reveal">
-          <span class="hck__k">기관이 정하는 것</span>
-          <p class="hck__t">대출 승인과 지원 선정은 기관이 정해요.</p>
-          <ul class="hck__by">${by.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
-        </div>
-      </div>`;
+  /* 5. 시작하기: 단지 카드. 그림은 지도에 까는 단지 주변 지도(img/map/<id>.jpg, OpenStreetMap 재해석)이고 가운데가 단지 자리다.
+     판정·월 부담은 해결 1과 같은 김지훈 예시 조건. 요건 충족 → 확인 필요 → 미충족 순. shell.js 는 이미 채워져 있으면 덮어쓰지 않는다 */
+  if (track) {
+    const cards = evs.map((x, i) => ({ ...x, i })).sort((a, b) => ORDER[a.e.light] - ORDER[b.e.light] || a.i - b.i).map(({ c, e }) => {
+      const name = c.name.replace("(예시)", "").trim(), main = e.net_monthly != null ? e.net_monthly : e.net_monthly_best;
+      const cost = main == null ? `<p class="hc__cost is-none">모은 돈이 모자라 월 부담은 계산하지 않았어요</p>`
+        : `<p class="hc__cost">월 부담 약 <b>${man1(main)}만 원</b>${e.net_monthly == null ? `<small>지원을 모두 받으면</small>` : ""}</p>`;
+      return `<button class="plan-card hc" data-cid="${c.id}" aria-label="${esc(name)} 집 보기">
+        <div class="plan-card__media hc__media"><img src="img/map/${c.id}.jpg" alt="" loading="lazy">${house(e.light, LIGHT_KO[e.light])}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span><span class="hc__osm">© OpenStreetMap</span></div>
+        ${jd(e.light)}
+        <p class="plan-card__name">${esc(name)}</p>
+        <p class="plan-card__meta">${esc(c.district)} · ${esc(SUPPLY_KO[c.supply_type] || "")} · ${c.area_m2}㎡</p>
+        ${cost}
+      </button>`;
+    });
+    track.innerHTML = cards.join("");
   }
 })();
 
@@ -4936,7 +4987,8 @@ $$(".faq details").forEach(d => d.addEventListener("toggle", () => { if (d.open 
 /* 평형 갤러리 (모델하우스 집 보기 구조) */
 (function () {
   const track = $("#plansTrack"); if (!track || !window.MH) return;
-  track.innerHTML = MH.galleryCards();
+  /* 홈 시작하기 카드는 home_bb.js 가 판정 결과와 함께 먼저 채운다. 비어 있을 때만 예전 평면 카드로 채운다 */
+  if (!track.children.length) track.innerHTML = MH.galleryCards();
   $$("[data-cid]", track).forEach(b => b.addEventListener("click", () => MH.openHouse(b.dataset.cid)));
   const go = dir => { const c = $(".plan-card", track); const w = c ? c.getBoundingClientRect().width + 24 : 300; track.scrollBy({ left: dir * w, behavior: REDUCED ? "auto" : "smooth" }); };
   $("#plansPrev").addEventListener("click", () => go(-1)); $("#plansNext").addEventListener("click", () => go(1));
