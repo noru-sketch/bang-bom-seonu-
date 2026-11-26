@@ -32,9 +32,10 @@ PROMPTS = {
 }
 
 
-def generate(name, out=None, prompt=None):
-    """out 을 주면 그 경로에 저장(다시 만들어 보는 시도용), prompt 를 주면 PROMPTS 대신 그 문장을 쓴다"""
-    body = {"model": MODEL, "prompt": (prompt or PROMPTS[name]) + " " + COMMON, "aspect_ratio": "3:2"}
+def generate(name, out=None, prompt=None, common=True, ratio="3:2"):
+    """out 을 주면 그 경로에 저장(다시 만들어 보는 시도용), prompt 를 주면 PROMPTS 대신 그 문장을 쓴다.
+    common=False 면 집 사진용 공통 문구(COMMON)를 붙이지 않는다(마스코트 시안 등). ratio 는 화면비"""
+    body = {"model": MODEL, "prompt": (prompt or PROMPTS[name]) + (" " + COMMON if common else ""), "aspect_ratio": ratio}
     req = urllib.request.Request(server.BASE_URL + "/images/generate", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + server.API_KEY, "Content-Type": "application/json"})
     try:
@@ -59,7 +60,9 @@ if __name__ == "__main__":
     if "--out" in args:  # 시도용: python make_images.py house_flow --out <파일> [--prompt-file <파일>]
         o = args[args.index("--out") + 1]
         pf = args[args.index("--prompt-file") + 1] if "--prompt-file" in args else None
-        generate(args[0], out=o, prompt=open(pf, encoding="utf-8").read().strip() if pf else None)
+        # --no-common: 공통 문구 없이, --ratio 1:1: 화면비 (마스코트 시안: python make_images.py mascot --out <파일> --prompt-file <파일> --no-common --ratio 1:1)
+        rt = args[args.index("--ratio") + 1] if "--ratio" in args else "3:2"
+        generate(args[0], out=o, prompt=open(pf, encoding="utf-8").read().strip() if pf else None, common="--no-common" not in args, ratio=rt)
         sys.exit(0)
     names = args or ["house_flow"]
     for n in names:
