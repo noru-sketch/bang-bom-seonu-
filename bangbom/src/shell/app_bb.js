@@ -202,6 +202,30 @@ function saleHTML(c, jeonse) {
     </tbody></table>
     <p class="small muted" style="margin-top:6px">${esc(sc.notes.join(" · "))}. 보금자리론은 상태가 늘 확인 필요예요. 최종 대출 한도·금리는 은행과 기관이 정해요.</p>${src}</details>`;
 }
+/* 공개 목록 단지의 최근 실거래가(국토부) + 그 가격으로 본 매매 대출 요건(참고) */
+const eok = n => n >= 10000 ? `${Math.floor(n / 10000)}억${n % 10000 ? " " + won(n % 10000) + "만" : ""}` : `${won(n)}만`;
+const ymTxt = ym => `${ym.slice(0, 4)}.${ym.slice(4)}`;
+function unsoldPriceHTML(u) {
+  const e = typeof UNSOLD_PRICE !== "undefined" && UNSOLD_PRICE[u.name];
+  if (!e) return `<p class="small muted" style="margin-top:12px">최근 2년 실거래가를 찾지 못했어요. 가격은 분양사에 직접 확인해 주세요.</p>`;
+  const KO = { trade: "매매", silv: "분양권" };
+  const rows = ["trade", "silv"].filter(k => e[k]).flatMap(k => e[k].bands.filter(b => b.n >= 1).map(b => ({ k, b })));
+  const main = (e.trade || e.silv).bands.reduce((a, b) => (b.n > a.n ? b : a));
+  let judge = "";
+  if (S.mode === "match" && S.profile) {
+    const sc = saleCalc(S.profile, { sale_price: main.median, area_m2: main.area, mgmt: 0, sale_source: "국토부 실거래가 중간값" });
+    if (sc) judge = `<table class="calc" style="margin-top:8px"><tbody>
+      <tr><td>디딤돌대출 · 전용 ${main.area}㎡ ${eok(main.median)} 기준</td><td><span class="st st--${sc.didimdol.status}">${ST_KO[sc.didimdol.status]}</span></td></tr>
+      <tr><td colspan="2" class="muted small" style="text-align:left">${esc(sc.didimdol.reason)}</td></tr>
+      ${sc.loanP ? `<tr><td>계산에 쓴 대출 · ${esc(sc.loanP.name)}</td><td>${wonK(sc.loan)}</td></tr><tr><td>월 원리금 (${RULES.sale.years}년)</td><td>${man1(sc.pmt)}만</td></tr>` : `<tr><td>정책 대출</td><td>해당 없음</td></tr>`}
+      <tr><td>자기자금</td><td${sc.shortfall ? ' class="neg"' : ""}>${sc.shortfall ? wonK(sc.shortfall) + " 부족" : "모은 돈으로 돼요"}</td></tr>
+    </tbody></table><p class="small muted" style="margin-top:6px">실거래 중간값으로 계산한 참고값이에요. 관리비는 빼고 계산했어요. 최종 대출 한도·금리는 은행과 기관이 정해요.</p>`;
+  } else judge = `<p class="why" style="margin-top:8px">내 조건을 넣으면 이 가격으로 디딤돌·보금자리론 요건을 따져 봐요.</p>`;
+  return `<details class="fold" open style="margin-top:12px"><summary>최근 실거래가</summary>
+    <table class="calc"><tbody>${rows.map(({ k, b }) => `<tr><td>${KO[k]} · 전용 ${b.area}㎡<br><span class="muted small">${b.n}건 · 최근 ${ymTxt(b.latest)}${b.n > 1 ? ` · ${eok(b.min)}~${eok(b.max)}` : ""}</span></td><td>${eok(b.median)}</td></tr>`).join("")}</tbody></table>
+    ${judge}
+    <p class="small muted" style="margin-top:6px">출처: ${esc(UNSOLD_PRICE_META.source)} · ${esc(UNSOLD_PRICE_META.range)} · 중간값. ${esc(UNSOLD_PRICE_META.note)}</p></details>`;
+}
 /* 대구시 공개 미분양 목록 점: 판정 없이 출처만 */
 function openUnsold(k) {
   const u = UNSOLD_LIST[k], p = $("#panelR"); S.sel = null;
@@ -210,6 +234,7 @@ function openUnsold(k) {
     <p class="why">${/언론/.test(u.source) ? "언론 보도로 확인된 단지" : "대구시 공개 미분양 목록"} · 현재 계약 가능 여부는 확인 필요</p>
     <p class="small muted" style="margin-top:12px">${esc(u.source)} · ${esc(u.as_of)} 기준</p>
     <div class="links" style="margin-top:8px"><a href="${esc(UNSOLD_SRC_URL)}" target="_blank" rel="noopener">대구시 원자료 ↗</a></div>
+    ${unsoldPriceHTML(u)}
     ${u.approx ? `<p class="small muted" style="margin-top:8px">지도 위치는 동 중심 근사예요.</p>` : `<p class="small muted" style="margin-top:8px">지도 위치: OpenStreetMap 단지 위치</p>`}</div>`;
   p.classList.add("is-open"); p.scrollTop = 0;
   $("#ccX").onclick = () => { closeCard(); MapView.select(null); };

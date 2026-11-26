@@ -162,6 +162,10 @@ class KeyProblem(Exception):
     pass
 
 
+class Skipped(Exception):
+    """한 달치가 끝내 응답이 없을 때. 그 달만 빼고 계속한다(다음 실행 때 다시 시도)."""
+
+
 def fetch_one(key: str, api: str, lawd: str, ym: str, current: set) -> list:
     path = CACHE / f"{api}_{lawd}_{ym}.json"
     if path.exists() and ym not in current:
@@ -171,19 +175,19 @@ def fetch_one(key: str, api: str, lawd: str, ym: str, current: set) -> list:
         q = urllib.parse.urlencode({"LAWD_CD": lawd, "DEAL_YMD": ym, "pageNo": page, "numOfRows": 1000})
         url = f"{APIS[api]}?serviceKey={urllib.parse.quote(key, safe='')}&{q}"
         body = None
-        for attempt in range(3):
+        for attempt in range(5):
             try:
-                with urllib.request.urlopen(url, timeout=20) as r:
+                with urllib.request.urlopen(url, timeout=45) as r:
                     body = r.read()
                 break
             except urllib.error.HTTPError as e:
                 if e.code in (401, 403):
                     raise KeyProblem(f"HTTP {e.code}")
-                time.sleep(1 + attempt)
+                time.sleep(2 * (attempt + 1))
             except Exception:
-                time.sleep(1 + attempt)
+                time.sleep(2 * (attempt + 1))
         if body is None:
-            raise RuntimeError(f"{API_KO[api]} {lawd} {ym} 응답 없음")
+            raise Skipped(f"{API_KO[api]} {lawd} {ym} 응답 없음")
         root = ET.fromstring(body)
         code = _text(root, ".//resultCode", ".//returnReasonCode")
         msg = _text(root, ".//resultMsg", ".//returnAuthMsg", ".//errMsg")
@@ -247,6 +251,13 @@ def parse_jibun(raw: str, dong: str):
     return (m.group(1) or dong), m.group(2)
 
 
+# 사람이 검수해서 '다른 단지'로 판단한 짝 (단지명, 자료) → 실거래 단지명. 2026-11-27 rtms_match.csv 검수
+EXCLUDE = {
+    ("힐스테이트 동인", "trade"): ("힐스테이트동인센트럴", "힐스테이트동인더스카이"),
+    ("해링턴 플레이스 감삼 Ⅲ", "trade"): ("죽전역해링턴플레이스더원",),
+}
+
+
 def unit_no(name: str) -> str:
     m = re.search(r"(\d)\s*(단지|차)", name)
     return m.group(1) if m else ""
@@ -282,14 +293,20 @@ def main() -> int:
     log(f"[실거래] {len(GU)}개 구·군 × {MONTHS}개월({yms[-1]}~{yms[0]}) × {len(APIS)}종 = {len(jobs)}번 받아요...")
     data = {api: {} for api in APIS}
     try:
-        with ThreadPoolExecutor(max_workers=6) as ex:
+        skipped = []
+        with ThreadPoolExecutor(max_workers=3) as ex:
             futs = {ex.submit(fetch_one, key, *j, current): j for j in jobs}
             done = 0
             for f, j in futs.items():
-                data[j[0]].setdefault(j[1], []).extend(f.result())
+                try:
+                    data[j[0]].setdefault(j[1], []).extend(f.result())
+                except Skipped as e:
+                    skipped.append(str(e))
                 done += 1
                 if done % 50 == 0:
                     log(f"  {done}/{len(jobs)}")
+        if skipped:
+            log(f"[실거래] 응답이 없어 뺀 달 {len(skipped)}개 (다시 실행하면 그 달만 다시 받아요): " + ", ".join(skipped[:8]))
     except KeyProblem as e:
         log(f"[실거래] 키가 아직 동작하지 않아요 ({e}). 활용신청 직후면 1~2시간 뒤 다시 실행해 주세요.")
         return 2
@@ -318,10 +335,11 @@ def main() -> int:
                 same_umd = bool(rumd) and (umd in rumd or rumd in umd or u["dong"] in rumd)
                 same_bon = bool(bon) and any(r["jibun"].split("-")[0] == bon for r in rs)
                 ua = unit_no(apt)
-                if un != ua:
-                    s -= 0.3 if (un and ua) else 0.15   # 1단지/2단지, 1차/2차가 다르면 깎는다
+                # 1단지/2단지, 1차/2차가 다르면 다른 단지다. 번호가 한쪽에만 있으면 '1'일 때만 같은 단지로 본다
+                unit_ok = un == ua or (not ua and un == "1") or (not un and ua == "1")
                 score = s + (0.25 if same_umd else 0) + (0.35 if same_bon else 0)
-                ok = s >= 0.62 or (s >= 0.4 and same_umd) or (same_bon and same_umd and s >= 0.2)
+                ok = unit_ok and (apt not in EXCLUDE.get((u["name"], api), ())) and (
+                    s >= 0.95 or (s >= 0.6 and same_umd) or (same_bon and same_umd and s >= 0.5))
                 cands.append((score, ok, apt, rumd, s, same_umd, same_bon, rs))
             cands.sort(key=lambda c: -c[0])
             best = next((c for c in cands if c[1]), None)
