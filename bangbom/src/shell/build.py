@@ -281,7 +281,9 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 '''
 # 휴대폰 화면용 CSS (가장 마지막에 붙여서 위의 규칙을 덮어쓴다). 홈·이용 안내는 mobile_home.css, 입력·지도·집 보기·상담은 mobile_app.css
 mobile=''.join(open(os.path.join(HERE,n),encoding='utf-8').read() for n in ('mobile_home.css','mobile_app.css','house_overview.css','tutorial.css'))
-h=R(h,'</style>\n</head>', mscoped+over+mobile+'\n</style>\n</head>')
+# 홈 6화면 CSS(home.css)는 휴대폰 CSS보다 앞에 둔다. 휴대폰 규칙이 마지막에 덮어써야 해서
+home_css=open(os.path.join(HERE,'home.css'),encoding='utf-8').read()
+h=R(h,'</style>\n</head>', mscoped+over+home_css+mobile+'\n</style>\n</head>')
 
 # ---------- BODY ----------
 b=open(B+'p2_body.html',encoding='utf-8').read()
@@ -374,6 +376,10 @@ mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
 b=R(b,'<li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>','<li>단지 공개 보도 · 뉴시스·뉴스1<span>2026.9</span></li>\n          <li>대구광역시 공동주택 미분양 현황(공개 단지)<span>2026.9.30 기준</span></li>')
 b=R(b,'<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n','<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n')
+# 홈 6화면: p2_body.html 의 #page-home 을 home.html 로 통째로 바꾼다.
+# 위의 R() 들이 예전 홈 문장을 찾아 바꾸므로(못 찾으면 멈춘다) 그 뒤에 끼워 넣는다. #map~#guide 앞 줄은 위에서 이미 잘라 냈다
+_i=b.index('<!-- ═══════════════ #home'); _j=b.index('<!-- ═══════════════ #guide')
+b=b[:_i]+open(os.path.join(HERE,'home.html'),encoding='utf-8').read()+b[_j:]
 # 탭바 4칸
 h=h.replace('.tabbar{display:grid;grid-template-columns:repeat(5,1fr);','.tabbar{display:grid;grid-template-columns:repeat(4,1fr);')
 
@@ -383,6 +389,10 @@ HOUSE_MARK='/* [house_view.js] 집 보기(House)는 house_view.js 에 있다. bu
 APP_BB=open(os.path.join(HERE,'app_bb.js'),encoding='utf-8').read()
 assert APP_BB.count(HOUSE_MARK)==1, 'app_bb.js 에 집 보기 표시 줄이 없어요'
 APP_BB=APP_BB.replace(HOUSE_MARK, open(os.path.join(HERE,'house_view.js'),encoding='utf-8').read())
+# 홈 6화면(해결 1·3)도 같은 범위에서 돌아야 PERSONA·판정 코드를 쓸 수 있다
+HOME_MARK='/* [home_bb.js] 홈 6화면(해결 1·3)을 채우는 코드는 home_bb.js 에 있다. build.py 가 이 줄 자리에 끼워 넣는다 */'
+assert APP_BB.count(HOME_MARK)==1, 'app_bb.js 에 홈 표시 줄이 없어요'
+APP_BB=APP_BB.replace(HOME_MARK, open(os.path.join(HERE,'home_bb.js'),encoding='utf-8').read())
 mjs=open(M+'data.js',encoding='utf-8').read()+open(M+'data2.js',encoding='utf-8').read()+open(M+'unsold_list.js',encoding='utf-8').read()+open(M+'geo.js',encoding='utf-8').read()+open(M+'engine.js',encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists };','')+open(M+'house.js',encoding='utf-8').read()+open(os.path.join(HERE,'backend.js'),encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { createBackend };','')+APP_BB+open(os.path.join(HERE,'tutorial.js'),encoding='utf-8').read()
 shell=open(os.path.join(HERE,'shell.js'),encoding='utf-8').read()
 tail='<script src="vendor/three.min.js"></script>\n<script>\n{\n'+mjs+'\n}\n</script>\n<script>\n'+shell+'\nBB.route();\n</script>\n</body>\n</html>\n'

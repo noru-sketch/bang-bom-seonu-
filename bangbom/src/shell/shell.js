@@ -127,7 +127,9 @@ if (zzBox) zzBox.addEventListener("scroll", () => {
   if (performance.now() >= zzBusy) zzSync();
 }, { passive: true });
 $$(".zz-tab").forEach(b => b.addEventListener("click", () => setZZ(+b.dataset.zz)));
-$("#zzPrev").addEventListener("click", () => setZZ(zzI - 1)); $("#zzNext").addEventListener("click", () => setZZ(zzI + 1));
+/* 홈 6화면(home.html)에는 이 넘김 단추가 없다. 없을 때 여기서 멈추면 아래 평면 갤러리와 BB.route 까지 멈춘다 */
+const zzPrev = $("#zzPrev"), zzNext = $("#zzNext");
+if (zzPrev) zzPrev.addEventListener("click", () => setZZ(zzI - 1)); if (zzNext) zzNext.addEventListener("click", () => setZZ(zzI + 1));
 /* 화면을 돌리거나 창 폭이 바뀌어 휴대폰 배치로 들어오면 넘김 위치를 지금 장에 맞춘다 */
 PHONE.addEventListener("change", () => { if (PHONE.matches && zzBox) requestAnimationFrame(() => { zzBox.scrollLeft = zzBox.clientWidth * zzI; }); });
 
