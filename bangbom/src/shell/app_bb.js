@@ -239,6 +239,8 @@ function closeCard() {
   document.body.classList.remove("card-open"); p.classList.remove("is-open"); p.style.transform = ""; syncPl();
   /* 휴대폰: 시트가 열린 동안에는 단지를 시트 위쪽 좁은 지도로 올려서 봤다. 닫으면 다시 나타나는 구 칩 줄과 요약 줄에 이름표가 깔리지 않게 화면 가운데로 되돌린다 */
   if (was && isPhone() && S.sel && MapView.ok) { const c = MapView.units[S.sel].c; MapView.fly(c.map_x, c.map_z, Math.min(MapView.zoom, 44)); }
+  /* 카드가 닫히면 숨겼던 다른 단지·이름표·미분양 점을 다시 보인다 */
+  if (MapView.ok) MapView.paintSel();
 }
 
 /* ─── S1 입력 ─── */
@@ -403,6 +405,8 @@ const MapView = {
     });
     new ResizeObserver(() => this.resize()).observe($("#mapWrap"));
     this.resize(); this.applyMode(false); this.ok = true;
+    /* 처음에는 판정 단지와 미분양 점이 다 보이게 줌아웃한다. 왼쪽 패널 자리를 재야 해서 그린 뒤 한 번 더 맞춘다 */
+    this.overview(false); requestAnimationFrame(() => { if (!S.sel) this.overview(false); });
     let t0 = performance.now();
     const loop = t => { const dt = Math.min(.05, (t - t0) / 1000); t0 = t; this.tick(dt, t / 1000); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
@@ -553,14 +557,13 @@ const MapView = {
       const c = COMPLEX.find(c => Math.abs(x - c.map_x) < 2.2 && Math.abs(z - c.map_z) < 2.0); if (c) z = c.map_z + (z >= c.map_z ? 2.0 : -2.0); /* 판정 단지 건물에 가려지지 않게 */
       return [x, z]; });
     this.uHits = UNSOLD_LIST.map((u, k) => {
-      const [x, z] = this.uPos[k], d = new T3.Mesh(geo, m); d.position.set(x, 0, z); d.castShadow = true; this.decor.add(d);
+      const [x, z] = this.uPos[k], d = new T3.Mesh(geo, m); d.position.set(x, 0, z); d.castShadow = true; this.decor.add(d); (this.uDots = this.uDots || []).push(d);
       const hit = new T3.Mesh(hg, new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.set(x, 0, z); hit.userData.uk = k; this.scene.add(hit); return hit;
     });
   },
   selectUnsold(k) {
     const [x, z] = this.uPos[k];
-    if (!this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
-    S.sel = null; this.lift(); this.showLines(null);
+    S.sel = null; this.lift(); this.showLines(null); this.paintSel();
     this.fly(x + (isMobile() ? 0 : 1.6), z + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
     openUnsold(k);
   },
@@ -576,30 +579,84 @@ const MapView = {
       u.tgt = { browse: 1.0, on: 3.0, dim: 1.0, off: 0 }[light];
       if (animate && light !== "browse") u.cur = 0;
       const off = light === "off";
-      u.wallM.color.set(off ? new T3.Color("#c3c6c4").convertSRGBToLinear() : new T3.Color("#ffffff"));
-      u.bandM.color.set(new T3.Color(off ? "#9DB5B1" : "#1f6b4f").convertSRGBToLinear());
+      /* 기본 색은 paintSel 이 칠한다(고른 단지는 구 색, 나머지는 이 색) */
+      u.baseWall = off ? "#c3c6c4" : null; u.baseBand = off ? "#9DB5B1" : "#1f6b4f";
       const ev = S.evals[id];
       u.lbl.className = "clabel" + (light === "on" ? " is-on" : light === "dim" ? " is-dim" : light === "off" ? " is-off" : "");
       u.lbl.innerHTML = (light !== "browse" ? `<i>${LIGHT_ICON[light]}</i>` : `<i class="b">●</i>`) + esc(u.c.name.replace("(예시)", ""));
     });
-    this.nightT = S.mode === "match" ? 1 : 0;
+    this.nightT = S.mode === "match" ? 1 : 0; this.paintSel();
     if (S.sel && $("#panelR").classList.contains("is-open")) openCard(S.sel);
+  },
+  /* 고른 단지의 구별 선택 색 [벽, 띠·이름표]. 대구 9개 구·군이 모두 서로 구분되는 색을 가진다 (판정 단지 목록에 없는 구·군도 미리 둔다) */
+  GU_PAL: { 달서구: ["#ffb36b", "#d9600f"], 북구: ["#7fb8ff", "#1d5fd1"], 동구: ["#c39bff", "#7034d6"], 수성구: ["#6fe0b0", "#0d8f5c"], 서구: ["#ff8fa8", "#d12e5a"],
+    중구: ["#ffe066", "#b38600"], 남구: ["#6fd9e8", "#0b8a9c"], 달성군: ["#d6c08a", "#8a6d1f"], 군위군: ["#b9c97a", "#5b7016"] },
+  /* 선택 표시: 카드가 열려 있는 동안 고른 단지만 구 색으로 칠하고, 다른 단지·이름표·미분양 점은 숨긴다 */
+  paintSel() {
+    if (!this.units) return;
+    const cardOn = document.body.classList.contains("card-open"), focus = !!S.sel && cardOn;
+    Object.entries(this.units).forEach(([id, u]) => {
+      const sel = id === S.sel, pal = this.GU_PAL[u.c.district] || ["#8fd6ad", "#0f7a4a"];
+      u.g.visible = !(focus && !sel); u.lbl.style.display = focus && !sel ? "none" : "";
+      u.wallM.color.set(sel ? new T3.Color(pal[0]).convertSRGBToLinear() : u.baseWall ? new T3.Color(u.baseWall).convertSRGBToLinear() : new T3.Color("#ffffff"));
+      u.bandM.color.set(new T3.Color(sel ? pal[1] : (u.baseBand || "#1f6b4f")).convertSRGBToLinear());
+      u.lbl.style.background = sel ? pal[1] : ""; u.lbl.style.color = sel ? "#fff" : ""; u.lbl.style.borderColor = sel ? pal[1] : "";
+    });
+    (this.uDots || []).forEach(d => { d.visible = !focus; }); (this.uHits || []).forEach(h => { h.visible = !focus; });
+  },
+  /* P(월드 좌표)가 배율 Z 에서 화면 (dx, dy) 자리에 오게 하는 카메라 target. 카메라는 늘 target + (20,20,20) 에서 내려다본다 */
+  placeAt(P, Z, dx, dy) {
+    const W = innerWidth, H = innerHeight, cam = this.cam;
+    const save = { p: cam.position.clone(), q: cam.quaternion.clone() };
+    cam.position.copy(P).add(new T3.Vector3(20, 20, 20)); cam.lookAt(P); cam.updateMatrixWorld();
+    const r = new T3.Vector3().setFromMatrixColumn(cam.matrixWorld, 0), up = new T3.Vector3().setFromMatrixColumn(cam.matrixWorld, 1), d = new T3.Vector3(-1, -1, -1).normalize();
+    cam.position.copy(save.p); cam.quaternion.copy(save.q); cam.updateMatrixWorld();
+    const T = P.clone().addScaledVector(r, (W / 2 - dx) / Z).addScaledVector(up, (dy - H / 2) / Z);
+    return T.addScaledVector(d, -T.y / d.y);
+  },
+  /* 단지를 카드에 가리지 않는 지도 영역의 가운데로 옮기며 줌인.
+     PC: 오른쪽 카드 왼쪽 영역의 가운데. 휴대폰: 시트가 화면의 3분의 2를 덮으므로 시트 위쪽 지도에 건물이 서게 한다 */
+  flyTo(c) {
+    const W = innerWidth, H = innerHeight, u = this.units[c.id], P = new T3.Vector3(c.map_x, u.top * .5, c.map_z);
+    if (isPhone()) {
+      /* 건물 바닥을 시트 바로 위(시트 위 24px)에 세워서, 건물과 이름표가 위 막대와 시트 사이에 다 들어오게 한다 */
+      const sheetTop = H * .34, Z = clamp((sheetTop - 72 - 74) / 3.02, 30, 44);
+      const T = this.placeAt(new T3.Vector3(c.map_x, 0, c.map_z), Z, W / 2, sheetTop - 24); this.fly(T.x, T.z, Z); return;
+    }
+    const pr = $("#panelR"), Z = clamp(this.zoom, 36, 44);
+    const dx = pr && pr.offsetWidth && pr.offsetLeft > W / 3 ? Math.max(160, pr.offsetLeft / 2) : W / 2;
+    const T = this.placeAt(P, Z, dx, (140 + H) / 2); this.fly(T.x, T.z, Z);
+  },
+  /* 선택 전: 판정 단지와 미분양 점이 모두 보이게 줌아웃. 왼쪽 패널·위 막대(휴대폰은 한 줄 요약·아래 탭)를 피한다.
+     등축 화면 좌표: sx = (x − z)/√2, sy = −(x + z)/√6 (카메라 방향 (1,1,1)) */
+  overview(animate) {
+    if (!this.cam) return;
+    const W = innerWidth, H = innerHeight, pl = $("#panelL"), phone = isPhone();
+    const plOn = pl && !pl.hidden && pl.offsetWidth && getComputedStyle(pl).display !== "none";
+    const left = !phone && plOn ? pl.getBoundingClientRect().right + 24 : 24, right = W - 24;
+    const top = phone ? (plOn ? pl.getBoundingClientRect().bottom + 16 : 190) : 150, bottom = H - (phone ? 130 : 90);
+    /* 휴대폰은 폭이 좁아 미분양 점 60곳까지 넣으면 배율이 10 아래로 떨어진다(예전 처음 배율 17). 휴대폰에서는 판정 단지만 맞추고 점은 끌어서 본다 */
+    const pts = COMPLEX.map(c => [c.map_x, c.map_z]).concat(phone ? [] : this.uPos || []);
+    const xs = pts.map(([x, z]) => (x - z) / Math.SQRT2), ys = pts.map(([x, z]) => -(x + z) / Math.sqrt(6));
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), hTop = 4.6 * Math.sqrt(2 / 3);
+    const Z = clamp(Math.min((right - left) / (x1 - x0 + 3), (bottom - top) / (y1 - y0 + hTop + 2)), 6, 40);
+    const mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + hTop / 2;
+    const P = new T3.Vector3((Math.SQRT2 * mx - Math.sqrt(6) * my) / 2, 0, (-Math.SQRT2 * mx - Math.sqrt(6) * my) / 2);
+    const T = this.placeAt(P, Z, (left + right) / 2, (top + bottom) / 2);
+    this.lastOverviewZoom = Z;
+    if (animate && !REDUCED) this.fly(T.x, T.z, Z); else { this.target.set(T.x, 0, T.z); this.zoom = Z; this.fly0 = null; }
   },
   lift() { Object.entries(this.units).forEach(([id, u]) => u.liftT = (id === S.hover || id === S.sel) ? .05 : 0); },
   fly(x, z, zoom) { this.fly0 = { x, z, zoom: zoom || this.zoom, t: 0, fx: this.target.x, fz: this.target.z, fzoom: this.zoom }; },
   select(id, fly) {
-    if (id && !this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
     S.sel = id; this.lift(); this.showLines(id);
-    if (!id) { if (this.home) { this.fly(this.home.x, this.home.z, this.home.zoom); this.home = null; } return; }
+    /* 카드 X(선택 해제): 다시 전체가 보이게 줌아웃 */
+    if (!id) { this.paintSel(); if (this.ok && fly !== false) this.overview(true); return; }
     if (location.hash !== "#map") location.hash = "#map";
-    const u = this.units[id], c = u.c, m = u.top * .45;
-    if (fly && isPhone()) {
-      /* 휴대폰: 아래 시트가 화면의 3분의 2를 덮으므로, 단지가 시트 위쪽 지도에 보이게 화면 아래 방향으로 그만큼 옮겨서 본다 */
-      /* 건물(높이 약 3.7)과 이름표가 위 막대와 시트 사이에 다 들어오는 배율로 맞춘다 */
-      const sheetTop = innerHeight * .34, zoom = clamp((sheetTop - 72 - 74) / 3.02, 30, 44), dy = innerHeight / 2 - (sheetTop - 24), d = Math.max(0, dy) / zoom / Math.sin(Math.asin(1 / Math.sqrt(3))) / Math.SQRT2;
-      this.fly(c.map_x + d, c.map_z + d, zoom);
-    } else if (fly) this.fly(c.map_x - m + (isMobile() ? 0 : 1.6), c.map_z - m + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
-    openCard(id);
+    const c = this.units[id].c;
+    /* 카드를 먼저 열어야 카드 자리(왼쪽 끝)를 재서 그 밖의 지도 가운데로 옮길 수 있다 */
+    openCard(id); this.paintSel();
+    if (fly) this.flyTo(c);
   },
   showLines(id) {
     while (this.lines.children.length) { const o = this.lines.children.pop(); o.geometry && o.geometry.dispose(); }
@@ -795,6 +852,8 @@ window.MH = {
   route(v) { if (v === "map" && S.profile && S.mode !== "match" && !route.seen) S.mode = "match"; route.seen = true; route(v); if (v === "map" && MapView.ok) MapView.applyMode(false); },
   browse() { S.mode = "browse"; if (location.hash === "#map") { route("map"); MapView.applyMode(false); } else location.hash = "#map"; },
   openHouse(cid) { S.sel = cid; location.hash = "#house"; },
+  /* 검사용(읽기만): 지도 배율, 처음 줌아웃 배율, 고른 단지, 숨긴 단지·미분양 점 개수 */
+  mapState() { const us = Object.values(MapView.units || {}); return { ok: !!MapView.ok, zoom: Math.round(MapView.zoom * 10) / 10, overview: MapView.lastOverviewZoom ? Math.round(MapView.lastOverviewZoom * 10) / 10 : null, sel: S.sel, hiddenUnits: us.filter(u => !u.g.visible).length, units: us.length, hiddenDots: (MapView.uDots || []).filter(d => !d.visible).length, dots: (MapView.uDots || []).length, flying: !!MapView.fly0 }; },
   /* 눈높이로 집 보기: "child"(아이) 나 "adult"(어른). 다음에 집 보기를 열 때 room.html 에 view=3d&eye=<mode> 를 붙인다 (한 번 쓰고 지운다).
      이미 집 보기 화면이면 바로 다시 연다. 눈높이 화면 자체는 방 배치 도구(room.html)가 그린다 */
   setEye(mode) {
