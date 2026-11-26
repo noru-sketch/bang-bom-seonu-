@@ -409,6 +409,8 @@ FORM_Q='''<form class="card form qform" id="form" novalidate aria-labelledby="fT
 # "대구 거주·전입 예정"은 문항에서 빼고 기본값 예(판정 결과에서 바꾸기). 세 걸음 칩(#fSteps)은 뺀다. 움직임은 app_bb.js 의 Q
 _fi=mb.index('<form class="card form" id="form"'); _fj=mb.index('</form>',_fi)+len('</form>')
 mb=mb[:_fi]+FORM_Q+mb[_fj:]
+# 입력 화면 왼쪽 설명: 미분양 전용처럼 읽히지 않게
+mb=R(mb,'<span>들어갈 수 있는 미분양 단지만 밝게</span>','<span>요건이 맞는 단지를 밝게</span>')
 mb=re.sub(r'\s*<nav class="fsteps m-only" id="fSteps".*?</nav>','',mb,count=1,flags=re.S)
 mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>','')
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
