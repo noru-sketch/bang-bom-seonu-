@@ -1,0 +1,601 @@
+<body>
+<a class="sr-only" href="#main">본문으로 건너뛰기</a>
+
+<!-- ═════════ 네비 ═════════ -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a href="#home" class="logo" aria-label="방봄 홈"><b>방봄</b><i>Bangbom</i></a>
+    <div class="nav__right">
+      <nav aria-label="주요 메뉴">
+        <ul class="nav__links">
+          <li><a class="nav__link" href="#home" data-route="home"><span>홈</span><small>HOME</small></a></li>
+          <li><a class="nav__link" href="#map" data-route="map"><span>집 찾기</span><small>MAP</small></a></li>
+          <li><a class="nav__link" href="#sim" data-route="sim"><span>미리 살아보기</span><small>SIMULATOR</small></a></li>
+          <li><a class="nav__link" href="#report" data-route="report"><span>비교 리포트</span><small>REPORT</small></a></li>
+          <li><a class="nav__link" href="#guide" data-route="guide"><span>이용 안내</span><small>GUIDE</small></a></li>
+        </ul>
+      </nav>
+      <div class="nav__actions">
+        <a href="#map" class="btn nav__cta">내 조건 넣기</a>
+        <button class="btn btn--ghost menu-btn" id="menuOpen" aria-controls="panel" aria-expanded="false">메뉴 <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-label="전체 메뉴">
+  <div class="panel__head">
+    <span class="logo"><b>방봄</b><i>Bangbom</i></span>
+    <button class="close-btn" id="menuClose" aria-label="메뉴 닫기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+  </div>
+  <div class="panel__body">
+    <ul class="panel__list">
+      <li><a href="#home" data-route="home"><b>홈</b><i>Home</i></a></li>
+      <li><a href="#map" data-route="map"><b>집 찾기</b><i>Map</i></a></li>
+      <li><a href="#sim" data-route="sim"><b>미리 살아보기</b><i>Simulator</i></a></li>
+      <li><a href="#report" data-route="report"><b>비교 리포트</b><i>Report</i></a></li>
+      <li><a href="#guide" data-route="guide"><b>이용 안내</b><i>Guide</i></a></li>
+    </ul>
+  </div>
+  <div class="panel__foot">
+    <a href="#map" class="btn">내 조건 넣기</a>
+    <p class="panel__note">대구에서 고쳐 살지, 이사 갈지 결정을 돕는 서비스예요.</p>
+  </div>
+</aside>
+
+<main id="main">
+
+<!-- ═══════════════ #home ═══════════════ -->
+<section class="page" id="page-home" data-page="home" aria-label="홈">
+
+  <div class="hero">
+    <video class="hero__media" autoplay muted playsinline preload="auto" poster="img/hero.jpg" aria-label="새 집 거실을 천천히 둘러보는 예시 영상">
+      <source src="vid/hero.mp4" type="video/mp4">
+    </video>
+    <div class="hero__shade" aria-hidden="true"></div>
+    <span class="tag-example">예시 영상</span>
+    <div class="container hero__inner">
+      <p class="hero__en">Your furniture, your model house.</p>
+      <h1 class="hero__title"><span>방봄</span></h1>
+      <p class="hero__desc">대구에 좋은 매물 있는데, 함께 보시겠어요?</p>
+      <div class="hero__btns">
+        <a href="#sim" class="btn btn--white">우리 집 걸어보기 →</a>
+        <a href="#guide" class="btn btn--ghost">이용 방법 보기</a>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">Scroll<i></i></div>
+  </div>
+
+  <!-- 휴대폰(820px 이하)에서만 보이는 카테고리 칩. 고른 묶음(data-catp) 하나만 보여요. PC에서는 숨기고 모든 묶음을 이어서 보여요 -->
+  <div class="cats" id="homeCats" role="tablist" aria-label="홈 내용 고르기">
+    <button class="cat is-on" type="button" role="tab" aria-selected="true" data-cat="num"><span>숫자</span></button>
+    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="plan"><span>평면</span></button>
+    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="help"><span>돕는 방법</span></button>
+    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="story"><span>우리 이야기</span></button>
+  </div>
+
+  <div class="stats is-on" data-catp="num">
+    <div class="container stats__grid">
+      <div class="stat reveal">
+        <div class="stat__num"><span data-count="3077">0</span><small>세대</small></div>
+        <p class="stat__label">대구 준공 후 미분양, 전국 시·도 중 최다</p>
+        <p class="stat__src">국토교통부 주택통계 · 2026.9</p>
+      </div>
+      <div class="stat reveal">
+        <div class="stat__num"><span data-count="43">0</span><small>시간</small></div>
+        <p class="stat__label">분양 0건이던 990가구 단지가 전세로 나오자 생긴 대기 줄</p>
+        <p class="stat__src">뉴시스·뉴스1 · 2026.9</p>
+      </div>
+      <div class="stat reveal">
+        <div class="stat__num"><span data-count="33.6">0</span><small>%</small></div>
+        <p class="stat__label">대구 청년 주거지원 예산 집행률</p>
+        <p class="stat__src">대구시 시의회 제출 자료 · 2026.10 기준</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" data-catp="plan">
+    <div class="container">
+      <div class="plans__head reveal">
+        <div>
+          <span class="eyebrow">Plans</span>
+          <h2 class="title">우리 집과 비슷한 구조부터 골라보세요</h2>
+        </div>
+        <p class="muted small">표준 구조로 시작하고, 다른 곳만 줄자로 맞춰요.</p>
+      </div>
+      <div class="plans__track" id="plansTrack"></div>
+      <div class="plans__btns">
+        <button class="round-btn" id="plansPrev" aria-label="이전 구조"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
+        <button class="round-btn" id="plansNext" aria-label="다음 구조"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section--gray" data-catp="help">
+    <div class="container">
+      <div class="head-center reveal">
+        <span class="eyebrow">How it helps</span>
+        <h2 class="title">가 보지 않고, 미분양 집을 골라요</h2>
+      </div>
+
+      <div class="zz-tabs" role="tablist" aria-label="방봄이 돕는 방법">
+        <button class="zz-tab is-on" role="tab" data-zz="0"><i>01</i>불 켜지는 지도</button>
+        <button class="zz-tab" role="tab" data-zz="1"><i>02</i>이사 갈래?</button>
+        <span class="zz-tabs__sep" aria-hidden="true">입주 뒤까지 미리</span>
+        <button class="zz-tab" role="tab" data-zz="2"><i>03</i>고쳐 살래?</button>
+        <button class="zz-tab" role="tab" data-zz="3"><i>04</i>아이 눈높이</button>
+      </div>
+      <div class="zz zz--tabbed">
+        <div class="zz__row is-on">
+          <div class="zz__media">
+            <div class="mini-map" aria-hidden="true">
+              <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+                <style>.mmb{animation:blink 1.2s ease-in-out infinite}</style>
+                <rect width="600" height="400" fill="#20241f"/>
+                <path d="M-10 150 C110 120 180 170 280 120 S470 80 610 110" fill="none" stroke="#33413a" stroke-width="18" stroke-linecap="round"/>
+                <path d="M360 410 C350 330 330 260 320 170 S300 60 290 -10" fill="none" stroke="#33413a" stroke-width="10" stroke-linecap="round"/>
+                <path d="M40 340 L180 270 L300 210 L420 160 L560 120" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+                <path d="M60 220 L200 200 L300 210 L430 240 L570 250" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+                <g fill="#ffe2a8"><circle cx="150" cy="292" r="7"/><circle cx="430" cy="236" r="7"/></g>
+                <g fill="#ffe2a8" opacity=".25"><circle cx="150" cy="292" r="22"/><circle cx="430" cy="236" r="22"/></g>
+                <g fill="#ffe2a8" class="mmb"><circle cx="300" cy="170" r="7"/><circle cx="500" cy="300" r="7"/></g>
+                <g fill="#5b605a"><circle cx="230" cy="110" r="7"/><circle cx="80" cy="360" r="7"/><circle cx="520" cy="150" r="7"/></g>
+                <path d="M150 292 L180 270" stroke="#fff" stroke-dasharray="3 4" stroke-width="1.5"/>
+                <path d="M150 292 L96 250" stroke="#fff" stroke-dasharray="3 4" stroke-width="1.5"/>
+                <path d="M150 292 L205 330" stroke="#fff" stroke-dasharray="3 4" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <span class="tag-example">예시 화면</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">01 · Match</p>
+            <h3 class="zz__title">내 조건에 불이 켜지는 집</h3>
+            <p>나이, 소득, 모은 돈만 넣으면 대출·지원 요건을 따져서 대구 미분양 지도에 들어갈 수 있는 집에만 불을 켜요. 단지를 누르면 역과 병원까지 거리와 실제 월 부담이 같이 보여요.</p>
+            <a href="#map" class="link">내 조건으로 찾아보기 →</a>
+          </div>
+        </div>
+        <div class="zz__row is-rev">
+          <div class="zz__media">
+            <video muted playsinline preload="none" poster="img/move.jpg" data-autoplay aria-label="미분양 새 집에 가구를 옮겨 놓는 예시 영상"><source src="vid/move.mp4" type="video/mp4"></video>
+            <span class="tag-example">예시 영상</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">02 · Move</p>
+            <h3 class="zz__title">이사 갈래?</h3>
+            <p>대구 미분양 단지의 면적에 맞춘 구조에 우리 가구를 그대로 옮겨봐요. 안 들어가는 가구와 새로 사야 할 가구가 먼저 보여요.</p>
+            <a href="#sim" class="link" data-go-mode="move">새 집에 가구 놓아보기 →</a>
+          </div>
+        </div>
+
+        <div class="zz__row">
+          <div class="zz__media">
+            <div class="ba" id="ba">
+              <img src="img/fix_after.jpg" alt="도배와 바닥재를 새로 바꿔 밝아진 방" loading="lazy">
+              <img class="ba__before" src="img/fix_before.jpg" alt="벽지가 누렇게 바래고 장판이 낡은 지금의 방" loading="lazy">
+              <span class="ba__line" aria-hidden="true"></span>
+              <span class="ba__knob" aria-hidden="true">⟷</span>
+              <input class="ba__range" type="range" min="0" max="100" value="100" aria-label="지금과 고친 후 비교 위치">
+            </div>
+            <span class="pill-label pill-label--l">지금</span>
+            <span class="pill-label pill-label--r">고친 후</span>
+            <span class="tag-example">예시 이미지</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">03 · 입주 뒤까지 미리</p>
+            <h3 class="zz__title">고쳐 살래?</h3>
+            <p>방 크기로 도배·장판 면적을 계산하고, 벽지와 바닥재를 바꾼 모습을 3D로 바로 보여줘요. 받을 수 있는 집수리 지원금은 빼고 계산해요.</p>
+            <span class="zz__hint">← 사진을 좌우로 밀어서 비교해보세요 →</span>
+            <a href="#sim" class="link" data-go-mode="fix">고친 우리 집 보기 →</a>
+          </div>
+        </div>
+
+        <div class="zz__row is-rev">
+          <div class="zz__media">
+            <video muted playsinline preload="none" poster="img/child.jpg" data-autoplay aria-label="아이 눈높이 90cm에서 거실을 걸어보는 예시 영상"><source src="vid/child.mp4" type="video/mp4"></video>
+            <div class="media-dim dim dim--v" aria-hidden="true">아이 눈높이</div>
+            <span class="tag-example">예시 영상</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">04 · 입주 뒤까지 미리</p>
+            <h3 class="zz__title">아이 눈높이 90cm</h3>
+            <p>어른 눈에는 무릎 높이였던 탁자 모서리가 아이 시선에서는 바로 얼굴 앞이에요. 부딪히기 쉬운 곳을 빨간 점으로 짚어줘요.</p>
+            <a href="#sim" class="link" data-go-eye="1">90cm로 걸어보기 →</a>
+          </div>
+        </div>
+
+      </div>
+      <div class="zz-nav">
+        <button class="round-btn" id="zzPrev" aria-label="이전"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
+        <span class="zz-dots" id="zzDots" aria-hidden="true"><i class="is-on"></i><i></i><i></i><i></i></span>
+        <button class="round-btn" id="zzNext" aria-label="다음"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section section--white" data-catp="story">
+    <div class="container story">
+      <figure class="story__fig reveal">
+        <div class="story__img">
+          <img src="img/story.jpg" alt="방봄 팀원 네 명이 노트북 앞에서 화면을 함께 보며 이야기하는 모습" loading="lazy">
+          <span class="tag-example">예시 이미지</span>
+        </div>
+        <figcaption>방봄 팀 · 대구 계명문화대학교에서 서로 다른 과 학생 네 명이 모여 만들었어요</figcaption>
+      </figure>
+      <div class="story__body reveal">
+        <span class="eyebrow">Our story</span>
+        <h2 class="title">집을 바꿀지 말지는, 살아보고 정해야 하니까요</h2>
+        <p>낡은 집에 사는 가족은 늘 같은 질문 앞에 서요. 고쳐서 계속 살지, 새 집으로 옮길지. 그런데 그 답을 정하는 도구는 견적서 몇 장과 남이 꾸민 모델하우스뿐이었어요.</p>
+        <p class="story__more" id="storyMoreText">방봄은 대구 계명문화대학교의 서로 다른 과 학생 네 명이 모인 팀이에요. 시작은 아이들 곁에서 일하며 '아이 눈높이에서 공간은 전혀 다르게 보인다'는 걸 알게 된 팀원의 경험이었어요. 그래서 우리 가구, 우리 가족, 90cm 시선까지 넣어서 두 집을 미리 걸어볼 수 있게 만들었어요.</p>
+        <button class="link story__toggle" id="storyToggle" type="button" aria-expanded="false" aria-controls="storyMoreText">팀 이야기 더 보기</button>
+        <ul class="story__list">
+          <li><b>대구의 실제 숫자로 시작해요</b><span>국토교통부·대구시 공공 통계에 출처와 기준일을 함께 적어요</span></li>
+          <li><b>아이 눈높이를 기준에 넣었어요</b><span>유아교육을 공부하는 팀원이 90cm 시선과 모서리 체크를 설계했어요</span></li>
+          <li><b>남의 도면을 가져오지 않아요</b><span>표준 구조와 실측, 공공데이터만 쓰고 예시 값은 예시라고 밝혀요</span></li>
+        </ul>
+        <a href="#sim" class="btn">우리 집부터 같이 걸어봐요 →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" data-catp="story" style="padding-top:0;padding-bottom:var(--section-y)">
+    <div class="container">
+      <div class="cta reveal">
+        <img src="img/cta.jpg" alt="" loading="lazy">
+        <span class="tag-example">예시 이미지</span>
+        <div class="cta__inner">
+          <p class="cta__en">Your furniture, your model house.</p>
+          <h2 class="cta__title">우리 집부터 같이 걸어봐요</h2>
+          <a href="#map" class="btn btn--white">무료로 시작하기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ #map ═══════════════ -->
+<section class="page" id="page-map" data-page="map" aria-label="집 찾기">
+  <div class="container page-head">
+    <span class="eyebrow">Map</span>
+    <h1 class="title">내 조건에 맞는 집만 불이 켜져요</h1>
+    <p class="lead">대출·지원 요건을 세 단계로 따져요. 요건 충족만으로 맞으면 켜짐, 확인 필요까지 받아야 맞으면 깜빡임, 그래도 안 되면 꺼짐이에요. 승인 여부는 기관이 최종으로 정해요.</p>
+  </div>
+  <div class="container map-layout">
+    <aside class="card cond" aria-label="내 조건">
+      <h2>내 조건</h2>
+      <div class="cond__persona" id="personas"></div>
+      <div class="field">
+        <div class="field__label">나이 <small>만 나이</small></div>
+        <div class="input-row"><input class="input" type="number" inputmode="numeric" min="19" max="80" id="c-age"><span class="input-unit">세</span></div>
+      </div>
+      <div class="field">
+        <div class="field__label">월 소득 <small>세후 실수령</small></div>
+        <div class="input-row"><input class="input" type="number" inputmode="numeric" min="0" step="10" id="c-income"><span class="input-unit">만 원</span></div>
+      </div>
+      <div class="field">
+        <div class="field__label">모은 돈 <small>보증금에 쓸 수 있는 돈</small></div>
+        <div class="input-row"><input class="input" type="number" inputmode="numeric" min="0" step="100" id="c-asset"><span class="input-unit">만 원</span></div>
+      </div>
+      <div class="field">
+        <div class="field__label">무주택인가요?</div>
+        <div class="seg" data-seg="homeless"><button data-v="1">무주택</button><button data-v="0">집 있음</button></div>
+      </div>
+      <div class="field">
+        <div class="field__label">부모님과 따로 사나요?</div>
+        <div class="seg" data-seg="separate"><button data-v="1">따로 살아요</button><button data-v="0">함께 살아요</button></div>
+      </div>
+      <div class="field">
+        <div class="field__label">대구 전입</div>
+        <div class="seg" data-seg="moved"><button data-v="plan">전입 예정</button><button data-v="done">전입 완료</button></div>
+      </div>
+      <div class="field">
+        <div class="field__label">월 예산 <small>관리비·이자 포함</small></div>
+        <div class="input-row"><input class="input" type="number" inputmode="numeric" min="0" step="5" id="c-budget"><span class="input-unit">만 원</span></div>
+      </div>
+      <p class="cond__note">입력한 값은 이 브라우저에만 남아요. 대출 금리, 지원 금액, 소득 기준은 시연용 예시예요.</p>
+    </aside>
+
+    <div>
+      <div class="mapstage" id="mapStage">
+        <canvas id="mapCanvas" aria-label="대구 미분양 단지 지도. 단지를 누르면 주변 시설까지 거리와 월 부담이 보여요"></canvas>
+        <div class="legend" aria-hidden="true"><span><i class="lg-on"></i>입주 가능</span><span><i class="lg-blink"></i>조건부</span><span><i class="lg-off"></i>어려움</span></div>
+        <span class="tag-example">예시 단지</span>
+        <p class="map-hint">드래그로 돌리고, 단지를 눌러보세요</p>
+        <div class="map-fallback">3D 지도를 불러오지 못했어요. 아래 목록에서 단지를 골라주세요.</div>
+        <div class="map-card" id="mapCard" role="region" aria-live="polite"></div>
+      </div>
+      <div class="ulist" id="ulist"></div>
+      <p class="ulist__note">추천 순서와 불빛은 내 조건과 실부담으로만 정해요. 제휴·광고 단지는 따로 표시해요. 단지 이름·위치·금액은 모두 예시예요.</p>
+    </div>
+  </div>
+  <div style="height:var(--section-y)"></div>
+</section>
+
+<!-- ═══════════════ #sim ═══════════════ -->
+<section class="page" id="page-sim" data-page="sim" aria-label="미리 살아보기">
+  <div class="container page-head">
+    <span class="eyebrow">Simulator</span>
+    <h1 class="title">우리 가구 그대로, 미리 살아보기</h1>
+  </div>
+  <div class="container sim-layout">
+    <div>
+      <div class="stage" id="stage">
+        <canvas id="simCanvas" aria-label="집 3D 모형. 드래그해서 돌리고 확대할 수 있어요"></canvas>
+        <div class="prow prow--top">
+          <div class="pgroup" role="group" aria-label="고쳐 살래 이사 갈래">
+            <button class="pill" data-mode="fix">고쳐 살래?</button>
+            <button class="pill" data-mode="move">이사 갈래?</button>
+          </div>
+          <div class="pgroup" role="group" aria-label="보기 방식">
+            <button class="pill" data-view="orbit">둘러보기</button>
+            <button class="pill" data-view="walk">걸어보기</button>
+          </div>
+          <button class="pill" data-vp="entry">현관</button>
+          <button class="pill" data-vp="living">거실</button>
+          <button class="pill" data-vp="window">창가</button>
+          <button class="pill" data-vp="plan">평면</button>
+          <button class="pill" data-vp="tour">가이드 투어</button>
+        </div>
+        <div class="prow prow--bot">
+          <button class="pill" data-tg="after">개선 후</button>
+          <button class="pill" data-tg="eye90"><span class="pdot"></span>90cm 시선</button>
+          <button class="pill" data-tg="noise">소음 구역</button>
+          <div class="pgroup" role="group" aria-label="햇빛">
+            <button class="pill" data-sun="morning">아침</button>
+            <button class="pill" data-sun="day">낮</button>
+            <button class="pill" data-sun="evening">저녁</button>
+          </div>
+        </div>
+        <p class="stage-hint" id="stageHint">드래그로 돌리고, 휠이나 두 손가락으로 확대해요</p>
+        <p class="stage-tip" id="stageTip"></p>
+        <div class="eye-dim dim dim--v" aria-hidden="true">90cm</div>
+        <div class="pad" aria-label="걷기 패드">
+          <button class="up" data-k="f" aria-label="앞으로"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 10 5-5 5 5"/></svg></button>
+          <button class="lt" data-k="l" aria-label="왼쪽으로 돌기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m10 3-5 5 5 5"/></svg></button>
+          <button class="dn" data-k="b" aria-label="뒤로"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 6 5 5 5-5"/></svg></button>
+          <button class="rt" data-k="r" aria-label="오른쪽으로 돌기"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m6 3 5 5-5 5"/></svg></button>
+        </div>
+        <div class="score" aria-label="공간 점수">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="#e3e1db" stroke-width="6"/><circle id="scoreArc" cx="50" cy="50" r="44" fill="none" stroke="#1f6b4f" stroke-width="6" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5" style="transition:stroke-dashoffset .8s"/></svg>
+          <div><b id="scoreNum">0</b><small>공간 점수</small></div>
+        </div>
+        <div class="no3d-msg">3D를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.</div>
+      </div>
+      <div class="sim-sum" id="simSum"></div>
+    </div>
+
+    <aside class="card spanel" aria-label="조건 설정">
+      <div class="steps" role="tablist">
+        <button data-step="1" role="tab"><i>01</i>집</button>
+        <button data-step="2" role="tab"><i>02</i>가족</button>
+        <button data-step="3" role="tab"><i>03</i>우리 가구</button>
+        <button data-step="4" role="tab"><i>04</i>고칠 곳</button>
+      </div>
+      <div class="spanel__body">
+        <!-- 01 집 -->
+        <div class="step" data-panel="1">
+          <div data-only="fix">
+            <div class="field">
+              <div class="field__label">아파트 이름 검색 <small>공공데이터 연결 자리 · 예시</small></div>
+              <input class="input" type="search" id="aptSearch" placeholder="예: 대명동, 햇살맨션" autocomplete="off">
+              <ul class="sugg" id="aptSugg"></ul>
+            </div>
+            <div class="field">
+              <div class="field__label">비슷한 구조 고르기</div>
+              <div class="tpls" id="tplPick"></div>
+            </div>
+            <div class="field">
+              <div class="field__label">다른 곳만 실측 <small>m 단위</small></div>
+              <div class="input-row">
+                <input class="input" type="number" step="0.1" min="3" max="16" id="mW" aria-label="가로 길이"><span class="input-unit">×</span>
+                <input class="input" type="number" step="0.1" min="3" max="16" id="mD" aria-label="세로 길이"><span class="input-unit">m</span>
+              </div>
+              <button class="btn btn--line btn--sm" id="arBtn" style="margin-top:10px">AR 줄자로 재기</button>
+            </div>
+            <div class="field">
+              <label class="check"><input type="checkbox" id="balcony">발코니 확장했어요</label>
+            </div>
+            <div class="field">
+              <div class="field__label">준공연도</div>
+              <div class="input-row"><input class="input" type="number" min="1960" max="2026" id="year"><span class="input-unit">년</span></div>
+            </div>
+          </div>
+          <div data-only="move">
+            <div class="field">
+              <div class="field__label">이사 갈 단지 <small>지도에서 고른 단지 · 예시</small></div>
+              <div class="units" id="unitPick"></div>
+              <a href="#map" class="link small" style="margin-top:12px">지도에서 다시 고르기 →</a>
+            </div>
+            <div class="field">
+              <div class="field__label">이사 비용 <small>포장이사 견적</small></div>
+              <div class="input-row"><input class="input" type="number" step="10" min="0" id="moveCost"><span class="input-unit">만 원</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- 02 가족 -->
+        <div class="step" data-panel="2">
+          <div class="field">
+            <div class="field__label">가구원 수</div>
+            <div class="counter"><button id="cntMinus" aria-label="한 명 줄이기">−</button><b id="cnt">1</b><button id="cntPlus" aria-label="한 명 늘리기">+</button></div>
+          </div>
+          <div class="field"><div class="field__label">함께 사는 사람</div><div class="chips" data-chips="members"></div></div>
+          <div class="field"><div class="field__label">생활 특이사항</div><div class="chips" data-chips="life"></div></div>
+          <div class="field"><div class="field__label">인테리어 스타일</div><div class="chips" data-chips="style"></div></div>
+          <div class="field"><div class="field__label">지금 사는 집</div><div class="chips" data-chips="tenure"></div></div>
+          <div class="field"><div class="field__label">가구 소득 구간 <small>지원금 판정용</small></div><div class="chips" data-chips="band"></div></div>
+        </div>
+        <!-- 03 우리 가구 -->
+        <div class="step" data-panel="3">
+          <div class="field"><div class="field__label">우리 가구</div><div class="chips" data-chips="furn"></div>
+            <button class="btn btn--line btn--sm" id="photoBtn" style="margin-top:12px">사진으로 가구 추가</button>
+            <input type="file" accept="image/*" capture="environment" id="photoIn" hidden>
+          </div>
+          <div class="field">
+            <div class="field__label">이렇게 놓았어요</div>
+            <ul class="reasons" id="reasons"></ul>
+          </div>
+        </div>
+        <!-- 04 고칠 곳 -->
+        <div class="step" data-panel="4">
+          <div class="field"><div class="field__label">고칠 곳</div><div class="chips" data-chips="fixes"></div></div>
+          <div class="field"><div class="field__label">마감 등급</div><div class="seg" data-seg="grade"><button data-v="0">기본</button><button data-v="1">표준</button><button data-v="2">고급</button></div></div>
+          <div class="field"><div class="field__label">벽지 색</div><div class="swatches" data-sw="wall"></div></div>
+          <div class="field"><div class="field__label">바닥재 색</div><div class="swatches" data-sw="floor"></div></div>
+          <p class="note-ex">고칠 곳을 바꾸면 '개선 후' 화면과 비교 리포트 견적이 같이 바뀌어요. 단가는 예시예요.</p>
+        </div>
+      </div>
+      <div class="spanel__foot">
+        <button class="btn btn--line" id="stepPrev">이전</button>
+        <button class="btn" id="stepNext">다음</button>
+      </div>
+    </aside>
+  </div>
+  <div style="height:var(--section-y)"></div>
+</section>
+
+<!-- ═══════════════ #report ═══════════════ -->
+<section class="page" id="page-report" data-page="report" aria-label="비교 리포트">
+  <div class="container page-head report-hero">
+    <a href="#sim" class="back">← 조건 다시 바꾸기</a>
+    <span class="eyebrow">Report</span>
+    <h1 class="title" id="rTitle">비교 리포트</h1>
+    <p class="lead">집값과 대출은 빼고, 이 집에서 살 준비를 하는 데 드는 비용만 비교했어요. 단가와 지원금은 시연용 예시예요.</p>
+  </div>
+  <div class="rtabs"><div class="container"><div class="tabs" role="tablist" aria-label="리포트 항목">
+    <button data-rt="cost" class="is-on">비용 비교</button><button data-rt="support">받을 수 있는 지원</button><button data-rt="check">계약 체크</button><button data-rt="furn">추천 가구</button><button data-rt="doc">문서 받기</button>
+  </div></div></div>
+  <div class="container">
+    <div class="rgrid is-on" data-rp="cost">
+      <div class="card rcard">
+        <h2>살 준비 비용 비교</h2>
+        <p>고쳐 살 때 vs 이사 갈 때 · 단위 만 원 · 예시</p>
+        <table class="tbl" id="costTbl"></table>
+        <div class="bars" id="costBars"></div>
+      </div>
+      <div class="card rcard">
+        <h2>이사 갈 집의 월 실부담</h2>
+        <p id="rUnitName"></p>
+        <div class="big-num" id="rMonthly"></div>
+        <div class="range" id="rRange"></div>
+        <table class="tbl" id="monthTbl"></table>
+        <p class="formula">실부담(월) = 월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원 − (중개수수료 지원 ÷ 24개월)</p>
+      </div>
+    </div>
+
+    <div class="rsec" data-rp="support">
+      <span class="eyebrow">Support</span>
+      <h2 class="title">받을 수 있는 지원</h2>
+      <p class="lead">요건 충족 / 확인 필요 / 미충족, 세 단계로만 보여줘요. "받을 수 있다"고 단정하지 않아요.</p>
+      <div class="sup-grid" id="supGrid"></div>
+    </div>
+
+    <div class="rsec" data-rp="check">
+      <span class="eyebrow">Who decides</span>
+      <h2 class="title">누가 무엇을 확인하나요</h2>
+      <div class="tiers" id="tiers"></div>
+    </div>
+
+    <div class="rsec" data-rp="check">
+      <span class="eyebrow">Checklist</span>
+      <h2 class="title">계약 전에 꼭 확인해요</h2>
+      <ul class="checklist" id="checklist"></ul>
+    </div>
+
+    <div class="rsec" data-rp="furn">
+      <span class="eyebrow">Furniture</span>
+      <h2 class="title">추천 가구</h2>
+      <p class="lead" id="fLead"></p>
+      <div class="fcards" id="fcards"></div>
+    </div>
+
+    <div class="rsec" data-rp="doc">
+      <span class="eyebrow">Documents</span>
+      <h2 class="title">문서로 받아보기</h2>
+      <div class="docs">
+        <div class="doc-bar">
+          <div class="tabs" role="tablist"><button data-doc="family" class="is-on">가족용 리포트</button><button data-doc="vendor">업체용 사양서</button></div>
+          <button class="btn btn--sm" id="copyDoc">내용 복사</button>
+        </div>
+        <pre class="doc" id="docText"></pre>
+      </div>
+    </div>
+    <div class="rnext"><button class="btn btn--line" id="rPrev">← 이전</button><button class="btn" id="rNext">다음</button></div>
+  </div>
+  <div style="height:var(--section-y)"></div>
+</section>
+
+<!-- ═══════════════ #guide ═══════════════ -->
+<section class="page" id="page-guide" data-page="guide" aria-label="이용 안내">
+  <!-- 휴대폰(820px 이하)에서만 보이는 카테고리 칩 -->
+  <div class="cats" id="guideCats" role="tablist" aria-label="이용 안내 내용 고르기">
+    <button class="cat is-on" type="button" role="tab" aria-selected="true" data-cat="steps"><span>다섯 걸음</span></button>
+    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="faq"><span>자주 묻는 질문</span></button>
+  </div>
+  <div class="container page-head is-on" data-catp="steps">
+    <span class="eyebrow">Process</span>
+    <h1 class="title">결정까지 다섯 걸음</h1>
+    <p class="lead">상담 받기 전에, 우리 집 상황을 숫자로 정리해 가요.</p>
+    <div class="steps5">
+      <div class="s5 reveal"><i>1</i><b>집 구조 고르기</b><p>원룸부터 84형 쓰리룸까지. 다른 곳만 줄자로 맞춰요.</p></div>
+      <div class="s5 reveal"><i>2</i><b>가족 정보 넣기</b><p>아이, 재택근무, 반려동물까지 배치 조건이 돼요.</p></div>
+      <div class="s5 reveal"><i>3</i><b>우리 가구 등록</b><p>사진을 찍으면 비슷한 실제 상품 치수로 맞춰요.</p></div>
+      <div class="s5 reveal"><i>4</i><b>두 집 걸어보기</b><p>고친 우리 집과 미분양 새 집을 90cm 시선까지.</p></div>
+      <div class="s5 reveal"><i>5</i><b>리포트 받기</b><p>가족용 리포트와 업체용 사양서를 한 번에.</p></div>
+    </div>
+  </div>
+  <div class="section section--white" data-catp="faq">
+    <div class="container">
+      <div class="head-center reveal" style="margin-bottom:0">
+        <span class="eyebrow">FAQ</span>
+        <h2 class="title">자주 묻는 질문</h2>
+      </div>
+      <div class="faq">
+        <details><summary>도면이 없어도 되나요?<i aria-hidden="true"></i></summary><p>네. 원룸, 분리형, 투룸, 84형 쓰리룸 중 비슷한 표준 구조를 고르고, 다른 곳만 줄자로 재서 넣으면 돼요. 다른 업체의 도면이나 사진은 쓰지 않아요.</p></details>
+        <details><summary>데이터는 어디서 오나요?<i aria-hidden="true"></i></summary><p>미분양·건축물 통계는 국토교통부, 대구시, 공공데이터포털 자료를 쓰고 출처와 기준일을 함께 적어요. 단지 정보, 공사 단가, 지원 금액처럼 "예시"라고 적힌 값은 시연용이에요.</p></details>
+        <details><summary>"입주 가능"은 대출이 된다는 뜻인가요?<i aria-hidden="true"></i></summary><p>아니에요. 방봄은 요건 충족 / 확인 필요 / 미충족, 세 단계로 요건만 따져요. 대출 승인과 지원 대상 선정은 은행과 기관이 최종으로 정해요. 그래서 체크리스트 맨 위에 "계약금 전 은행 사전 상담"을 넣었어요.</p></details>
+        <details><summary>아이 시선은 왜 90cm인가요?<i aria-hidden="true"></i></summary><p>만 3~5세 아이의 눈높이가 대략 이 정도라서 기준으로 잡았어요. 어른에게는 무릎 높이인 식탁·책상 모서리가 이 높이에서는 얼굴 앞에 와요.</p></details>
+        <details><summary>견적은 정확한가요?<i aria-hidden="true"></i></summary><p>방향을 잡는 용도예요. 면적과 예시 단가로 계산해서 실제 금액은 업체 실측 뒤에 정해져요. 업체용 사양서를 들고 가면 같은 조건으로 비교 견적을 받기 쉬워요.</p></details>
+        <details><summary>무료인가요?<i aria-hidden="true"></i></summary><p>네, 지금 시연 버전은 모두 무료예요. 입력한 값은 서버로 보내지 않고 이 브라우저에만 남아요.</p></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <span class="logo"><b>방봄</b><i>Bangbom</i></span>
+        <p class="footer__team">대구 계명문화대학교에서 서로 다른 과 학생 넷이 모여 만들었어요.</p>
+      </div>
+      <div>
+        <p class="footer__label">Data sources</p>
+        <ul class="footer__src">
+          <li>국토교통부 주택통계 · 미분양주택현황<span>2026.9 기준</span></li>
+          <li>국토교통부 건축물 현황<span>2023 기준</span></li>
+          <li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>
+          <li>지도: © OpenStreetMap contributors<span>재해석 이미지</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>"예시" 표시가 있는 숫자와 이미지는 시연용이에요. 대출·지원 자격은 각 기관이 최종으로 정해요.</span>
+      <span>© 2026 Bangbom</span>
+    </div>
+  </div>
+</footer>
+
+<nav class="tabbar" aria-label="하단 메뉴">
+  <a href="#home" data-route="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg>홈</a>
+  <a href="#map" data-route="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 13 0c0 4.9-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>집 찾기</a>
+  <a href="#sim" data-route="sim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg>살아보기</a>
+  <a href="#report" data-route="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>리포트</a>
+  <a href="#guide" data-route="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.1"/></svg>안내</a>
+</nav>
+
+<dialog class="modal" id="modal"><div class="modal__body"><h3 id="modalTitle"></h3><p id="modalText"></p><button class="btn" id="modalClose">알겠어요</button></div></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

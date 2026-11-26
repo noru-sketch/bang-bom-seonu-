@@ -1,10 +1,67 @@
-.env
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 비밀값과 로컬 설정 (API 키는 절대 커밋하지 않는다)
+# 이름이 .env로 시작하거나 끝나면 모두 막는다: 탐색기로 복사한 사본(".env - 복사본.local", " - 복사본.env")도 걸리게
+.env*
 *.env
+!.env.example
+.vercel
+
+# 열쇠·인증서 파일
+*.pem
+*.key
+*.p12
+
+# 압축 파일 (속을 검사할 수 없어서 올리지 않는다. 소스를 보낼 때는 npm run pack)
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+*.tgz
+*.bz2
+*.xz
+
+# 도구가 만드는 폴더와 임시 파일 (내 PC 경로가 들어 있을 수 있다)
 __pycache__/
-node_modules/
-trace/refs/
-trace/art/
 *.pyc
-.claude/settings.local.json
-.vscode/
-trace/osm/
+.impeccable/
+.claude/
+graphify-out/
+
+# 만든 결과물
+reports/pdf/*.html
+docs/reference/private/
+
+# 파이썬 백엔드 (온라인 모델하우스용 에셋·대시보드 API)
+backend/.venv/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/data/*.db
+
+# 선우판 trace 로컬 전용 (네이버 캡처·생성 원본은 올리지 않는다)
+bangbom/trace/refs/
+bangbom/trace/art/

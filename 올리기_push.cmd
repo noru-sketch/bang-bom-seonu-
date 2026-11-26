@@ -5,7 +5,7 @@ title 방봄 - 내 수정 올리기
 where git >nul 2>nul
 if errorlevel 1 goto NOGIT
 if exist ".git" goto INREPO_OK
-echo 이 파일은 bangbom 폴더 안에서 실행해야 해요.
+echo 이 파일은 저장소를 받은 프로젝트 폴더 맨 위에서 실행해야 해요.
 echo 아직 프로젝트를 받지 않았다면 0_처음_받기.cmd 를 먼저 실행하세요.
 pause
 exit /b 1
@@ -21,8 +21,9 @@ set "MSG="
 set /p MSG=무엇을 고쳤는지 한 줄로 적어 주세요 (예: 지도 색 수정): 
 if "%MSG%"=="" set "MSG=수정"
 
-if exist "src\shell\build.py" (
-  python src\shell\build.py >nul 2>nul || py src\shell\build.py >nul 2>nul
+if exist "bangbom\src\shell\build.py" (
+  python bangbom\src\shell\build.py >nul 2>nul || py bangbom\src\shell\build.py >nul 2>nul
+  where node >nul 2>nul && (node scripts\sync-bangbom.mjs >nul 2>nul) || copy /y bangbom\index.html public\index.html >nul
 )
 git add -A
 git commit -m "%MSG%"

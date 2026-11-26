@@ -1,0 +1,10 @@
+#!/bin/sh
+# 올리기(push) 직전에 git 기록 전체(커밋된 내용과 커밋 설명 글)를 한 번 더 살핀다.
+# 커밋 검사를 건너뛴 커밋(--no-verify), 합치기(merge)로 들어온 내용, 검사를 켜기 전에 한 커밋이 여기서 걸린다.
+node scripts/check-secrets.mjs --history
+if [ "$?" -ne 0 ]; then
+  echo ""
+  echo "올리기를 멈췄어요. git 기록 안에 비밀값으로 보이는 것이 있어요. 그대로 올리지 말고 docs/SECURITY.md 의 '검사에 걸렸을 때'를 따라 해 주세요."
+  exit 1
+fi
+exit 0

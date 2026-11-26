@@ -5,7 +5,7 @@ title 방봄 - 팀원 수정 받기
 where git >nul 2>nul
 if errorlevel 1 goto NOGIT
 if exist ".git" goto INREPO_OK
-echo 이 파일은 bangbom 폴더 안에서 실행해야 해요.
+echo 이 파일은 저장소를 받은 프로젝트 폴더 맨 위에서 실행해야 해요.
 echo 아직 프로젝트를 받지 않았다면 0_처음_받기.cmd 를 먼저 실행하세요.
 pause
 exit /b 1
@@ -22,15 +22,18 @@ if not errorlevel 1 goto DONE
 rem 충돌 파일이 index.html 하나뿐이면 src에서 다시 빌드해서 자동 해결
 set "OTHER="
 for /f "delims=" %%f in ('git diff --name-only --diff-filter=U') do (
-  if /i not "%%f"=="index.html" set OTHER=1
+  if /i not "%%f"=="bangbom/index.html" if /i not "%%f"=="public/index.html" set OTHER=1
 )
 if defined OTHER goto CONFLICT
 git diff --name-only --diff-filter=U | findstr /i "index.html" >nul
 if errorlevel 1 goto NETFAIL
-echo index.html 충돌은 src에서 다시 빌드해서 해결합니다...
-git checkout --theirs index.html
-python src\shell\build.py || py src\shell\build.py
-git add index.html
+echo index.html 충돌은 bangbom\src에서 다시 빌드해서 해결합니다...
+git checkout --theirs bangbom/index.html public/index.html 2>nul
+if exist "bangbom\src\shell\build.py" (
+  python bangbom\src\shell\build.py >nul 2>nul || py bangbom\src\shell\build.py >nul 2>nul
+  where node >nul 2>nul && (node scripts\sync-bangbom.mjs >nul 2>nul) || copy /y bangbom\index.html public\index.html >nul
+)
+git add bangbom/index.html public/index.html
 git commit -m "받기: index.html 다시 빌드" >nul
 goto DONE
 
