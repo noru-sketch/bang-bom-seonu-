@@ -147,6 +147,8 @@ function legendCats() { return Object.keys(CAT_KO).map(k => `<span class="cat"><
 /* 계산 내역 금액 표시: 소수 첫째 자리까지, .0 은 뺀다(15.0만 → 15만, 0.5만은 그대로). 0 인 줄은 zero 글자로 */
 const manT = v => { const t = (Math.round(v * 10) / 10).toFixed(1); return (t.endsWith(".0") ? t.slice(0, -2) : t) + "만"; };
 const manZ = (v, zero) => v == null || Math.abs(v) < .05 ? zero : manT(v);
+/* 보증금 금액과 출처(작은 글씨). PC 는 카드 머리, 휴대폰은 요약 칸 맨 위 */
+const depHTML = c => `<p class="cc-dep">보증금 <b>${wonK(c.deposit)}</b>${c.rent ? ` · 월세 ${c.rent}만 원` : " · 전세"}</p>${!c.is_sample && c.source_url ? `<p class="small muted cc-src">보증금 출처: <a href="${esc(c.source_url)}" target="_blank" rel="noopener">${esc(c.source)}</a> · 확인일 ${esc(c.checked_at)}</p>` : ""}`;
 function whyLine(c) {
   const w = WHY[c.id]; if (!w) return "";
   const built = w.built ? `${w.built}년 준공${c.is_sample ? "(예시)" : ""}` : "준공 연도 확인 중";
@@ -163,16 +165,16 @@ function cardHTML(id) {
   const roomNote = noteText ? `<p class="small muted pc-only" style="margin-top:6px">${noteText}</p>` : "", roomNoteM = noteText ? `<p class="small muted m-only" style="margin-top:10px">${noteText}</p>` : "";
   const bd = match ? breakdown(c, ev) : null;
   const panes = [["sum", "요약"], bd && ["calc", "계산 내역"], match && ["sup", "지원"], match && ["chk", "체크리스트"], ["safe", "보증·권리 확인"], c.sale_price && ["sale", "매매"], ["near", "주변 시설"], match && ["link", "링크"], ["plan", "평면"]].filter(Boolean);
-  let head = `<div class="cc-plan" data-pane="plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2>${whyLine(c)}
-    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.supply_type === "lh_dundeun" ? '<span class="tag">공고·추첨</span>' : ""}${c.is_sample ? '<span class="sample">예시</span>' : ""}${match && brokerageBadge(S.profile, c) ? `<span class="tag">${esc(RULES.badges.brokerage.text)}</span>` : ""}</div><p class="cc-dep">보증금 <b>${wonK(c.deposit)}</b>${c.rent ? ` · 월세 ${c.rent}만 원` : " · 전세"}</p>${!c.is_sample && c.source_url ? `<p class="small muted cc-src">보증금 출처: <a href="${esc(c.source_url)}" target="_blank" rel="noopener">${esc(c.source)}</a> · 확인일 ${esc(c.checked_at)}</p>` : ""}</div>
+  let head = `<div class="cc-plan" data-pane="plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2><div class="pc-only">${whyLine(c)}</div>
+    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.supply_type === "lh_dundeun" ? '<span class="tag">공고·추첨</span>' : ""}${c.is_sample ? '<span class="sample">예시</span>' : ""}${match && brokerageBadge(S.profile, c) ? `<span class="tag">${esc(RULES.badges.brokerage.text)}</span>` : ""}</div><div class="pc-only">${depHTML(c)}</div></div>
     <button class="cc-big" id="ccBig" type="button" aria-label="크게 보기"><span aria-hidden="true">⤢</span></button><button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
     <div class="cc-chips m-only" role="tablist" aria-label="단지 정보 항목">${panes.map(p => `<button type="button" class="chip" role="tab" data-tab="${p[0]}">${p[1]}</button>`).join("")}</div>`;
   let body = `<div class="cc-panes">`;
   if (match) {
     const al = appliedLists(c, ev, S.pr);
     const main = ev.net_monthly != null ? ev.net_monthly : ev.net_monthly_best;
-    body += ev.shortfall ? `<div class="cc-sum" data-pane="sum"><p class="big">자기자금이 모자라요<b class="is-off">${wonK(ev.shortfall)} 부족</b>보증금 ${wonK(c.deposit)} − 모은 돈 ${wonK(S.profile.assets)} = 필요 대출 ${wonK(ev.loan_needed)}</p>`
-      : `<div class="cc-sum" data-pane="sum"><p class="big">지원 반영 후 월 부담<b class="${ev.light === "off" ? "is-off" : ""}">월 ${man1(main)}만 원</b>
+    body += ev.shortfall ? `<div class="cc-sum" data-pane="sum"><div class="m-only cc-mhead">${whyLine(c)}${depHTML(c)}</div><p class="big">자기자금이 모자라요<b class="is-off">${wonK(ev.shortfall)} 부족</b>보증금 ${wonK(c.deposit)} − 모은 돈 ${wonK(S.profile.assets)} = 필요 대출 ${wonK(ev.loan_needed)}</p>`
+      : `<div class="cc-sum" data-pane="sum"><div class="m-only cc-mhead">${whyLine(c)}${depHTML(c)}</div><p class="big">지원 반영 후 월 부담<b class="${ev.light === "off" ? "is-off" : ""}">월 ${man1(main)}만 원</b>
       ${ev.net_monthly == null && ev.net_monthly_best != null ? "요건 충족 지원만으로는 어려워요 · 확인 필요까지 받을 때 기준<br>" : ""}지원 모두 받으면 ${man1(ev.net_monthly_best)}만 · 하나도 못 받으면 ${man1(ev.net_monthly_worst)}만 원</p>
       ${ev.alts.length ? `<p class="small muted" style="margin-top:6px">다른 선택: ${ev.alts.slice(0, 2).map(a => `${esc(a.label)} 월 ${man1(a.net)}만(${ST_KO[a.status]})`).join(" · ")}</p>` : ""}`;
     body += `<p class="why">${esc(ev.light_reason)}</p>${roomNoteM}</div>`;
@@ -188,7 +190,7 @@ function cardHTML(id) {
     const links = [...(APPLY_LINKS[c.supply_type] || []), ...al.applied.map(a => ({ label: a.name.replace("(시연용)", "") + " 안내", url: a.source_url }))];
     body += `<details class="fold" data-pane="link"><summary>신청·문의 링크</summary><div class="links">${links.map(l => l.url ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>` : `<span>${esc(l.label)} · 공고 확인 중</span>`).join("")}</div></details>`;
   } else {
-    body += `<div class="cc-sum" data-pane="sum"><p class="small">${c.rent ? `월세 ${c.rent}만 원` : "월세 없음 (전세)"} · 관리비 ${mg}</p><p class="why">내 조건을 넣으면 대출·지원을 반영한 실제 월 부담을 계산해 드려요.</p>${roomNoteM}</div>`;
+    body += `<div class="cc-sum" data-pane="sum"><div class="m-only cc-mhead">${whyLine(c)}${depHTML(c)}</div><p class="small">${c.rent ? `월세 ${c.rent}만 원` : "월세 없음 (전세)"} · 관리비 ${mg}</p><p class="why">내 조건을 넣으면 대출·지원을 반영한 실제 월 부담을 계산해 드려요.</p>${roomNoteM}</div>`;
   }
   body += safetyHTML(c) + saleHTML(c, match ? (ev.shortfall ? null : (ev.net_monthly != null ? ev.net_monthly : ev.net_monthly_best)) : null);
   body += `<details class="fold" data-pane="near"><summary>가까운 시설</summary><p class="pane-h m-only">가까운 시설</p><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
@@ -788,7 +790,10 @@ const MapView = {
       u.sq.material.opacity = u.light === "dim" ? .5 : 0;
       u.lift = (u.lift || 0) + ((u.liftT || 0) - (u.lift || 0)) * Math.min(1, dt * 10); u.blds.position.y = u.lift;
       const p = this.project(new T3.Vector3(u.c.map_x, u.top + .6, u.c.map_z)); const far = this.zoom < 18; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
-      u.lbl.style.left = p.x + "px"; u.lbl.style.top = p.y + "px"; u.lbl.classList.toggle("is-dot", far); const focus = this.lineFor && S.sel; u.lbl.classList.toggle("is-faint", !!focus && focus !== u.c.id);
+      let lx = p.x, ly = p.y;
+      /* 휴대폰에서 아래 시트가 열리면 고른 단지 이름표를 시트 바로 위에 고정해 늘 보이게 한다 (위로 벗어나 잘리던 문제). 가로는 화면 안에서 지도를 따라간다 */
+      if (isPhone() && S.sel === u.c.id && document.body.classList.contains("card-open")) { const st = $("#panelR").getBoundingClientRect().top, hw = (u.lbl.offsetWidth || 120) / 2; ly = st - 10; lx = clamp(p.x, hw + 8, innerWidth - hw - 8); }
+      u.lbl.style.left = lx + "px"; u.lbl.style.top = ly + "px"; u.lbl.classList.toggle("is-dot", far); const focus = this.lineFor && S.sel; u.lbl.classList.toggle("is-faint", !!focus && focus !== u.c.id);
     });
     const near = this.zoom >= 30;
     this.lines.visible = near;
