@@ -143,6 +143,15 @@ async function run(cdp) {
     return name
   }
   const waitFrame = async (wantSlotNot) => { await waitFor(`(() => { const f = __q.frame(); return !!f && f.slot !== ${J(wantSlotNot || '')} && f.liveSlot === f.slot && f.ready })()`, 'iframe 안 방 배치 도구', 20000); await sleep(900); return ev('__q.frame()') }
+  // 집 보기는 먼저 집 전체 구조(평면도 + 방 목록)를 보여 준다. 전체 구조가 보이고 방 iframe 은 아직 없는지 확인한 뒤
+  // 목록의 방 단추(name, 없으면 첫 방)를 진짜 눌러서 그 방의 방꾸미 화면(iframe)이 뜰 때까지 기다린다
+  const pickRoom = async (name) => {
+    const over = await waitFor(`(() => { const o = ${q('#hvOver')}; if (!o || o.hidden || !__q.vis(o)) return null; const b = [...o.querySelectorAll('.hvo-room')]; if (!b.length) return null; return { hash: location.hash, rooms: b.map(x => __q.txt(x.querySelector('b'))), plan: !!o.querySelector('.hvo-plan svg'), frame: !!__q.frame() && !${q('#kkumiFrame')}.hidden } })()`, '집 전체 구조', 6000)
+    const target = name || over.rooms[0]
+    await tap(`[...document.querySelectorAll('#hvOver .hvo-room')].find(b => __q.txt(b.querySelector('b')) === ${J(target)})`, `전체 구조의 ${target}`)
+    const f = await waitFrame('')
+    return { over, f, target }
+  }
   // 저장된 조건을 지우고 새로 연다 (주소의 # 만 바꾸면 화면을 다시 읽지 않으므로 새로 고침을 한다)
   const fresh = async (hash) => { await nav(BASE + '/'); await ev('localStorage.clear()'); await loadThen(() => cdp.send('Page.reload')); await ev('location.hash = ' + J(hash)); await sleep(900) }
 
@@ -188,8 +197,9 @@ async function run(cdp) {
     const name = await openCard(); await shot('pc-card')
     const c = await ev(`({ chips: __q.vis(${q('#panelR .cc-chips')}), folds: [...document.querySelectorAll('#panelR details.fold')].map(d => __q.txt(d.querySelector('summary')) + (d.open ? '(열림)' : '')), plan: __q.vis(${q('#panelR .cc-plan')}), btns: __q.txt(${q('#panelR .cc-btns')}) })`)
     await tap(q('#ccHouse'), '집 보기 →'); await waitFor(`location.hash === '#house'`, '#house', 5000)
-    living = await waitFrame('')
-    return { ok: !c.chips && c.folds.length >= 5 && c.folds.every((t) => !t.includes('(열림)')) && c.plan && living.path.endsWith('/room.html') && living.embed === '1' && +living.w > 0 && !!living.op && !living.eye, evidence: `단지="${name}", 칩 줄 보임=${c.chips}, 접는 목록=${J(c.folds)}, 단추="${c.btns}", iframe=${J(living)}` }
+    const pk = await pickRoom('거실'); living = pk.f
+    const roomHash = await ev('location.hash')
+    return { ok: !c.chips && c.folds.length >= 5 && c.folds.every((t) => !t.includes('(열림)')) && c.plan && pk.over.hash === '#house' && pk.over.plan && pk.over.rooms.length >= 2 && !pk.over.frame && roomHash.startsWith('#house/') && living.path.endsWith('/room.html') && living.embed === '1' && +living.w > 0 && !!living.op && !living.eye && living.pressed === '거실', evidence: `단지="${name}", 칩 줄 보임=${c.chips}, 접는 목록=${J(c.folds)}, 단추="${c.btns}", 전체 구조(${pk.over.hash}) 평면도=${pk.over.plan} 방 목록=${J(pk.over.rooms)} iframe 미리 뜸=${pk.over.frame} → 거실 누름 → ${roomHash}, iframe=${J(living)}` }
   })
   await check('PC 3. 집 보기: 방 바꾸기 → 방마다 따로 저장 → 상담 단추', async () => {
     await shot('pc-house')
@@ -205,7 +215,9 @@ async function run(cdp) {
     await tap(q('#hvBack'), '← 지도로'); await waitFor(`location.hash === '#map'`, '#map', 4000)
     await ev('history.back()'); await sleep(1500)
     const h = await ev('location.hash'), f = await ev('__q.frame()')
-    return { ok: h === '#house' && !!f && f.pressed === '안방', evidence: `뒤로 한 번 → hash=${h}, 눌린 방="${f ? f.pressed : ''}", iframe 칸=${f ? f.liveSlot : ''}` }
+    // 집 보기 주소는 고른 방을 뒤에 붙인다(#house/<방>). 뒤로 가면 안방 주소로 돌아오고, 안방 칩이 눌려 있고, iframe 도 그 방 칸이어야 한다
+    const rid = h.startsWith('#house/') ? h.slice(7) : ''
+    return { ok: !!rid && !!f && f.pressed === '안방' && f.liveSlot === f.slot && f.slot.endsWith('-' + rid), evidence: `뒤로 한 번 → hash=${h}, 눌린 방="${f ? f.pressed : ''}", iframe 칸=${f ? f.liveSlot : ''}` }
   })
 
   // ═════════ 휴대폰 (크기 흉내 + 합성 터치) ═════════
@@ -262,12 +274,14 @@ async function run(cdp) {
     })
     await check(`${P} 5. 집 보기: 아래 탭 막대 숨김, 위쪽 두 줄, 가로 스크롤 없음`, async () => {
       await openCard(); await tap(q('#ccHouse'), '집 보기 →'); await waitFor(`location.hash === '#house'`, '#house', 5000)
-      const f = await waitFrame('')
+      const ov = await ev(`({ over: __q.over(), tabbar: __q.vis(${q('.tabbar')}), nav: __q.vis(${q('#nav')}) })`)
+      await shot(`m${w}-house-over`)
+      const pk = await pickRoom(''), f = pk.f
       const a = await ev(`({ over: __q.over(), tabbar: __q.vis(${q('.tabbar')}), nav: __q.vis(${q('#nav')}), plan: (() => { const d = ${q('#kkumiFrame')}.contentDocument, s = d && d.querySelector('svg[role="application"]'); return s ? Math.round(s.getBoundingClientRect().height) : 0 })(), top: __q.rect('#mh .hv-top'), back: __q.rect('#hvBack'), title: __q.rect('#hvTitle b'), name: __q.txt(${q('#hvTitle b')}), cut: (() => { const b = ${q('#hvTitle b')}; return b.scrollWidth > b.clientWidth + 1 })(), consult: __q.rect('#hvConsult'), rooms: __q.rect('#hvRooms'), roomTouch: __q.touchH(${q('#hvRooms button')}), backTouch: __q.touchH(${q('#hvBack')}), mode: document.body.classList.contains('house-mode'), fab: __q.vis(${q('#fab')}) })`)
       await shot(`m${w}-house`)
       const row1 = a.back && a.title && a.consult && Math.abs((a.back.y + a.back.h / 2) - (a.consult.y + a.consult.h / 2)) < 3 && a.rooms.y >= a.back.b - 2
-      const ok = a.over.docW <= w && a.over.bodyW <= w && a.mode && !a.tabbar && !a.nav && a.top.y === 0 && a.top.h <= 112 && row1 && !a.cut && f.top <= 112 && f.bottom >= h - 1 && f.wpx === w && a.plan >= h * 0.38 && a.roomTouch >= 44 && a.backTouch >= 44 && !a.fab
-      return { ok, evidence: `가로 ${a.over.docW}/${w}, house-mode=${a.mode}, 탭 막대 보임=${a.tabbar}, 방봄 위 막대 보임=${a.nav}, 평면도 높이 ${a.plan}px(화면의 ${Math.round(a.plan / h * 100)}%), 위쪽 틀 y=${a.top.y} 높이 ${a.top.h}px, 이름="${a.name}" 잘림=${a.cut}, 방 칩 y=${a.rooms.y} 닿는 높이 ${a.roomTouch}px, iframe y=${f.top}~${f.bottom} (화면 ${h}) 폭 ${f.wpx}, 칸=${f.liveSlot}` }
+      const ok = ov.over.docW <= w && !ov.tabbar && !ov.nav && pk.over.plan && pk.over.rooms.length >= 2 && !pk.over.frame && a.over.docW <= w && a.over.bodyW <= w && a.mode && !a.tabbar && !a.nav && a.top.y === 0 && a.top.h <= 112 && row1 && !a.cut && f.top <= 112 && f.bottom >= h - 1 && f.wpx === w && a.plan >= h * 0.38 && a.roomTouch >= 44 && a.backTouch >= 44 && !a.fab
+      return { ok, evidence: `전체 구조: 가로 ${ov.over.docW}/${w} 방 목록=${J(pk.over.rooms)} 평면도=${pk.over.plan} → ${pk.target} 누름 / 방 화면: 가로 ${a.over.docW}/${w}, house-mode=${a.mode}, 탭 막대 보임=${a.tabbar}, 방봄 위 막대 보임=${a.nav}, 평면도 높이 ${a.plan}px(화면의 ${Math.round(a.plan / h * 100)}%), 위쪽 틀 y=${a.top.y} 높이 ${a.top.h}px, 이름="${a.name}" 잘림=${a.cut}, 방 칩 y=${a.rooms.y} 닿는 높이 ${a.roomTouch}px, iframe y=${f.top}~${f.bottom} (화면 ${h}) 폭 ${f.wpx}, 칸=${f.liveSlot}` }
     })
     await check(`${P} 6. 집 보기에서 상담 열기: 전체 높이, 빠른 질문 한 줄`, async () => {
       await tap(q('#hvConsult'), '상담'); await waitFor(`${q('#drawer')}.classList.contains('is-open')`, '상담 서랍', 3000); await sleep(500)

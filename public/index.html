@@ -4744,8 +4744,8 @@ const House = {
     /* #house 는 전체 구조, #house/<방> 은 그 방. 이 집에 없는 방이면 전체 구조로 고친다 */
     let want = location.hash.startsWith("#house/") ? location.hash.slice(7) : "";
     if (want && !rooms.some(r => r.id === want)) { want = ""; history.replaceState(null, "", "#house"); }
-    /* 눈높이(MH.setEye)로 들어오면 전체 구조를 건너뛰고 거실을 연다. 기록을 하나 더 쌓아서 뒤로 가면 전체 구조가 나온다 */
-    if (!want && this.eye) { want = living; history.pushState({ mhOver: 1 }, "", "#house/" + want); }
+    /* 눈높이(MH.setEye)로 들어오면 전체 구조를 건너뛰고 마지막에 고른 방(아직 안 골랐으면 첫 방인 거실)을 연다. 기록을 하나 더 쌓아서 뒤로 가면 전체 구조가 나온다 */
+    if (!want && this.eye) { want = rooms.some(r => r.id === this.room) ? this.room : living; history.pushState({ mhOver: 1 }, "", "#house/" + want); }
     if (want) this.showRoom(c, L, rooms, want); else this.showOver(c, L, rooms);
   },
   /* 전체 구조와 방 화면 가운데 하나만 보인다. 방 칩과 [전체 구조]는 방 화면에서만 쓴다 */
