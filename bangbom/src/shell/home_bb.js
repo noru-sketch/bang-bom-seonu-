@@ -1,9 +1,9 @@
-/* ═══════ 홈 6화면 채우기 (해결 1 · 해결 3) ═══════
+/* ═══════ 홈 5화면 채우기 (해결 1 · 시작하기) ═══════
    build.py 가 app_bb.js 바로 뒤에 붙인다. 같은 { } 범위라 RULES·COMPLEXES·profileResult·evaluate·appliedLists·PERSONA 를 그대로 쓴다.
    판정·개수·이유는 모두 판정 코드가 계산한 값이다. 이 파일에 숫자를 직접 적지 않는다 */
 (function homeFill() {
-  const sup = $("#homeSupport"), chk = $("#homeCheck");
-  if (!sup && !chk) return;
+  const sup = $("#homeSupport");
+  if (!sup) return;
   const P = PERSONA, pr = profileResult(P);
   const evs = COMPLEXES.map(c => ({ c, e: evaluate(P, c, pr) }));
   const n = { on: 0, dim: 0, off: 0 }; evs.forEach(x => n[x.e.light]++);
@@ -40,38 +40,4 @@
       </div>`;
   }
 
-  /* 5. 해결 3: 방봄이 확인한 것 / 직접 확인할 것 / 기관이 정하는 것 */
-  if (chk) {
-    const byType = {}; COMPLEXES.forEach(c => { byType[c.supply_type] = (byType[c.supply_type] || 0) + 1; });
-    /* 공급 주체: 단지 자료에 있는 것(LH·CR리츠)은 개수까지, 민간은 지금 목록에 없어서 확인할 점만 적는다 */
-    const supply = Object.keys(byType).map(t =>
-      `<li><b>${esc(SUPPLY_KO[t] || t)}</b><span>${esc(LANDLORD_KO[t] || "")} · ${byType[t]}곳</span></li>`).join("")
-      + `<li><b>민간 임대</b><span>임대인 개인·법인 · 지금 목록에는 없어요</span></li>`;
-    const gf = RULES.badges.guarantee_fee;
-    /* 체크리스트 순서: 계약금 전 은행 사전 상담 → (해제 특약) → 등기부 → 임대인 → 보증서. 앞의 다섯 줄은 판정 자료(RULES) 그대로, 보증서 한 줄만 홈에서 더한다 */
-    const mine = [...RULES.fixed_checklist, ...RULES.safety_checklist, "보증에 가입했다면 보증서를 받아 두고, 이름·주소·보증금이 계약서와 같은지 확인하세요"]
-      .map(t => `<li>${esc(t)}</li>`).join("");
-    const by = [];
-    [...RULES.loans, RULES.market_loan, ...RULES.policies].forEach(x => { if (x.approval_by && !by.includes(x.approval_by)) by.push(x.approval_by); });
-    chk.innerHTML = `
-      <div class="hck-grid">
-        <div class="card hck reveal">
-          <span class="hck__k">방봄이 확인한 것</span>
-          <p class="hck__t">단지마다 공급 주체와 임대인을 먼저 보여줘요.</p>
-          <ul class="hck__supply">${supply}</ul>
-          <p class="hck__note"><b>보증 안내</b> ${esc(gf.text)} <a href="${esc(gf.source_url)}" target="_blank" rel="noopener">출처 ↗</a></p>
-          <p class="hck__note">민간 임대는 임대인이 보증에 가입했는지 계약 전에 꼭 확인하세요. 단지별 보증 안내와 공고 링크는 단지 카드에서 같이 볼 수 있어요.</p>
-        </div>
-        <div class="card hck reveal">
-          <span class="hck__k">직접 확인할 것</span>
-          <p class="hck__t">계약 전에 이것만은 꼭 챙겨요.</p>
-          <ul class="hck__list">${mine}</ul>
-        </div>
-        <div class="card hck reveal">
-          <span class="hck__k">기관이 정하는 것</span>
-          <p class="hck__t">대출 승인과 지원 선정은 기관이 정해요.</p>
-          <ul class="hck__by">${by.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
-        </div>
-      </div>`;
-  }
 })();

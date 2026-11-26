@@ -33,21 +33,6 @@
 .hsu__steps li{position:relative;padding:0 0 var(--s3) 44px;color:#3d413d;counter-increment:hsu}
 .hsu__steps li::before{content:counter(hsu,decimal-leading-zero);position:absolute;left:0;top:0;font-family:var(--en);font-style:italic;font-size:20px;color:var(--green);line-height:1.4}
 .hsu__steps b{display:block;color:var(--ink);font-size:18px;font-weight:600;letter-spacing:-0.03em}
-/* 5. 해결 3: 방봄이 확인한 것 / 직접 확인할 것 / 기관이 정하는 것 */
-.hck-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
-.hck{padding:var(--s4) var(--s3)}
-.hck__k{font-size:14px;font-weight:600;color:var(--green)}
-.hck__t{margin-top:var(--s1);font-size:18px;font-weight:600;letter-spacing:-0.03em;line-height:1.45}
-.hck ul{list-style:none;margin:var(--s3) 0 0;padding:0;border-top:1px solid var(--line)}
-.hck li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.55}
-.hck__supply li{display:flex;justify-content:space-between;gap:var(--s2)}
-.hck__supply span{color:var(--sub);font-size:14px;text-align:right}
-.hck__list li{position:relative;padding-left:26px}
-.hck__list li::before{content:"";position:absolute;left:0;top:15px;width:14px;height:14px;border:1.5px solid var(--ink);border-radius:4px}
-.hck__by li{color:#3d413d}
-.hck__note{margin-top:var(--s2);font-size:13px;color:var(--sub)}
-@media (max-width:1100px){.hck-grid{grid-template-columns:1fr 1fr}}
-@media (max-width:820px){.hck-grid{grid-template-columns:1fr;gap:var(--s2)}.hsu,.hck{padding:var(--s3)}.hsu__head{flex-direction:column-reverse}}
 /* 4. 해결 2: 바탕이 밝은 그림(평면도 → 3D → 방)은 회색 바탕 대신 카드 바탕과 선을 쓴다 */
 .zz__media--plain{background:var(--card);border:1px solid var(--line)}
 /* 세 단계 그림은 넓은 칸(7fr)에 둔다. 휴대폰에서는 p1_head.html 의 .zz__row.is-rev 규칙(한 칸)이 이긴다 */
