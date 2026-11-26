@@ -55,3 +55,26 @@
 .zz__media--plain > img{object-fit:contain}
 .hs__links{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);margin-top:var(--s3)}
 .hs__links .link{margin-top:0}
+/* ═══════ 풀페이지 스크롤 (shell.js) · 예전 hyewon 홈에서 옮김 ═══════ */
+/* 오른쪽 섹션 점: 풀페이지가 켜졌을 때만(body.fp-on) 보인다. 어두운 화면(히어로·푸터)에서는 밝게 */
+.fp-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:14px}
+body.fp-on .fp-dots{display:flex}
+body.app-mode .fp-dots{display:none}
+.fp-dots button{position:relative;width:10px;height:10px;border-radius:50%;background:rgba(20,23,20,.22);transition:transform .25s,background .25s}
+.fp-dots button::after{content:"";position:absolute;inset:-8px}
+.fp-dots button.is-on{background:var(--ink);transform:scale(1.35)}
+.fp-dots.is-light button{background:rgba(255,255,255,.4)}
+.fp-dots.is-light button.is-on{background:#fff}
+.fp-dots button span{position:absolute;right:22px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--ink);color:#fff;opacity:0;pointer-events:none;transition:opacity .2s}
+.fp-dots button:hover span,.fp-dots button:focus-visible span{opacity:1}
+/* 어두운 화면(히어로 아래쪽·푸터)에서 위 막대 글자를 밝게 */
+.nav.is-dark:not(.is-clear){background:rgba(20,23,20,.78);color:#fff;border-bottom-color:rgba(255,255,255,.08)}
+.nav.is-dark:not(.is-clear) .btn:not(.btn--ghost){background:#fff;color:var(--ink)}
+.nav.is-dark:not(.is-clear) .btn--ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.24)}
+/* 맨 위로: 홈 맨 끝에 닿으면 나타난다 */
+.to-top{position:fixed;right:var(--pad-x);bottom:32px;z-index:45;height:48px;padding:0 18px 0 16px;border-radius:999px;background:#fff;color:var(--ink);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-shadow:0 10px 30px rgba(0,0,0,.22);opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .25s,transform .25s}
+.to-top.is-on{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{background:var(--gray)}
+body.app-mode .to-top{display:none}
+@media (max-width:900px){.to-top{bottom:calc(var(--tab-h) + 16px);right:16px}}
+@media (prefers-reduced-motion:reduce){.fp-dots button,.to-top{transition:none}}
