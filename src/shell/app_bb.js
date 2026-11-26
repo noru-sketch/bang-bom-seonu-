@@ -14,11 +14,11 @@ function toast(m) { const t = $("#mhToast"); t.textContent = m; t.classList.add(
 const PERSONA = { age: 27, monthly_income: 250, annual_income_gross: null, assets: 1000, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
 const S = { mode: "browse", profile: null, pr: null, evals: {}, sel: null, hover: null, chk: {} };
 try { const raw = localStorage.getItem("mh-profile"); if (raw) { S.profile = JSON.parse(raw); } } catch (e) {}
-const COMPLEX = COMPLEXES.map(c => { const nb = nearbyOf(c); return Object.assign({}, c, { nearby: nb, infra_score: infraScore(nb) }); });
+const COMPLEX = COMPLEXES.map(c => Object.assign({}, c, { nearby: nearbyOf(c) }));
 function recompute() {
   if (!S.profile) { S.pr = null; S.evals = {}; return; }
   S.pr = profileResult(S.profile); S.evals = {};
-  COMPLEX.forEach(c => { S.evals[c.id] = evaluate(S.profile, c, S.pr); c.infra_score = infraScore(c.nearby, S.profile.priorities || []); });
+  COMPLEX.forEach(c => { S.evals[c.id] = evaluate(S.profile, c, S.pr); });
 }
 function counts() { const n = { on: 0, dim: 0, off: 0 }; Object.values(S.evals).forEach(e => n[e.light]++); return n; }
 function minNet() { const v = Object.values(S.evals).map(e => e.net_monthly).filter(x => x != null); return v.length ? Math.min(...v) : null; }
@@ -97,7 +97,7 @@ function legendCats() { return Object.keys(CAT_KO).map(k => `<span class="cat"><
 /* ─── 단지 카드 ─── */
 function cardHTML(id) {
   const c = COMPLEX.find(x => x.id === id), ev = S.evals[id], match = S.mode === "match" && ev;
-  const near = c.nearby.map(n => `<li><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${CAT_DARK[n.category]};margin-right:6px"></i>${esc(n.name)}</span><span>${n.walk_min != null ? `도보 ${n.walk_min}분` : `차 ${n.drive_min}분`} · ${n.distance_km}km</span></li>`).join("");
+  const pr = (S.profile && S.profile.priorities) || [], near = c.nearby.slice().sort((a, b) => pr.includes(b.category) - pr.includes(a.category)).map(n => `<li><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${CAT_DARK[n.category]};margin-right:6px"></i>${esc(n.name)} · ${n.walk_min != null ? `도보 ${n.walk_min}분` : `차 ${n.drive_min}분`}</span></li>`).join("");
   const mg = c.mgmt_known ? `${c.mgmt}만 원` : `미확인 (추정 ${c.mgmt}만 원)`;
   const roomNote = c.room_id === "room_84a" && c.area_m2 !== 84 ? `<p class="small muted" style="margin-top:6px">집 보기는 ${c.area_m2}㎡ 평면이 아직 없어 84㎡ 구조로 대신 보여줘요.</p>` : "";
   let head = `<div class="cc-plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2>
@@ -124,7 +124,7 @@ function cardHTML(id) {
   } else {
     body += `<p class="big">보증금<b>${wonK(c.deposit)}</b>${c.rent ? `월세 ${c.rent}만 원` : "월세 없음 (전세)"} · 관리비 ${mg}</p><p class="why">내 조건을 넣으면 대출·지원을 반영한 실제 월 부담을 계산해 드려요.</p>`;
   }
-  body += `<details class="fold"><summary>${esc(c.infra_score.label)} · ${c.infra_score.score}점</summary><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
+  body += `<details class="fold"><summary>가까운 시설</summary><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
   body += roomNote;
   body += `<div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
   return `<div class="cc">${head}${body}</div>`;
@@ -442,7 +442,7 @@ const MapView = {
   },
   showLines(id) {
     while (this.lines.children.length) { const o = this.lines.children.pop(); o.geometry && o.geometry.dispose(); }
-    $$(".ilabel,.score-badge", $("#lblLayer")).forEach(e => e.remove());
+    $$(".ilabel", $("#lblLayer")).forEach(e => e.remove());
     this.lineFor = id; this.lineT = 0;
     this.marks.forEach(m => { m.userData.sp.scale.setScalar(.48); m.userData.sp.material.opacity = id ? .35 : .7; });
     if (!id) return;
@@ -454,7 +454,6 @@ const MapView = {
       const mk = this.marks.find(g => g.userData.i.id === n.infra_id); if (mk) { mk.userData.sp.scale.setScalar(.72); mk.userData.sp.material.opacity = 1; }
       const el = document.createElement("span"); el.className = "ilabel"; el.innerHTML = `<i style="background:${CAT_DARK[n.category]}"></i>${esc(n.name)} · ${n.walk_min != null ? "도보 " + n.walk_min + "분" : "차 " + n.drive_min + "분"}`; el.style.opacity = 0; el._p = b.clone(); $("#lblLayer").appendChild(el);
     });
-    const sb = document.createElement("span"); sb.className = "score-badge"; sb.textContent = `${c.infra_score.label} ${c.infra_score.score}`; sb._p = new T3.Vector3(c.map_x, 0, c.map_z + 1); $("#lblLayer").appendChild(sb);
   },
   project(v) { const p = v.clone().project(this.cam); return { x: (p.x + 1) / 2 * innerWidth, y: (1 - p.y) / 2 * innerHeight }; },
   tick(dt, time) {
@@ -489,7 +488,7 @@ const MapView = {
     }
     /* 시설 라벨: 겹치면 위아래로 밀어내요 */
     const placed = [];
-    $$(".ilabel,.score-badge", $("#lblLayer")).map(el => ({ el, p: this.project(el._p), w: el.offsetWidth + 6, h: el.offsetHeight + 4 })).sort((a, b) => a.p.y - b.p.y).forEach(o => {
+    $$(".ilabel", $("#lblLayer")).map(el => ({ el, p: this.project(el._p), w: el.offsetWidth + 6, h: el.offsetHeight + 4 })).sort((a, b) => a.p.y - b.p.y).forEach(o => {
       let y = o.p.y;
       for (let k = 0; k < placed.length; k++) { const q = placed[k]; if (Math.abs(o.p.x - q.x) < (o.w + q.w) / 2 && Math.abs(y - q.y) < (o.h + q.h) / 2) { y = q.y + (o.h + q.h) / 2 + 1; k = -1; } } /* +1: 소수점 오차로 같은 자리에서 다시 겹치지 않게 */
       placed.push({ x: o.p.x, y, w: o.w, h: o.h });

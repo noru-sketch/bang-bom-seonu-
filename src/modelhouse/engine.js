@@ -111,7 +111,7 @@ function appliedLists(c, ev, pr) {
   return { applied, not_applied };
 }
 
-/* ═══════ 생활 편의 평가 (API_SPEC 5장) ═══════ */
+/* ═══════ 가까운 시설 (카테고리마다 가장 가까운 1곳) ═══════ */
 function haversine(a, b) { const R = 6371, t = Math.PI / 180, dLa = (b.lat - a.lat) * t, dLo = (b.lng - a.lng) * t; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
 const CATS = ["subway", "hospital", "mall", "culture", "university", "park", "office"];
 function nearbyOf(c) {
@@ -122,14 +122,5 @@ function nearbyOf(c) {
     const km = Math.round(best.km * 10) / 10, walk = km <= 1.5 ? Math.round(km * 15) : null, drive = km > 1.5 ? Math.round(km * 3 + 3) : null;
     return { infra_id: best.i.id, name: best.i.name, category: cat, distance_km: km, walk_min: walk, drive_min: drive, map_x: best.i.map_x, map_z: best.i.map_z };
   }).filter(Boolean);
-}
-function infraScore(nearby, priorities = []) {
-  let sum = 0, max = 0; const by = {};
-  nearby.forEach(n => {
-    const pts = n.walk_min != null && n.walk_min <= 10 ? 3 : n.walk_min != null && n.walk_min <= 20 ? 2 : n.drive_min != null && n.drive_min <= 15 ? 1 : 0;
-    const w = priorities.includes(n.category) ? 2 : 1; sum += pts * w; max += 3 * w; by[n.category] = pts;
-  });
-  const score = max ? Math.round(sum / max * 100) : 0;
-  return { score, label: score >= 70 ? "생활 편의 높음" : score >= 40 ? "생활 편의 보통" : "생활 편의 낮음", by_category: by };
 }
 if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists };

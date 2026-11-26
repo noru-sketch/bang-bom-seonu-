@@ -116,7 +116,6 @@ body.card-open #mh .pills-r{display:none}
 #mh .clabel.is-on i{color:#7ED6A8}#mh .clabel.is-dim i{color:#FFD48A}
 #mh .clabel.is-off{background:#5f625d}
 #mh .ilabel{background:rgba(255,255,255,.94);border:1px solid rgba(20,23,20,.08);font-size:11px;padding:4px 9px;box-shadow:0 4px 12px rgba(20,23,20,.08);transition:opacity .2s}
-#mh .score-badge{border:1px solid rgba(20,23,20,.08);color:var(--green);font-size:12px;padding:4px 10px}
 
 /* 정보 입력 = 방봄 페이지 */
 #mh #vInput{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;display:block;padding:calc(72px + 48px) var(--pad-x) 96px;z-index:40}
