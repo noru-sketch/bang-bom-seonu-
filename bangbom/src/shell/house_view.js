@@ -116,33 +116,35 @@ const House = {
     const box = r => `left:${pc(P(r.x) / vw)};top:${pc(P(r.z) / vh)};width:${pc(len(r.w) / vw)};height:${pc(len(r.d) / vh)}`;
     const mine = {}; rooms.forEach(r => { mine[r.id] = this.saved(c.id + "-" + r.id); });
     const count = r => mine[r.id] ? mine[r.id].items.length : 0;
-    const fills = L.rooms.map(r => `<rect x="${P(r.x)}" y="${P(r.z)}" width="${len(r.w)}" height="${len(r.d)}" fill="${r.id in mine ? "#fff" : r.type === "bath" ? "#e6e8e4" : r.type === "kitchen" ? "#efe7da" : "#ece8e0"}"/>`).join("");
+    const fills = L.rooms.map(r => `<rect x="${P(r.x)}" y="${P(r.z)}" width="${len(r.w)}" height="${len(r.d)}" fill="${r.id in mine ? "#fff" : "#eceae5"}"/>`).join("");
     /* 방마다 저장된 방 크기(cm)를 그대로 좌표로 쓰는 작은 그림을 끼운다. 방 밖으로 나간 부분은 잘린다 */
     const furs = rooms.map(r => count(r) ? `<svg data-fur="${r.id}" x="${P(r.x)}" y="${P(r.z)}" width="${len(r.w)}" height="${len(r.d)}" viewBox="0 0 ${n1(mine[r.id].w)} ${n1(mine[r.id].d)}" preserveAspectRatio="none">${mine[r.id].items.map(f => {
       const turned = Math.abs(Math.round(f.rot / 90)) % 2 === 1, cx = f.x + (turned ? f.d : f.w) / 2, cy = f.y + (turned ? f.w : f.d) / 2;
       return `<rect x="${n1(cx - f.w / 2)}" y="${n1(cy - f.d / 2)}" width="${n1(f.w)}" height="${n1(f.d)}" rx="3" transform="rotate(${n1(f.rot)} ${n1(cx)} ${n1(cy)})"/>`;
     }).join("")}</svg>` : "").join("");
-    const walls = L.pieces.filter(p => p.kind === "solid").map(p => p.axis === "x" ? `<line x1="${P(p.a)}" y1="${P(p.c)}" x2="${P(p.b)}" y2="${P(p.c)}"/>` : `<line x1="${P(p.c)}" y1="${P(p.a)}" x2="${P(p.c)}" y2="${P(p.b)}"/>`).join("");
+    /* 벽 조각은 모서리에서 벽 두께 절반보다 조금 더 나와 있다. 집 테두리(벽 두께 절반)에서 잘라 모서리가 반듯하게 한다 */
+    const cut = (p, v) => P(Math.max(-.065, Math.min((p.axis === "x" ? L.W : L.D) + .065, v)));
+    const walls = L.pieces.filter(p => p.kind === "solid").map(p => p.axis === "x" ? `<line x1="${cut(p, p.a)}" y1="${P(p.c)}" x2="${cut(p, p.b)}" y2="${P(p.c)}"/>` : `<line x1="${P(p.c)}" y1="${cut(p, p.a)}" x2="${P(p.c)}" y2="${cut(p, p.b)}"/>`).join("");
     const wins = L.pieces.filter(p => p.kind === "glass").map(p => p.axis === "x" ? `<rect x="${P(p.a)}" y="${P(p.c) - 6.5}" width="${len(p.b - p.a)}" height="13"/>` : `<rect x="${P(p.c) - 6.5}" y="${P(p.a)}" width="13" height="${len(p.b - p.a)}"/>`).join("");
     /* 입구: 현관문 바깥에서 집 안쪽을 가리키는 세모 */
     const e = L.entry, m = P(e.m), out = e.side === "N" || e.side === "W" ? -1 : 1, tip = P(e.c) + out * 10, base = tip + out * 34;
     const tri = e.axis === "z" ? `${tip},${m} ${base},${m - 24} ${base},${m + 24}` : `${m},${tip} ${m - 24},${base} ${m + 24},${base}`;
     const labels = L.rooms.map(r => r.id in mine
       ? `<button type="button" class="hvo-rm" data-room="${r.id}" style="${box(r)}" aria-label="${esc(r.name)} ${size(r)} 꾸미기"><span class="hvo-tag"><b>${esc(r.name)}</b><i>${size(r)}</i></span></button>`
-      : `<span class="hvo-q" data-room="${r.id}" style="${box(r)}"><b>${esc(r.name)}</b><i>${size(r)}</i></span>`).join("");
+      : `<span class="hvo-q${r.w < 2.2 ? " is-sm" : ""}" data-room="${r.id}" style="${box(r)}"><b>${esc(r.name)}</b><i>${size(r)}</i></span>`).join("");
     const list = rooms.map(r => `<li><button type="button" class="hvo-room" data-room="${r.id}"><b>${esc(r.name)}</b><span class="hvo-sz">${size(r)}</span><span class="hvo-st${count(r) ? " is-done" : ""}">${count(r) ? `가구 ${count(r)}개` : "아직 꾸미지 않았어요"}</span></button></li>`).join("");
     const key = (d, t) => `<span><svg viewBox="0 0 20 14" aria-hidden="true">${d}</svg>${t}</span>`;
     return `<div class="hvo">
 <h2 class="hvo-lead">꾸미고 싶은 방을 눌러 주세요.</h2>
 <div class="hvo-fig" style="--ar:${(vw / vh).toFixed(4)}">
 <div class="hvo-plan" role="group" aria-label="${esc(L.name)} 평면도 (표준 구조 단순화)">
-<svg viewBox="0 0 ${vw} ${vh}" aria-hidden="true" focusable="false">${fills}<g class="hvo-fur" fill="#f4ede1" stroke="#a39a86" stroke-width="2">${furs}</g><g stroke="#1f6b4f" stroke-width="13" stroke-linecap="square">${walls}</g><g fill="#fff" stroke="#1f6b4f" stroke-width="3">${wins}</g><polygon class="hvo-entry" points="${tri}" fill="#141714"/></svg>
+<svg viewBox="0 0 ${vw} ${vh}" aria-hidden="true" focusable="false">${fills}<g class="hvo-fur" fill="#f1e6d3" stroke="#9a8f79" stroke-width="2">${furs}</g><g stroke="#1f6b4f" stroke-width="13">${walls}</g><g fill="#fff" stroke="#1f6b4f" stroke-width="3">${wins}</g><polygon class="hvo-entry" points="${tri}" fill="#141714"/></svg>
 ${labels}
 </div>
-<p class="hvo-key">${key('<path d="M4 7 16 1v12z" fill="#141714"/>', "입구")}${key('<rect x="1.5" y="4" width="17" height="6" fill="#fff" stroke="#1f6b4f" stroke-width="1.5"/>', "창문")}${rooms.some(count) ? key('<rect x="2.5" y="1.5" width="15" height="11" rx="1.5" fill="#f4ede1" stroke="#a39a86"/>', "놓아 둔 가구") : ""}</p>
+<p class="hvo-key">${key('<path d="M4 7 16 1v12z" fill="#141714"/>', "입구")}${key('<rect x="1.5" y="4" width="17" height="6" fill="#fff" stroke="#1f6b4f" stroke-width="1.5"/>', "창문")}${rooms.some(count) ? key('<rect x="2.5" y="1.5" width="15" height="11" rx="1.5" fill="#f1e6d3" stroke="#9a8f79"/>', "놓아 둔 가구") : ""}</p>
 </div>
 <ul class="hvo-list">${list}</ul>
-<p class="hvo-note">표준 구조로 단순화한 평면이에요. 공고 평면도 원본이 아니에요. 꾸민 배치는 이 브라우저에만 저장돼요.</p>
+<p class="hvo-note">표준 구조로 단순화한 평면이에요.${c.area_m2 !== L.area ? ` 이 단지는 ${c.area_m2}㎡인데 ${L.area}㎡ 구조로 대신 보여 드려요.` : ""} 공고 평면도 원본이 아니고, 방 크기도 실제와 다를 수 있어요. 꾸민 배치는 이 브라우저에만 저장돼요.</p>
 </div>`;
   },
   /* 집 보기를 떠난다. 열어 둔 방은 그대로 두어서 뒤로 가기로 돌아오면 바로 보인다 */

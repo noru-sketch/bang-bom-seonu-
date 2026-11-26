@@ -9,10 +9,9 @@
 <title>이용 현황 · 방봄</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
-/* 글꼴은 같은 사이트의 fonts/ 에서만 받아요 (바깥 주소를 쓰지 않아요) */
+/* 글꼴은 같은 사이트의 fonts/ 에서만 받아요 (바깥 주소를 쓰지 않아요). 내려받는 양을 줄이려고 굵기는 둘만 써요 */
 @font-face{font-family:"PretendardLocal";font-weight:400;font-style:normal;font-display:swap;src:url("fonts/Pretendard-Regular.woff2") format("woff2")}
 @font-face{font-family:"PretendardLocal";font-weight:600;font-style:normal;font-display:swap;src:url("fonts/Pretendard-SemiBold.woff2") format("woff2")}
-@font-face{font-family:"PretendardLocal";font-weight:700;font-style:normal;font-display:swap;src:url("fonts/Pretendard-Bold.woff2") format("woff2")}
 
 /* 방봄 색 그대로. 보조 글자만 바탕 위에서 4.5:1 이 되게 조금 진하게 했어요 */
 :root{
@@ -27,7 +26,7 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);font-size:16px;line-height:1.65;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);font-size:16px;line-height:1.65;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
 h1,h2,p,ol,ul,dl,dt,dd{margin:0}
 ol,ul{padding:0;list-style:none}
 a{color:inherit}
@@ -42,7 +41,7 @@ button{font:inherit;color:inherit;letter-spacing:inherit;border:0;background:non
 .top{border-bottom:1px solid var(--line)}
 .top__in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
 .logo{display:inline-flex;align-items:baseline;gap:8px;padding:11px 0;line-height:1;white-space:nowrap;text-decoration:none}
-.logo b{font-weight:700;font-size:22px;letter-spacing:-.05em}
+.logo b{font-weight:600;font-size:22px;letter-spacing:-.05em}
 .logo i{font-family:var(--en);font-style:italic;font-size:20px;letter-spacing:0;opacity:.75}
 
 /* 단추 = 방봄의 알약 모양 */
@@ -72,10 +71,9 @@ h1{font-size:32px;font-weight:600;letter-spacing:-.04em;line-height:1.25}
 
 /* 틀 */
 main{padding-bottom:64px}
-#view{transition:opacity .2s}
-#view.is-stale{opacity:.55}
 .stack>*+*{margin-top:16px}
 .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.grid--top{align-items:start}
 .c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c12{grid-column:span 12}
 .panel{min-width:0;padding:24px 28px;background:var(--card);border:1px solid var(--line);border-radius:16px}
 h2{font-size:18px;font-weight:600;letter-spacing:-.03em;line-height:1.4}
@@ -112,17 +110,18 @@ h2{font-size:18px;font-weight:600;letter-spacing:-.03em;line-height:1.4}
 .parts__share{grid-column:1/-1;margin-top:4px;font-size:30px;font-weight:600;letter-spacing:-.04em;line-height:1.25}
 .parts__count{grid-column:1/-1;font-size:13px;color:var(--sub)}
 
-/* 미충족 이유: 이름·건수·비율 한 줄 + 아래 막대 */
+/* 미충족 사유: 이름·건수 한 줄 + 아래 막대와 비율 */
 .reasons{margin-top:12px}
 .reasons li{padding:14px 0;border-top:1px solid var(--line)}
 .reasons li:first-child{border-top:0;padding-top:4px}
 .reasons li:last-child{padding-bottom:0}
-.reasons__row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.reasons__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
 .reasons__name{min-width:0;font-size:15px;font-weight:600;line-height:1.45}
-.rank{display:inline-block;min-width:1.5em;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
-.reasons__fig{flex:none;font-size:14px;color:var(--sub);white-space:nowrap;font-variant-numeric:tabular-nums}
-.reasons__fig b{margin-right:8px;font-weight:600;color:var(--ink)}
-.meter{height:8px;margin-top:10px;border-radius:4px;background:var(--gray)}
+.rank{display:inline-block;min-width:1.25em;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
+.reasons__count{flex:none;font-size:15px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.reasons__bar{display:flex;align-items:center;gap:12px;margin-top:8px}
+.reasons__share{flex:none;min-width:3.4em;font-size:14px;color:var(--sub);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.meter{flex:1;height:8px;border-radius:4px;background:var(--gray)}
 .meter span{display:block;height:100%;min-width:4px;border-radius:4px;background:var(--off)}
 
 /* 표 */
@@ -139,13 +138,15 @@ thead tr+tr th:first-child{padding-left:12px}
 tbody th{font-weight:600}
 tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
 .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* 문장이 들어가는 칸은 좁아져도 읽을 수 있는 폭을 지켜요 (모자라면 표 안에서 옆으로 밀어요) */
+thead th.wide{min-width:15em}
 td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:400;color:var(--sub)}
 
 /* 내려받기 줄 */
 .csv{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;padding-top:8px;font-size:14px;color:var(--sub)}
 
 /* 처음 불러오는 동안의 뼈대 */
-.sk i{display:block;height:14px;border-radius:7px;background:var(--gray)}
+.sk i{display:block;height:14px;border-radius:7px;background:var(--line)}
 .sk i+i{margin-top:14px}
 .sk .sk-b{height:36px;width:45%;border-radius:10px}
 .sk .sk-bar{height:8px;border-radius:999px;margin-top:22px}
@@ -305,13 +306,14 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
       h('thead', null, headRows.map((r) => h('tr', null, r))),
       h('tbody', null, rows.map((r) => h('tr', null, r.map((c, i) => {
         const o = c !== null && typeof c === 'object' ? c : { v: c }
-        const kids = [o.pre || null, o.v, o.s ? h('small', { text: o.s }) : null]
+        // 순위와 이름 사이에 진짜 빈칸을 둬요 (화면 낭독기가 "1상인…" 처럼 붙여 읽지 않게)
+        const kids = [o.pre || null, o.pre ? ' ' : null, o.v, o.s ? h('small', { text: o.s }) : null]
         return i === 0 ? h('th', { scope: 'row' }, kids) : h('td', { class: nums[i] ? 'n' : null }, kids)
       }))))))
 
   const kpiValue = (k) => {
     if (!has(k.value)) return DASH
-    if (typeof k.value !== 'number') return named(k.value, '그 밖의 이유')
+    if (typeof k.value !== 'number') return named(k.value, '그 밖의 사유')
     return k.unit === '원' ? won(k.value) : num(k.value) + (k.unit || '')
   }
   const kpiSection = (kpis) => h('section', { 'aria-labelledby': 'h-kpi' },
@@ -340,13 +342,16 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
       fine(note))
   }
 
-  const reasonSection = (cls, items, note, sub) => section(cls, '미충족 이유',
+  // 한 줄: 순위·사유·건수, 그 아래 막대와 비율 (건수가 없는 샘플에서도 "—" 와 비율이 헷갈리지 않게 따로 둬요)
+  const reasonSection = (cls, items, note, sub) => section(cls, '미충족 사유',
     sub ? h('p', { class: 'sub', text: sub }) : null,
     items && items.length ? h('ol', { class: 'reasons' }, items.map((f, i) => h('li', null,
       h('div', { class: 'reasons__row' },
-        h('span', { class: 'reasons__name' }, h('span', { class: 'rank', text: String(has(f.rank) ? f.rank : i + 1) }), named(f.label, '그 밖의 이유')),
-        h('span', { class: 'reasons__fig' }, h('b', { text: count(f.count, '건') }), pct(f.share))),
-      h('div', { class: 'meter', 'aria-hidden': 'true' }, Number(f.share) > 0 ? h('span', { style: 'width:' + Math.min(100, Number(f.share)) + '%' }) : null)))) : empty(),
+        h('span', { class: 'reasons__name' }, h('span', { class: 'rank', text: String(has(f.rank) ? f.rank : i + 1) }), ' ', named(f.label, '그 밖의 사유')),
+        h('b', { class: 'reasons__count', text: count(f.count, '건') })),
+      h('div', { class: 'reasons__bar' },
+        h('span', { class: 'meter', 'aria-hidden': 'true' }, Number(f.share) > 0 ? h('span', { style: 'width:' + Math.min(100, Number(f.share)) + '%' }) : null),
+        h('span', { class: 'reasons__share', text: pct(f.share) }))))) : empty(),
     fine(note))
 
   const districtSection = (m, reasonLabel) => {
@@ -355,7 +360,7 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
     const types = m.supply_types || []
     const labels = m.supply_type_labels || {}
     const head = [th('구'), th('판정', { cls: 'n' }), ...PARTS.map(([, name]) => th(name, { cls: 'n' })), th('평균 월 부담', { cls: 'n' }), th('집 보기', { cls: 'n' }),
-      ...types.map((st) => th(named(labels[st], '그 밖의 유형') + ' 판정', { cls: 'n' })), th('가장 많은 미충족 이유')]
+      ...types.map((st) => th(named(labels[st], '그 밖의 유형') + ' 판정', { cls: 'n' })), th('가장 많은 미충족 사유', { cls: 'wide' })]
     const body = rows.map((r) => [
       r.district,
       count(r.total_sessions),
@@ -363,7 +368,7 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
       won(r.avg_monthly_cost),
       { v: count(r.s4_conversion_cnt), s: has(r.s4_conversion_rate) ? '전환율 ' + pct(r.s4_conversion_rate) : null },
       ...types.map((st) => ({ v: count((r.sessions_by_supply_type || {})[st]), s: r.complex_count_by_supply_type ? '등록 단지 ' + count(r.complex_count_by_supply_type[st], '곳') : null })),
-      r.top_fail_reason ? reasonLabel[r.top_fail_reason] || '그 밖의 이유' : DASH,
+      r.top_fail_reason ? reasonLabel[r.top_fail_reason] || '그 밖의 사유' : DASH,
     ])
     const nums = [false, true, true, true, true, true, true, ...types.map(() => true), false]
     return section('c12', '구별 판정',
@@ -415,14 +420,14 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
     const ratio = kpis.find((k) => k.key === 'on_ratio')
     const fails = d.fail_reasons || {}
     const reasonLabel = {}
-    for (const f of fails.items || []) reasonLabel[f.code] = named(f.label, '그 밖의 이유')
+    for (const f of fails.items || []) reasonLabel[f.code] = named(f.label, '그 밖의 사유')
     const matrix = d.district_matrix || {}
     return [
       // 세 판정 비율은 아래 "판정 분포" 한 곳에서만 보여요 (같은 숫자를 두 번 늘어놓지 않아요)
       kpiSection(kpis.filter((k) => !/^(on|dim|off)_ratio$/.test(k.key))),
       h('div', { class: 'grid' }, distSection(d.totals || {}, ratio && ratio.note), reasonSection('c5', fails.items, fails.note)),
       districtSection(matrix, reasonLabel),
-      h('div', { class: 'grid' }, supportSection(d.support_status, live), complexSection(d.complex_ranking, matrix.supply_type_labels)),
+      h('div', { class: 'grid grid--top' }, supportSection(d.support_status, live), complexSection(d.complex_ranking, matrix.supply_type_labels)),
       h('p', { class: 'csv' },
         h('a', { class: 'btn btn--ghost', href: API + '/dashboard/export.csv', download: true }, art(DOWNLOAD), 'CSV 내려받기'),
         h('span', { text: '날짜와 구별로 센 횟수를 표 파일(CSV)로 받아요.' })),
@@ -457,15 +462,16 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
     for (const id of ['refresh', 'retry']) { $(id).setAttribute('aria-disabled', String(on)); $(id).classList.toggle('is-busy', on) }
     $('refreshTxt').textContent = on ? '불러오는 중' : '새로 고침'
     $('retry').textContent = on ? '불러오는 중' : '다시 불러오기'
+    // 다시 불러오는 동안에도 앞의 숫자는 그대로 읽을 수 있게 둬요 (흐리게 하면 글자 대비가 모자라요). 단추 글자로만 알려요
     $('view').setAttribute('aria-busy', String(on))
-    // 다시 불러오는 동안에는 앞의 숫자를 흐리게만 해요 (화면이 덜컹거리지 않게)
-    $('view').classList.toggle('is-stale', on && hasData)
   }
 
   let turn = 0
+  let asked = '' // 마지막으로 달라고 한 자료 종류 (pc 또는 mobile)
   const load = async () => {
     const mine = ++turn
     const device = phone.matches ? 'mobile' : 'pc'
+    asked = device
     setBusy(true)
     const ctl = new AbortController()
     const timer = setTimeout(() => ctl.abort(), LIMIT_MS)
@@ -482,7 +488,7 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
       $('loaded').hidden = false
       if (document.activeElement === $('retry')) $('refresh').focus()
       $('alert').hidden = true
-      $('status').textContent = '이용 현황을 불러왔어요.'
+      $('status').textContent = '이용 현황을 불러왔어요. 불러온 시각 ' + $('loadedAt').textContent
     } catch {
       if (mine !== turn) return
       // 처음부터 실패하면 뼈대를 치우고 안내만 남겨요. 앞서 불러온 숫자가 있으면 그대로 둬요
@@ -498,8 +504,8 @@ td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:
 
   $('refresh').addEventListener('click', () => { if (!busy) load() })
   $('retry').addEventListener('click', () => { if (!busy) load() })
-  // 화면 폭이 휴대폰 ↔ PC 로 바뀌면 그 크기에 맞는 자료를 다시 받아요
-  phone.addEventListener('change', load)
+  // 화면 폭이 휴대폰 ↔ PC 로 바뀌면 그 크기에 맞는 자료를 다시 받아요 (종류가 그대로면 다시 받지 않아요)
+  phone.addEventListener('change', () => { if ((phone.matches ? 'mobile' : 'pc') !== asked) load() })
   load()
 })()
 </script>

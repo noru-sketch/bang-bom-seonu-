@@ -6,7 +6,22 @@
       "maxDuration": 60
     }
   },
+  "rewrites": [
+    {
+      "source": "/backend/:path*",
+      "destination": "https://bangbom-api.vercel.app/api/:path*"
+    }
+  ],
   "headers": [
+    {
+      "source": "/backend/:path*",
+      "headers": [
+        {
+          "key": "x-vercel-enable-rewrite-caching",
+          "value": "0"
+        }
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [

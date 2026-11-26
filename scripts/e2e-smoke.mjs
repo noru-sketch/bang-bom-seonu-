@@ -10,6 +10,7 @@
 //   E2E_PROFILE      브라우저 프로필 폴더. 안 쓰면 임시 폴더를 만들고 끝나면 지운다
 //   E2E_BROWSER      브라우저 실행 파일 경로 (기본: 설치된 Edge 또는 Chrome)
 //   E2E_ONLY         pc 또는 phone 만 돌리기
+//   E2E_IDS          이 번호로 시작하는 점검만 돌리기. 쉼표로 여러 개 (예: 1-,12-3). 앞 점검에 기대는 점검은 같이 골라야 한다
 //   E2E_3D_SWITCHES  2D↔3D 를 되풀이해 바꾸는 횟수 (기본 10)
 //   E2E_NO_AI        1 이면 AI를 부르는 주소(/api/advice 등)를 막고 규칙 기반 기본 답으로 점검한다 (AI 호출 횟수를 아낄 때)
 //
@@ -27,6 +28,7 @@ const BASE_URL = (process.argv[2] || 'http://localhost:4180').replace(/\/+$/, ''
 const SHOTS_DIR = process.env.E2E_SHOTS || ''
 const PROFILE_DIR = process.env.E2E_PROFILE || ''
 const ONLY = (process.env.E2E_ONLY || '').toLowerCase()
+const IDS = (process.env.E2E_IDS || '').split(',').map((part) => part.trim()).filter(Boolean)
 const SWITCHES = Math.max(1, Number(process.env.E2E_3D_SWITCHES) || 10)
 const NO_AI = process.env.E2E_NO_AI === '1'
 const TOTAL_LIMIT_MS = 12 * 60 * 1000
@@ -567,8 +569,18 @@ async function runAll(cdp) {
     })
     await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: vp.touch, maxTouchPoints: vp.touch ? 5 : 1 })
 
+    /** 지금 화면 크기. 몇몇 점검은 다른 크기(360×740, 태블릿, 키보드가 올라온 높이)로 잠깐 바꿨다가 되돌린다 */
+    const view = { width: vp.width, height: vp.height }
+    /** @param {number} width @param {number} height */
+    async function resize(width, height) {
+      view.width = width
+      view.height = height
+      await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: vp.scale, mobile: vp.mobile, screenWidth: width, screenHeight: height })
+    }
+
     /** @param {string} id @param {string} title @param {() => Promise<string | void>} run */
     async function check(id, title, run) {
+      if (IDS.length > 0 && !IDS.some((prefix) => id.startsWith(prefix))) return
       const name = `[${vp.label}] ${id} ${title}`
       if (cdp.closed) throw new Error(`브라우저가 도중에 꺼졌어요 (${name} 앞에서)`)
       currentCheck = name
@@ -627,8 +639,8 @@ async function runAll(cdp) {
     /** 실제 포인터로 끌기 @param {{x: number, y: number}} from @param {{x: number, y: number}} to */
     async function dragPx(from, to, steps = 10) {
       const end = {
-        x: Math.min(vp.width - 2, Math.max(2, to.x)),
-        y: Math.min(vp.height - 2, Math.max(2, to.y)),
+        x: Math.min(view.width - 2, Math.max(2, to.x)),
+        y: Math.min(view.height - 2, Math.max(2, to.y)),
       }
       const at = (/** @type {number} */ i) => ({
         x: from.x + ((end.x - from.x) * i) / steps,
@@ -751,25 +763,38 @@ async function runAll(cdp) {
       await waitFor(`typeof __e2e === 'object' && document.querySelector('#root') && document.querySelector('#root').children.length > 0`, '새로고침 뒤 화면이 그려지기', 20000)
     }
 
+    /**
+     * 방꾸미 주소. 첫 방문 도움말을 보는 점검(coach)이 아니면 tips=0을 붙여서, 어떤 점검에도 도움말이 끼어들지 않게 한다
+     * @param {{ coach?: boolean }} options @param {string} [extra]
+     */
+    const roomUrl = (options, extra = '') => `${BASE_URL}/room.html?${[extra, options.coach ? '' : 'tips=0'].filter(Boolean).join('&')}`.replace(/\?$/, '')
+
+    /** 이 기기에 처음 온 것처럼, 저장된 방과 "도움말을 닫았다"는 기억을 지운다 @param {boolean} [waitForSave] */
+    async function clearSaved(waitForSave = true) {
+      const origin = await ev('location.origin').catch(() => '')
+      if (origin !== new URL(BASE_URL).origin) await open(`${BASE_URL}/room.html?tips=0`)
+      // 앞 점검이 예약해 둔 자동 저장(배치안 0.25초 + 저장 0.4초)이 끝나게 한다. 안 그러면 화면을 떠날 때 다시 저장된다
+      if (waitForSave) await sleep(800)
+      await ev(`(() => { localStorage.removeItem(${J(PROJECT_KEY)}); localStorage.removeItem(${J(COACH_KEY)}) })()`)
+    }
+
     /** 저장된 것을 지우고 시작 화면을 연다 @param {{ coach?: boolean }} [options] */
     async function gotoStart(options = {}) {
-      const origin = await ev('location.origin').catch(() => '')
-      if (origin !== new URL(BASE_URL).origin) await open(`${BASE_URL}/room.html`)
-      await sleep(800) // 앞 점검이 예약해 둔 자동 저장(배치안 0.25초 + 저장 0.4초)이 끝나게 한다
-      await ev(
-        `(() => { localStorage.removeItem(${J(PROJECT_KEY)}); ${
-          options.coach ? `localStorage.removeItem(${J(COACH_KEY)})` : `localStorage.setItem(${J(COACH_KEY)}, 'true')`
-        } })()`,
-      )
-      await open(`${BASE_URL}/room.html`)
+      await clearSaved()
+      await open(roomUrl(options))
       await waitFor(`__e2e.byText('h2', '방 크기 설정')`, '시작 화면')
     }
 
-    /** @param {{ coach?: boolean }} [options] */
+    /**
+     * 예시 방으로 시작한다. 시작 화면의 예시 단추는 없앴고, 주소 옵션 ?example=1(숨은 연결)로 연다
+     * @param {{ coach?: boolean }} [options]
+     */
     async function startExample(options = {}) {
-      await gotoStart(options)
-      await clickEl(button('예시 방 바로 보기'), '예시 방 바로 보기')
+      await clearSaved(false) // 예시로 시작하면 앞에 저장된 방은 어차피 덮인다
+      await open(roomUrl(options, 'example=1'))
       await waitFor('__e2e.svg() && __e2e.pieces().length > 0', '예시 방 평면도')
+      // example=1이 주소에 남으면 새로고침할 때마다 예시 방이 새로 시작된다. 보통 방문처럼 그 옵션만 뗀다
+      await ev(`history.replaceState(null, '', ${J(roomUrl(options))})`)
       await sleep(200)
     }
 
@@ -904,17 +929,41 @@ async function runAll(cdp) {
       must(covered.length === 0, `가려진 가구: ${covered.join(' / ')}`)
     })
 
+    await check('0-3', '주소에 tips=0이 있으면 처음 온 기기에서도 첫 방문 도움말이 뜨지 않아요', async () => {
+      await startExample()
+      const coach = `__e2e.all('aside[aria-label="처음 쓰는 분을 위한 도움말"]')[0]`
+      const ready = await ev(`({ remembered: localStorage.getItem(${J(COACH_KEY)}), tips: new URLSearchParams(location.search).get('tips') })`)
+      must(ready.remembered === null && ready.tips === '0', `점검 준비가 잘못됐어요 (닫은 기억 ${ready.remembered}, 주소의 tips ${ready.tips})`)
+      await sleep(400)
+      must(!(await ev(`!!${coach}`)), 'tips=0인데 첫 방문 도움말이 떠 있어요')
+      await sleep(600)
+      await reload()
+      await waitFor('__e2e.svg() && __e2e.pieces().length > 0', '새로고침 뒤 평면도')
+      must(!(await ev(`!!${coach}`)), 'tips=0으로 새로고침하니 첫 방문 도움말이 나왔어요')
+      must((await ev(`localStorage.getItem(${J(COACH_KEY)})`)) === null, 'tips=0으로 열었을 뿐인데 도움말을 닫았다고 기억했어요')
+    })
+
     // ════════ 1. 시작 화면 ════════
-    await check('1-1', '시작 화면에 [방 크기 설정]과 [1초 예시 체험]이 같이 보여요', async () => {
+    await check('1-1', '시작 화면에는 방 크기를 넣고 시작하는 길 하나와 [방봄에서 집 고르기] 링크만 있어요', async () => {
       await gotoStart()
       const seen = await ev(`({
-        size: !!__e2e.byText('h2', '방 크기 설정'), example: !!__e2e.byText('h2', '1초 예시 체험'),
-        start: !!__e2e.byText('button', '이 크기로 시작'), open: !!__e2e.byText('button', '예시 방 바로 보기'),
-        bottom: Math.max(...__e2e.all('button').map((b) => b.getBoundingClientRect().bottom)), height: innerHeight,
+        size: !!__e2e.byText('h2', '방 크기 설정'), width: !!__e2e.field('가로 (cm)'), depth: !!__e2e.field('세로 (cm)'),
+        start: !!__e2e.byText('button', '이 크기로 시작'), example: /예시/.test(document.body.innerText),
+        forms: __e2e.all('form').length, buttons: __e2e.all('button').map(__e2e.text),
+        home: (() => { const a = __e2e.byText('a', '방봄에서 집 고르기'); if (!a) return null; const r = a.getBoundingClientRect(); return { href: a.href, raw: a.getAttribute('href'), height: r.height } })(),
+        links: __e2e.all('a[href]').length,
+        bottom: Math.max(...__e2e.all('button, a[href]').map((b) => b.getBoundingClientRect().bottom)), height: innerHeight,
+        scrollWidth: document.documentElement.scrollWidth, innerWidth, clipped: __e2e.clipped(),
       })`)
-      must(seen.size && seen.start, '[방 크기 설정]과 시작 버튼이 보이지 않아요')
-      must(seen.example && seen.open, '[1초 예시 체험]과 버튼이 보이지 않아요')
-      must(seen.bottom <= seen.height, `버튼이 첫 화면 아래로 밀려 있어요 (버튼 아래 ${Math.round(seen.bottom)}px, 화면 ${seen.height}px)`)
+      must(seen.size && seen.width && seen.depth && seen.start, '[방 크기 설정]의 가로·세로 칸과 시작 버튼이 보이지 않아요')
+      must(!seen.example, '시작 화면에 예시 체험이 남아 있어요')
+      must(seen.forms === 1 && seen.buttons.length === 1, `시작하는 길이 하나가 아니에요 (입력 틀 ${seen.forms}개, 버튼: ${seen.buttons.join(', ')})`)
+      must(seen.home, '[방봄에서 집 고르기] 링크가 보이지 않아요')
+      must(seen.home.raw === './' && seen.home.href === `${new URL(BASE_URL).origin}/`, `[방봄에서 집 고르기]가 방봄 첫 화면으로 가지 않아요 (${seen.home.raw} → ${seen.home.href})`)
+      must(seen.links === 1, `링크가 ${seen.links}개예요 (방봄으로 가는 것 하나만 있어야 해요)`)
+      must(seen.home.height >= (vp.touch ? 43.5 : 35.5), `[방봄에서 집 고르기]의 누르는 자리가 ${Math.round(seen.home.height)}px로 낮아요`)
+      must(seen.bottom <= seen.height, `버튼이나 링크가 첫 화면 아래로 밀려 있어요 (아래 끝 ${Math.round(seen.bottom)}px, 화면 ${seen.height}px)`)
+      must(seen.scrollWidth <= seen.innerWidth && seen.clipped.length === 0, `시작 화면이 가로로 넘쳐요: ${seen.clipped[0] || seen.scrollWidth + 'px'}`)
       await shot('start')
     })
 
@@ -932,7 +981,7 @@ async function runAll(cdp) {
       await shot('empty-room')
     })
 
-    await check('1-3', '새로 열어서 [예시 방 바로 보기]를 누르면 가구 5개인 예시가 열려요', async () => {
+    await check('1-3', '주소 옵션 ?example=1(숨은 연결)로 열면 가구 5개인 예시가 열려요', async () => {
       await startExample()
       const room = await savedRoom()
       must(room, '자동 저장된 프로젝트가 없어요')
@@ -1335,6 +1384,21 @@ async function runAll(cdp) {
       if (health.aiConfigured === true) return `${seconds}초, AI 연결됨${answer.notice ? `, 안내: ${answer.notice}` : ''}`
       must(answer.notice === FALLBACK_NOTICE, `기본 답 안내 문구가 "${answer.notice}"이에요`)
       return `${seconds}초, 기본 답, 요약 ${answer.summary.length}자`
+    })
+
+    await check('6-5', '다른 메뉴에 다녀와도 받아 둔 AI 해설이 그대로 남아 있어요 (다시 받으면 AI를 한 번 더 불러요)', async () => {
+      const read = () => ev(`(() => { const again = __e2e.byText('button', 'AI 해설 다시 듣기'); const card = again ? again.parentElement.querySelector('.card') : null; return card ? __e2e.text(card) : '' })()`)
+      const before = await read()
+      must(before.length >= 10, '앞 단계(AI 해설 듣기)가 되지 않아 확인하지 못했어요')
+      // 휴대폰에서는 다른 메뉴로 가면 피드백 패널이 화면에서 사라졌다가 새로 그려진다
+      await goCategory('가구')
+      if (vp.touch) {
+        await clickEl(feedbackNav, '탭 바의 [피드백]')
+        await openSheetTab('AI 해설')
+      }
+      const after = await read()
+      must(after !== '', '다녀오니 받아 둔 AI 해설이 사라지고 [AI 해설 듣기]만 남았어요')
+      must(after === before, `다녀오니 해설 글이 달라졌어요: "${after.slice(0, 60)}"`)
     })
 
     // ════════ 7. 비용 탭 ════════
@@ -1817,8 +1881,6 @@ async function runAll(cdp) {
       // ════════ 11. 방봄 "집 보기" 안에 끼워진 휴대폰 화면 (390 × 700) ════════
       const EMBED_KEY = 'bangkkumi2.project.e2e-embed'
       const EMBED_URL = `${BASE_URL}/room.html?embed=1&slot=e2e-embed&w=400&d=500&kind=living&name=${encodeURIComponent('거실')}&op=door:left:183:90,window:bottom:76:248`
-      /** @param {number} width @param {number} height */
-      const resize = (width, height) => cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: vp.scale, mobile: vp.mobile, screenWidth: width, screenHeight: height })
 
       await check('11-1', '끼워진 화면(390×700)에는 머리줄과 첫 방문 도움말이 없고, 가로로 밀리지 않아요', async () => {
         await gotoStart({ coach: true })
@@ -1881,8 +1943,225 @@ async function runAll(cdp) {
         return `(${before.x}, ${before.y}) → (${moved.x}, ${moved.y}) → 실행취소`
       })
 
+      await check('11-3', '끼워진 화면에서 이미 고른 가구를 가장자리 가까이에서 끌어도 크기는 그대로이고 자리만 바뀌어요', async () => {
+        must(await ev(`location.search.includes('embed=1') && !!__e2e.svg()`), '앞 단계(끼워진 화면 열기)가 되지 않아 확인하지 못했어요')
+        await press('Escape')
+        // 화면에서 가장 좁은 가구(거실에서는 TV장). 좁을수록 크기 손잡이의 누르는 자리가 가구를 많이 덮는다
+        const narrow = await ev(`__e2e.pieces().slice().sort((a, b) => Math.min(a.w, a.h) - Math.min(b.w, b.h))[0]`)
+        const { before, after, dx, dy } = await dragSelectedNearEdge(narrow.id)
+        must(after.w === before.w && after.h === before.h, `${before.label}: 끌었더니 크기가 ${before.w} × ${before.h} → ${after.w} × ${after.h}cm로 바뀌었어요 (옮겨져야 해요)`)
+        must(Math.abs(after.x - before.x - dx) <= 8 && Math.abs(after.y - before.y - dy) <= 8, `${before.label}: 끈 만큼 옮겨지지 않았어요 (${before.x}, ${before.y}) → (${after.x}, ${after.y}), 기대: 약 ${Math.round(dx)}, ${Math.round(dy)}`)
+        await press('Escape')
+        return `${before.label}: (${before.x}, ${before.y}) → (${after.x}, ${after.y})`
+      })
+
+      await check('11-4', '끼워진 화면에서 가구를 골라도 도구 막대가 방과 치수 글자를 가리지 않아요', async () => {
+        must(await ev(`location.search.includes('embed=1') && !!__e2e.svg()`), '앞 단계(끼워진 화면 열기)가 되지 않아 확인하지 못했어요')
+        const bad = await toolbarCovers(400, 500)
+        await shot('embed-toolbar')
+        must(bad.length === 0, bad.join(' / '))
+      })
+
+      await check('11-5', '끼워진 화면(360×637)에서 키보드가 올라와 화면이 300px 낮아져도 누른 입력 칸이 시트 안에 다 보여요', async () => {
+        await resize(360, 637)
+        await ev(`localStorage.removeItem(${J(EMBED_KEY)})`)
+        await open(EMBED_URL)
+        await waitFor('__e2e.svg() && __e2e.pieces().length > 0', '끼워진 화면의 평면도')
+        await goCategory('방')
+        await clickEl(`__e2e.field('가로 (cm)')`, '가로 칸')
+        must(await ev(`document.activeElement === __e2e.field('가로 (cm)')`), '가로 칸을 눌러도 커서가 들어가지 않아요')
+        // 화면 키보드가 페이지 높이를 줄이는 브라우저(안드로이드의 앱 안 브라우저 등)를 흉내 낸다
+        await resize(360, 337)
+        await sleep(450)
+        const seen = await ev(`(() => {
+          const field = document.activeElement
+          // 브라우저는 키보드가 뜨면 입력 중인 칸을 보이는 곳으로 옮긴다
+          field.scrollIntoView({ block: 'nearest' })
+          const box = ${scroller}.getBoundingClientRect(), r = field.getBoundingClientRect(), nav = __e2e.all('nav')[0].getBoundingClientRect()
+          const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+          return { top: box.top, bottom: Math.min(box.bottom, nav.top), fieldTop: r.top, fieldBottom: r.bottom, hit: top === field, plan: __e2e.svg() ? __e2e.svg().getBoundingClientRect().height : 0 }
+        })()`)
+        await shot('embed-keyboard')
+        must(seen.fieldTop >= seen.top - 1 && seen.fieldBottom <= seen.bottom + 1 && seen.hit, `입력 칸(${Math.round(seen.fieldTop)}~${Math.round(seen.fieldBottom)}px)이 시트의 보이는 곳(${Math.round(seen.top)}~${Math.round(seen.bottom)}px)에 다 들어오지 않아요`)
+        must(seen.plan >= 40, `평면도가 ${Math.round(seen.plan)}px밖에 남지 않았어요`)
+        await press('Escape')
+        return `시트의 보이는 곳 ${Math.round(seen.bottom - seen.top)}px, 평면도 ${Math.round(seen.plan)}px`
+      })
+
       await resize(vp.width, vp.height)
       await ev(`localStorage.removeItem(${J(EMBED_KEY)})`).catch(() => {})
+
+      // ════════ 12. 휴대폰 검수에서 고친 것 ════════
+      await check('12-1', '이미 고른 작은 가구를 가장자리 가까이에서 끌어도 크기는 그대로이고 자리만 바뀌어요', async () => {
+        await startExample()
+        const { before, after, dx, dy } = await dragSelectedNearEdge(CHAIR)
+        must(after.w === before.w && after.h === before.h, `끌었더니 크기가 ${before.w} × ${before.h} → ${after.w} × ${after.h}cm로 바뀌었어요 (옮겨져야 해요)`)
+        must(Math.abs(after.x - before.x - dx) <= 8 && Math.abs(after.y - before.y - dy) <= 8, `끈 만큼 옮겨지지 않았어요 (${before.x}, ${before.y}) → (${after.x}, ${after.y}), 기대: 약 +${Math.round(dx)}, +${Math.round(dy)}`)
+        const saved = itemOf(await savedRoom(), CHAIR)
+        must(saved.widthCm === 50 && saved.depthCm === 50, `저장된 크기가 ${saved.widthCm} × ${saved.depthCm}cm예요`)
+        // 크기 손잡이는 가구 바깥쪽에서 계속 잡힌다 (3-5가 손잡이 한가운데를 끌어 본다)
+        return `(${before.x}, ${before.y}) → (${after.x}, ${after.y}), 크기 ${after.w} × ${after.h}`
+      })
+
+      for (const [width, height] of [[390, 844], [360, 740]]) {
+        const at = `${width}×${height}`
+
+        await check(`12-2-${width}`, `[${at}] 가구 추가에서 아래쪽 종류를 눌러 펼치면 그 목록의 [추가] 단추가 시트 안에 보여요`, async () => {
+          await resize(width, height)
+          await startExample()
+          await goCategory('가구')
+          await openSheetTab('가구 추가')
+          await ev(`(() => { const el = ${scroller}; el.scrollTop = el.scrollHeight })()`)
+          await sleep(200)
+          await clickEl(`__e2e.fold('소파')`, '소파 묶음')
+          await sleep(450)
+          const seen = await ev(`(() => {
+            const add = document.querySelector('[aria-label="2인 소파 추가"]'), head = __e2e.fold('소파')
+            if (!add || !head) return null
+            const box = ${scroller}.getBoundingClientRect(), a = add.getBoundingClientRect(), h = head.getBoundingClientRect()
+            const top = document.elementFromPoint(a.left + a.width / 2, a.top + a.height / 2)
+            return { top: box.top, bottom: box.bottom, addTop: a.top, addBottom: a.bottom, headTop: h.top, hit: !!top && add.contains(top) }
+          })()`)
+          await shot(`catalog-open-${width}`)
+          must(seen, '소파를 눌러도 목록이 펼쳐지지 않아요')
+          must(seen.addTop >= seen.top - 1 && seen.addBottom <= seen.bottom + 1 && seen.hit, `[2인 소파 추가] 단추(${Math.round(seen.addTop)}~${Math.round(seen.addBottom)}px)가 시트의 보이는 곳(${Math.round(seen.top)}~${Math.round(seen.bottom)}px) 밖에 있어요`)
+          must(seen.headTop >= seen.top - 1, '펼친 종류의 제목이 위로 밀려 보이지 않아요')
+        })
+
+        await check(`12-3-${width}`, `[${at}] 목록을 내려 둔 채 [추가]를 눌러도 결과 알림이 시트 안에 보여요`, async () => {
+          await resize(width, height)
+          await startExample()
+          await goCategory('가구')
+          await openSheetTab('가구 추가')
+          await ev(`(() => { ${scroller}.scrollTop = 100 })()`)
+          await sleep(200)
+          await clickEl(`__e2e.byLabel('퀸 침대 추가')`, '퀸 침대 추가')
+          await sleep(500)
+          const seen = await ev(`(() => {
+            const note = __e2e.all('[role="status"]').find((el) => /추가했어요|놓았어요/.test(__e2e.text(el)))
+            if (!note) return null
+            const box = ${scroller}.getBoundingClientRect(), r = note.getBoundingClientRect()
+            const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+            const add = document.querySelector('[aria-label="퀸 침대 추가"]').getBoundingClientRect()
+            return { text: __e2e.text(note), top: box.top, bottom: box.bottom, noteTop: r.top, noteBottom: r.bottom, hit: !!top && note.contains(top), addMid: add.top + add.height / 2 }
+          })()`)
+          await shot(`catalog-notice-${width}`)
+          must(seen, '추가했는데 결과 알림이 없어요')
+          must(/가운데에 두었으니 직접 옮겨/.test(seen.text), `자리가 없을 때의 알림이 아니에요: "${seen.text}"`)
+          must(seen.noteTop >= seen.top - 1 && seen.noteBottom <= seen.bottom + 1 && seen.hit, `결과 알림(${Math.round(seen.noteTop)}~${Math.round(seen.noteBottom)}px)이 시트의 보이는 곳(${Math.round(seen.top)}~${Math.round(seen.bottom)}px) 밖에 있어요`)
+          return `알림 ${Math.round(seen.noteTop)}~${Math.round(seen.noteBottom)}px, 보이는 곳 ${Math.round(seen.top)}~${Math.round(seen.bottom)}px`
+        })
+
+        await check(`12-4-${width}`, `[${at}] 가구를 골라도 도구 막대가 방과 치수 글자를 가리지 않고, 단추가 44px 이상이에요`, async () => {
+          await resize(width, height)
+          await startExample()
+          const bad = await toolbarCovers(300, 400)
+          await selectPiece(DESK)
+          await shot(`toolbar-${width}`)
+          await press('Escape')
+          must(bad.length === 0, bad.join(' / '))
+        })
+      }
+      await resize(vp.width, vp.height)
+
+      await check('12-5', '피드백 탭의 숫자 표시는 두 자리여도 한 줄로 온전히 보여요', async () => {
+        await startExample()
+        await goCategory('가구')
+        await openSheetTab('가구 추가')
+        for (let i = 0; i < 4; i++) await clickEl(`__e2e.byLabel('싱글 침대 추가')`, '싱글 침대 추가')
+        await settle()
+        const seen = await ev(`(() => {
+          const tab = ${feedbackNav}
+          const badge = tab.querySelector('span.relative > span')
+          if (!badge) return null
+          const range = document.createRange()
+          range.selectNodeContents(badge)
+          const b = badge.getBoundingClientRect(), t = range.getBoundingClientRect(), cell = tab.getBoundingClientRect()
+          return {
+            label: tab.getAttribute('aria-label'), text: __e2e.text(badge),
+            lines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size,
+            inBox: t.left >= b.left - 0.5 && t.right <= b.right + 0.5 && t.top >= b.top - 2 && t.bottom <= b.bottom + 2,
+            inCell: b.left >= cell.left - 0.5 && b.right <= cell.right + 0.5 && b.top >= cell.top - 0.5, width: b.width, height: b.height,
+          }
+        })()`)
+        await shot('badge')
+        must(seen, '피드백 탭에 숫자 표시가 없어요')
+        const count = Number((/문제 (\d+)개/.exec(seen.label) || [])[1])
+        must(count >= 10, `두 자리 숫자를 만들지 못했어요 (${seen.label})`)
+        must(seen.text === String(count), `숫자 표시가 "${seen.text}"예요 (문제 ${count}개)`)
+        must(seen.lines === 1, `숫자가 ${seen.lines}줄로 꺾였어요`)
+        must(seen.inBox, `숫자가 동그란 바탕(${Math.round(seen.width)} × ${Math.round(seen.height)}px) 밖으로 나가요`)
+        must(seen.inCell, '숫자 표시가 피드백 탭 칸 밖으로 나가요')
+        return `문제 ${count}개, 표시 ${Math.round(seen.width)} × ${Math.round(seen.height)}px`
+      })
+
+      await check('12-6', '태블릿 너비(768×1024)의 휴대폰 틀에서도 가구 이름표가 "…"로 잘리지 않아요', async () => {
+        await resize(768, 1024)
+        await startExample()
+        must(await ev(`!!${sheet}`), '768px인데 휴대폰 틀이 아니에요')
+        const labels = await ev(`[...__e2e.svg().querySelectorAll('[data-piece-id] text')].map(__e2e.text)`)
+        await shot('tablet')
+        const cut = labels.filter((/** @type {string} */ value) => value.includes('…'))
+        must(cut.length === 0, `잘린 이름표: ${cut.join(' / ')}`)
+        must(labels.length >= 5, `이름표가 ${labels.length}줄뿐이에요: ${labels.join(' / ')}`)
+        return labels.join(' / ')
+      })
+      await resize(vp.width, vp.height)
+
+      await check('12-7', '시트 모양이 방봄 카드 시트와 같아요 (위 모서리 20px, 옅은 선, 칩 옆 여백 14px)', async () => {
+        await startExample()
+        await goCategory('가구')
+        const seen = await ev(`(() => { const s = getComputedStyle(${sheet}); const chip = ${sheet}.querySelector('.seg-chip'); return { radius: s.borderTopLeftRadius, line: s.borderTopColor, pad: chip ? getComputedStyle(chip).paddingLeft : '' } })()`)
+        must(seen.radius === '20px', `시트 위 모서리가 ${seen.radius}예요 (방봄 카드 시트는 20px)`)
+        must(seen.line === 'rgb(227, 225, 219)', `시트 위 선 색이 ${seen.line}예요 (방봄 카드 시트는 #e3e1db)`)
+        must(seen.pad === '14px', `칩의 옆 여백이 ${seen.pad}예요 (방봄 카드 칩은 14px)`)
+      })
+
+      await check('12-8', '폭 280px 화면에서도 위 막대의 [실행취소] [다시실행] [더보기]가 화면 안에 있어요', async () => {
+        await resize(280, 653)
+        await startExample()
+        const seen = await ev(`({
+          tools: ['실행취소', '다시실행', '더보기'].map((label) => { const el = __e2e.byLabel(label); const r = el ? el.getBoundingClientRect() : null; return { label, left: r ? r.left : -1, right: r ? r.right : -1 } }),
+          view: __e2e.all('[aria-label="보기 방식"] button').length, innerWidth, scrollWidth: document.documentElement.scrollWidth,
+        })`)
+        await shot('narrow')
+        const out = seen.tools.filter((/** @type {any} */ tool) => tool.left < 0 || tool.right > seen.innerWidth + 0.5)
+        must(out.length === 0, `화면(${seen.innerWidth}px) 밖으로 나간 단추: ${out.map((/** @type {any} */ tool) => `${tool.label} ${Math.round(tool.left)}~${Math.round(tool.right)}px`).join(', ')}`)
+        must(seen.view === 2, '2D/3D 단추가 보이지 않아요')
+        must(seen.scrollWidth <= seen.innerWidth, `가로 ${seen.scrollWidth}px > 화면 ${seen.innerWidth}px`)
+      })
+
+      await check('12-9', '낮은 화면(720×450)에 처음 와도 시트에 패널 내용이 100px 넘게 보여요', async () => {
+        await resize(720, 450)
+        await startExample({ coach: true })
+        await goCategory('방')
+        const seen = await ev(`(() => { const box = ${scroller}.getBoundingClientRect(); const field = __e2e.field('가로 (cm)'); const r = field ? field.getBoundingClientRect() : null; return { room: box.height, field: !!r && r.top >= box.top - 1 && r.bottom <= box.bottom + 1, plan: __e2e.svg().getBoundingClientRect().height } })()`)
+        await shot('short')
+        must(seen.room >= 100, `시트에서 패널 내용이 보이는 높이가 ${Math.round(seen.room)}px뿐이에요`)
+        must(seen.field, '방 크기의 가로 칸이 처음 화면에 다 보이지 않아요')
+        must(seen.plan >= 100, `평면도가 ${Math.round(seen.plan)}px밖에 남지 않았어요`)
+        return `패널 내용 ${Math.round(seen.room)}px, 평면도 ${Math.round(seen.plan)}px`
+      })
+      await resize(vp.width, vp.height)
+    }
+
+    // ════════ 13. PC 틀은 그대로 ════════
+    if (!vp.touch) {
+      await check('13-1', 'PC 1024px 너비에서는 가구 이름표가 예전처럼 한 줄이에요 (두 줄로 나누는 규칙은 휴대폰 틀에서만 써요)', async () => {
+        await resize(1024, 768)
+        await startExample()
+        const seen = await ev(`({
+          desktop: __e2e.all('section[aria-label="조작 패널"]').length === 0 && __e2e.all('header').length === 1,
+          plan: Math.round(__e2e.svg().getBoundingClientRect().width),
+          pieces: [...document.querySelectorAll('[data-piece-id]')].map((g) => ({ name: g.getAttribute('aria-label'), lines: [...g.querySelectorAll('text')].map(__e2e.text) })),
+        })`)
+        await shot('pc-1024')
+        must(seen.desktop, '1024px인데 PC 틀이 아니에요')
+        const split = seen.pieces.filter((/** @type {any} */ piece) => piece.lines.length > 1)
+        must(split.length === 0, `두 줄로 나뉜 이름표: ${split.map((/** @type {any} */ piece) => piece.lines.join('/')).join(', ')} (평면도 너비 ${seen.plan}px)`)
+        return `평면도 너비 ${seen.plan}px, 이름표 ${seen.pieces.map((/** @type {any} */ piece) => piece.lines.join('/') || '없음').join(', ')}`
+      })
+      await resize(vp.width, vp.height)
     }
   }
 }

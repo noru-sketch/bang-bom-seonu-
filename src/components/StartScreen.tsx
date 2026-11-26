@@ -1,4 +1,4 @@
-// 시작 화면. 긴 설명 없이 두 가지 길만 보여 준다: 방 크기를 넣고 시작하거나, 예시 방을 바로 본다.
+// 시작 화면: 방 크기를 넣고 시작하는 길 하나와 방봄으로 돌아가는 링크. 예시 방은 주소 ?example=1 로만 연다(자동 검사·옛 링크용).
 import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
 import { actions } from '../state/store.ts'
@@ -67,7 +67,7 @@ export default function StartScreen() {
           </p>
         </header>
 
-        <div className="grid gap-4 lg:grid-cols-[3fr_2fr] lg:gap-5">
+        <div className="mx-auto grid max-w-md gap-3">
           <form className="card p-5 lg:p-6" onSubmit={start} noValidate>
             <h2 className="panel-title">방 크기 설정</h2>
             <p className="hint mt-1">벽 안쪽 길이를 cm로 넣어요. 나중에 언제든 바꿀 수 있어요.</p>
@@ -123,15 +123,7 @@ export default function StartScreen() {
             </button>
           </form>
 
-          <section className="card flex flex-col p-5 lg:p-6" aria-labelledby="start-example-title">
-            <h2 id="start-example-title" className="panel-title">
-              1초 예시 체험
-            </h2>
-            <p className="hint mt-1">가구가 놓인 예시 방을 바로 열어 봐요.</p>
-            <button type="button" className="btn btn-lg mt-4 w-full lg:mt-auto" onClick={() => actions.startWithExample()}>
-              예시 방 바로 보기
-            </button>
-          </section>
+          <a href="./" className="btn btn-lg w-full">방봄에서 집 고르기</a>
         </div>
       </div>
     </main>

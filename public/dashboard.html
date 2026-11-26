@@ -1,2 +1,513 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>이용 현황 · 방봄</title></head><body><p>준비 중이에요.</p></body></html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f3f2ee">
+<meta name="description" content="방봄을 몇 번 썼는지, 지도에 불빛이 몇 개 켜졌는지 같은 익명 횟수를 보여 주는 화면이에요.">
+<title>이용 현황 · 방봄</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+/* 글꼴은 같은 사이트의 fonts/ 에서만 받아요 (바깥 주소를 쓰지 않아요). 내려받는 양을 줄이려고 굵기는 둘만 써요 */
+@font-face{font-family:"PretendardLocal";font-weight:400;font-style:normal;font-display:swap;src:url("fonts/Pretendard-Regular.woff2") format("woff2")}
+@font-face{font-family:"PretendardLocal";font-weight:600;font-style:normal;font-display:swap;src:url("fonts/Pretendard-SemiBold.woff2") format("woff2")}
+
+/* 방봄 색 그대로. 보조 글자만 바탕 위에서 4.5:1 이 되게 조금 진하게 했어요 */
+:root{
+  color-scheme:light;
+  --bg:#f3f2ee; --card:#fcfbf9; --white:#ffffff; --gray:#efeeea;
+  --ink:#141714; --sub:#62655f; --line:#e3e1db;
+  --green:#1f6b4f; --green-soft:#e2efe7; --warn:#c2563a;
+  --amber:#e0a23a; --off:#8a8780;
+  --pad-x:max(4vw,18px);
+  --kr:"Pretendard","PretendardLocal",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --en:"Instrument Serif",Georgia,"Times New Roman",serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--kr);font-size:16px;line-height:1.65;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+h1,h2,p,ol,ul,dl,dt,dd{margin:0}
+ol,ul{padding:0;list-style:none}
+a{color:inherit}
+button{font:inherit;color:inherit;letter-spacing:inherit;border:0;background:none;padding:0;cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:6px}
+::selection{background:var(--green-soft);color:var(--ink)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1360px;margin:0 auto;padding:0 var(--pad-x)}
+
+/* 위 막대 */
+.top{border-bottom:1px solid var(--line)}
+.top__in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+.logo{display:inline-flex;align-items:baseline;gap:8px;padding:11px 0;line-height:1;white-space:nowrap;text-decoration:none}
+.logo b{font-weight:600;font-size:22px;letter-spacing:-.05em}
+.logo i{font-family:var(--en);font-style:italic;font-size:20px;letter-spacing:0;opacity:.75}
+
+/* 단추 = 방봄의 알약 모양 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:999px;background:var(--ink);color:#fff;font-weight:600;font-size:15px;letter-spacing:-.02em;text-decoration:none;white-space:nowrap;transition:background-color .15s}
+.btn:hover{background:#000}
+.btn:focus-visible{border-radius:999px}
+.btn--ghost{background:var(--white);color:var(--ink);border:1px solid var(--line)}
+.btn--ghost:hover{background:var(--gray)}
+.btn[aria-disabled="true"]{opacity:.65;cursor:default}
+.btn svg{flex:none}
+
+/* 제목 */
+.head{padding:40px 0 24px}
+.head__row{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+h1{font-size:32px;font-weight:600;letter-spacing:-.04em;line-height:1.25}
+.src{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.src--live{background:var(--green-soft);color:var(--green)}
+.src--live::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.src--sample{background:var(--white);color:var(--ink);border:1px solid var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:2px 20px;margin-top:10px;font-size:14px;color:var(--sub)}
+.note{margin-top:14px;font-size:15px;max-width:68ch}
+
+/* 연결하지 못했을 때 */
+.alert{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:16px;padding:20px 24px;background:var(--white);border:1px solid var(--line);border-radius:16px}
+.alert svg{flex:none;color:var(--warn)}
+.alert p{flex:1 1 220px;font-weight:600}
+
+/* 틀 */
+main{padding-bottom:64px}
+.stack>*+*{margin-top:16px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.grid--top{align-items:start}
+.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c12{grid-column:span 12}
+.panel{min-width:0;padding:24px 28px;background:var(--card);border:1px solid var(--line);border-radius:16px}
+h2{font-size:18px;font-weight:600;letter-spacing:-.03em;line-height:1.4}
+.sub{margin-top:2px;font-size:14px;color:var(--sub)}
+.fine{margin-top:16px;max-width:75ch;font-size:13px;line-height:1.55;color:var(--sub)}
+.empty{margin-top:16px;padding:18px 20px;border-radius:12px;background:var(--gray);font-size:15px}
+
+/* 핵심 숫자 */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kpi{min-width:0;padding:24px 28px;background:var(--card);border:1px solid var(--line);border-radius:16px}
+.kpi dt{font-size:14px;font-weight:600;color:var(--sub)}
+.kpi-v{margin-top:6px;font-size:36px;font-weight:600;letter-spacing:-.04em;line-height:1.25}
+.kpi-v--text{margin-top:10px;font-size:20px;letter-spacing:-.03em;line-height:1.45}
+.kpi-x{margin-top:10px;font-size:14px}
+.kpi-x b{font-weight:600}
+.kpi-n{margin-top:8px;font-size:13px;line-height:1.55;color:var(--sub)}
+
+/* 판정 분포: 얇은 막대 하나 + 아래에 이름·비율·건수 (색만으로 구분하지 않아요) */
+.segbar{display:flex;gap:2px;height:8px;margin-top:20px}
+.seg{position:relative;flex:0 1 0;min-width:3px;height:100%}
+.seg:first-child{border-radius:999px 0 0 999px}
+.seg:last-child{border-radius:0 999px 999px 0}
+.seg:only-child{border-radius:999px}
+.seg--on{background:var(--green)}.seg--dim{background:var(--amber)}.seg--off{background:var(--off)}
+.seg::before{content:"";position:absolute;inset:-12px 0}
+.seg::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);padding:6px 10px;border-radius:8px;background:var(--ink);color:#fff;font-size:13px;font-weight:600;line-height:1.4;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s}
+.seg:hover{filter:brightness(1.12)}
+.seg:hover::after{opacity:1}
+.parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+.parts li{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:8px}
+.mark{display:inline-flex}
+.f-on{fill:var(--green)}.f-dim{fill:var(--amber)}.s-dim{stroke:var(--amber)}.s-off{stroke:var(--off)}
+.parts__name{font-size:14px;font-weight:600}
+.parts__share{grid-column:1/-1;margin-top:4px;font-size:30px;font-weight:600;letter-spacing:-.04em;line-height:1.25}
+.parts__count{grid-column:1/-1;font-size:13px;color:var(--sub)}
+
+/* 미충족 사유: 이름·건수 한 줄 + 아래 막대와 비율 */
+.reasons{margin-top:12px}
+.reasons li{padding:14px 0;border-top:1px solid var(--line)}
+.reasons li:first-child{border-top:0;padding-top:4px}
+.reasons li:last-child{padding-bottom:0}
+.reasons__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.reasons__name{min-width:0;font-size:15px;font-weight:600;line-height:1.45}
+.rank{display:inline-block;min-width:1.25em;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
+.reasons__count{flex:none;font-size:15px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.reasons__bar{display:flex;align-items:center;gap:12px;margin-top:8px}
+.reasons__share{flex:none;min-width:3.4em;font-size:14px;color:var(--sub);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.meter{flex:1;height:8px;border-radius:4px;background:var(--gray)}
+.meter span{display:block;height:100%;min-width:4px;border-radius:4px;background:var(--off)}
+
+/* 표 */
+.tbl{margin-top:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.45}
+caption{caption-side:top;padding:0 0 12px;text-align:left;font-size:14px;color:var(--sub)}
+th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-weight:400}
+th:first-child,td:first-child{padding-left:0}
+th:last-child,td:last-child{padding-right:0}
+thead th{vertical-align:bottom;border-bottom-color:var(--ink);font-size:13px;font-weight:600;color:var(--sub);white-space:nowrap}
+thead th.grp{padding-bottom:6px;border-bottom-color:var(--line);text-align:center}
+thead tr+tr th:last-child{padding-right:0}
+thead tr+tr th:first-child{padding-left:12px}
+tbody th{font-weight:600}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* 문장이 들어가는 칸은 좁아져도 읽을 수 있는 폭을 지켜요 (모자라면 표 안에서 옆으로 밀어요) */
+thead th.wide{min-width:15em}
+td small,tbody th small{display:block;margin-top:2px;font-size:13px;font-weight:400;color:var(--sub)}
+
+/* 내려받기 줄 */
+.csv{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;padding-top:8px;font-size:14px;color:var(--sub)}
+
+/* 처음 불러오는 동안의 뼈대 */
+.sk i{display:block;height:14px;border-radius:7px;background:var(--line)}
+.sk i+i{margin-top:14px}
+.sk .sk-b{height:36px;width:45%;border-radius:10px}
+.sk .sk-bar{height:8px;border-radius:999px;margin-top:22px}
+.w30{width:30%}.w40{width:40%}.w60{width:60%}.w80{width:80%}
+
+@media (prefers-reduced-motion:no-preference){
+  .sk i{animation:breathe 1.4s ease-in-out infinite}
+  .is-busy svg{animation:turn .9s linear infinite}
+  @keyframes breathe{50%{opacity:.5}}
+  @keyframes turn{to{transform:rotate(360deg)}}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+}
+@media (max-width:1179.98px){
+  .c6{grid-column:span 12}
+}
+/* 휴대폰: 한 줄로 */
+@media (max-width:819.98px){
+  .top__in{height:60px}
+  .top .btn{height:44px;padding:0 16px;font-size:14px}
+  .head{padding:28px 0 20px}
+  h1{font-size:28px}
+  main{padding-bottom:48px}
+  .stack>*+*{margin-top:12px}
+  .grid,.kpis{grid-template-columns:minmax(0,1fr);gap:12px}
+  .c5,.c6,.c7,.c12{grid-column:auto}
+  .panel{padding:20px 18px}
+  .kpi{padding:20px 18px}
+  .kpi-v{font-size:32px}
+  .kpi-v--text{font-size:19px}
+  .alert{padding:18px}
+  .alert .btn{width:100%}
+  th,td{padding:12px 8px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top__in">
+    <a class="logo" href="/"><b>방봄</b><i>Bangbom</i><span class="sr-only"> 첫 화면으로</span></a>
+    <button class="btn btn--ghost" id="refresh" type="button">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3h-3"/></svg>
+      <span id="refreshTxt">새로 고침</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <div class="head">
+    <div class="head__row">
+      <h1>이용 현황</h1>
+      <span class="src" id="src" hidden></span>
+    </div>
+    <p class="meta">
+      <span id="period" hidden></span>
+      <span id="loaded" hidden>마지막으로 불러온 시각 <time id="loadedAt"></time></span>
+    </p>
+    <p class="note" id="note" hidden></p>
+  </div>
+
+  <div class="alert" id="alert" role="alert" hidden>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.4v.1"/></svg>
+    <p id="alertMsg"></p>
+    <button class="btn" id="retry" type="button">다시 불러오기</button>
+  </div>
+
+  <p class="sr-only" id="status" role="status">이용 현황을 불러오는 중이에요.</p>
+
+  <div class="stack" id="view" aria-busy="true">
+    <div class="sk stack" aria-hidden="true">
+      <div class="kpis">
+        <div class="kpi"><i class="w40"></i><i class="sk-b"></i><i class="w80"></i></div>
+        <div class="kpi"><i class="w40"></i><i class="sk-b"></i><i class="w80"></i></div>
+        <div class="kpi"><i class="w40"></i><i class="sk-b"></i><i class="w80"></i></div>
+      </div>
+      <div class="grid">
+        <div class="panel c7"><i class="w30"></i><i class="sk-bar"></i><i class="w80"></i><i class="w60"></i></div>
+        <div class="panel c5"><i class="w30"></i><i class="w80"></i><i class="w60"></i><i class="w80"></i></div>
+      </div>
+    </div>
+  </div>
+  <noscript><p class="empty">자바스크립트를 켜야 이용 현황이 보여요.</p></noscript>
+</main>
+
+<script>
+(() => {
+  'use strict'
+  const qs = new URLSearchParams(location.search)
+  // backend=down 을 붙이면 없는 주소를 불러요 ("연결하지 못했어요" 화면을 일부러 확인할 때 써요)
+  const API = qs.get('backend') === 'down' ? '/backend-down' : '/backend'
+  const LIMIT_MS = 8000
+  const DASH = '—'
+  const EMPTY = '아직 쌓인 기록이 없어요'
+  const DOWN = '서버에 연결하지 못했어요. 잠시 뒤에 다시 눌러 주세요.'
+  const LIVE_NOTE = '서버에는 몇 번 계산했는지, 불빛이 몇 개였는지 같은 횟수만 쌓여요. 나이·소득·자산 같은 값은 쌓지 않아요.'
+  // 판정 이름은 이 세 가지만 써요
+  const PARTS = [['on', '요건 충족'], ['dim', '확인 필요'], ['off', '미충족']]
+  const KIND = { loan: '대출', policy: '지원' }
+  const MARK = {
+    on: '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle class="f-on" cx="6" cy="6" r="6"/></svg>',
+    dim: '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle class="s-dim" cx="6" cy="6" r="5" fill="none" stroke-width="2"/><path class="f-dim" d="M6 1a5 5 0 0 0 0 10z"/></svg>',
+    off: '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle class="s-off" cx="6" cy="6" r="5" fill="none" stroke-width="2"/></svg>',
+  }
+  const DOWNLOAD = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v8M4.5 7.5 8 11l3.5-3.5M3 13.5h10"/></svg>'
+
+  const phone = matchMedia('(max-width: 819.98px)')
+  const $ = (id) => document.getElementById(id)
+
+  // 서버에서 온 글자는 언제나 글자로만 넣어요 (태그로 해석하지 않아요)
+  const h = (tag, attrs, ...kids) => {
+    const el = document.createElement(tag)
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v === null || v === undefined || v === false) continue
+      if (k === 'text') el.textContent = v
+      else if (k === 'class') el.className = v
+      else el.setAttribute(k, v === true ? '' : v)
+    }
+    for (const kid of kids.flat(3)) if (kid !== null && kid !== undefined && kid !== false) el.append(kid)
+    return el
+  }
+  // 우리가 직접 쓴 그림(SVG)만 이 길로 넣어요
+  const art = (markup) => { const t = document.createElement('template'); t.innerHTML = markup; return t.content.firstChild }
+
+  const has = (v) => v !== null && v !== undefined && v !== '' && !(typeof v === 'number' && !Number.isFinite(v))
+  const num = (v) => Number(v).toLocaleString('ko-KR', { maximumFractionDigits: 1 })
+  const count = (v, unit) => (has(v) ? num(v) + (unit || '') : DASH)
+  const pct = (v) => (has(v) ? num(v) + '%' : DASH)
+  const won = (v) => {
+    if (!has(v)) return DASH
+    const n = Number(v)
+    return Math.abs(n) < 10000 ? num(Math.round(n)) + '원' : '약 ' + num(Math.round(n / 10000)) + '만 원'
+  }
+  // 서버가 괄호로 붙인 내부 이름 (on), (clicks), (match_logs) 는 화면에서 지워요
+  const plain = (s) => String(s === null || s === undefined ? '' : s).replace(/\s*\([a-z][a-z0-9_./-]*\)/g, '').trim()
+  // 한글 이름 없이 코드만 온 항목은 코드 대신 쉬운 말로 보여요
+  const named = (s, fallback) => { const t = plain(s); return !t || /^[A-Za-z0-9_.-]+$/.test(t) ? fallback : t }
+  const day = (s) => String(s || '').replace(/-/g, '.')
+  const periodText = (p) => {
+    if (!p || !p.from) return ''
+    return '집계 기간 ' + (p.from === p.to ? day(p.from) : day(p.from) + ' ~ ' + day(p.to)) + (has(p.days) ? ' (' + num(p.days) + '일)' : '')
+  }
+
+  let uid = 0
+  const section = (cls, title, ...kids) => {
+    const id = 'sec' + (++uid)
+    return h('section', { class: 'panel ' + cls, 'aria-labelledby': id }, h('h2', { id, text: title }), kids)
+  }
+  const empty = (text) => h('p', { class: 'empty', text: text || EMPTY })
+  const fine = (text) => (plain(text) ? h('p', { class: 'fine', text: plain(text) }) : null)
+  const th = (text, o) => h('th', { scope: (o && o.scope) || 'col', class: (o && o.cls) || null, colspan: o && o.colspan, rowspan: o && o.rowspan, text })
+  // 표 한 개. nums 는 칸마다 숫자 칸(오른쪽 맞춤)인지, 첫 칸은 줄 제목이에요
+  const table = (label, caption, headRows, nums, rows, groups) => h('div', { class: 'tbl', role: 'region', tabindex: '0', 'aria-label': label },
+    h('table', null,
+      h('caption', { text: caption }),
+      groups ? groups.map((span) => h('colgroup', { span: String(span) })) : null,
+      h('thead', null, headRows.map((r) => h('tr', null, r))),
+      h('tbody', null, rows.map((r) => h('tr', null, r.map((c, i) => {
+        const o = c !== null && typeof c === 'object' ? c : { v: c }
+        // 순위와 이름 사이에 진짜 빈칸을 둬요 (화면 낭독기가 "1상인…" 처럼 붙여 읽지 않게)
+        const kids = [o.pre || null, o.pre ? ' ' : null, o.v, o.s ? h('small', { text: o.s }) : null]
+        return i === 0 ? h('th', { scope: 'row' }, kids) : h('td', { class: nums[i] ? 'n' : null }, kids)
+      }))))))
+
+  const kpiValue = (k) => {
+    if (!has(k.value)) return DASH
+    if (typeof k.value !== 'number') return named(k.value, '그 밖의 사유')
+    return k.unit === '원' ? won(k.value) : num(k.value) + (k.unit || '')
+  }
+  const kpiSection = (kpis) => h('section', { 'aria-labelledby': 'h-kpi' },
+    h('h2', { id: 'h-kpi', class: 'sr-only', text: '핵심 숫자' }),
+    h('dl', { class: 'kpis' }, kpis.map((k) => h('div', { class: 'kpi' },
+      h('dt', { text: plain(k.label) }),
+      h('dd', { class: 'kpi-v' + (has(k.value) && typeof k.value !== 'number' ? ' kpi-v--text' : ''), text: kpiValue(k) }),
+      k.alt && has(k.alt.value) ? h('dd', { class: 'kpi-x' }, plain(k.alt.label) + ' ', h('b', { text: won(k.alt.value) })) : null,
+      k.key === 's4_conversion_rate' && has(k.count) ? h('dd', { class: 'kpi-x' }, '집 보기로 들어간 횟수 ', h('b', { text: num(k.count) + '번' })) : null,
+      plain(k.note) ? h('dd', { class: 'kpi-n', text: plain(k.note) }) : null))))
+
+  const distSection = (t, note) => {
+    const n = (k) => Number(t[k + '_count']) || 0
+    const total = PARTS.reduce((s, [k]) => s + n(k), 0)
+    if (!total) return section('c7', '판정 분포', empty())
+    const said = PARTS.map(([k, name]) => name + ' ' + num(n(k)) + '건 · ' + pct(t[k + '_ratio']))
+    return section('c7', '판정 분포',
+      h('p', { class: 'sub', text: '판정 ' + num(total) + '건이 세 가지로 이렇게 나뉘었어요.' }),
+      h('div', { class: 'segbar', role: 'img', 'aria-label': '판정 분포 막대. ' + said.join(', ') },
+        PARTS.map(([k], i) => (n(k) > 0 ? h('span', { class: 'seg seg--' + k, style: 'flex-grow:' + n(k), 'data-tip': said[i] }) : null))),
+      h('ul', { class: 'parts' }, PARTS.map(([k, name]) => h('li', null,
+        h('span', { class: 'mark' }, art(MARK[k])),
+        h('span', { class: 'parts__name', text: name }),
+        h('b', { class: 'parts__share', text: pct(t[k + '_ratio']) }),
+        h('span', { class: 'parts__count', text: num(n(k)) + '건' })))),
+      fine(note))
+  }
+
+  // 한 줄: 순위·사유·건수, 그 아래 막대와 비율 (건수가 없는 샘플에서도 "—" 와 비율이 헷갈리지 않게 따로 둬요)
+  const reasonSection = (cls, items, note, sub) => section(cls, '미충족 사유',
+    sub ? h('p', { class: 'sub', text: sub }) : null,
+    items && items.length ? h('ol', { class: 'reasons' }, items.map((f, i) => h('li', null,
+      h('div', { class: 'reasons__row' },
+        h('span', { class: 'reasons__name' }, h('span', { class: 'rank', text: String(has(f.rank) ? f.rank : i + 1) }), ' ', named(f.label, '그 밖의 사유')),
+        h('b', { class: 'reasons__count', text: count(f.count, '건') })),
+      h('div', { class: 'reasons__bar' },
+        h('span', { class: 'meter', 'aria-hidden': 'true' }, Number(f.share) > 0 ? h('span', { style: 'width:' + Math.min(100, Number(f.share)) + '%' }) : null),
+        h('span', { class: 'reasons__share', text: pct(f.share) }))))) : empty(),
+    fine(note))
+
+  const districtSection = (m, reasonLabel) => {
+    const rows = m.rows || []
+    if (!rows.length) return section('c12', '구별 판정', empty())
+    const types = m.supply_types || []
+    const labels = m.supply_type_labels || {}
+    const head = [th('구'), th('판정', { cls: 'n' }), ...PARTS.map(([, name]) => th(name, { cls: 'n' })), th('평균 월 부담', { cls: 'n' }), th('집 보기', { cls: 'n' }),
+      ...types.map((st) => th(named(labels[st], '그 밖의 유형') + ' 판정', { cls: 'n' })), th('가장 많은 미충족 사유', { cls: 'wide' })]
+    const body = rows.map((r) => [
+      r.district,
+      count(r.total_sessions),
+      ...PARTS.map(([k]) => ({ v: count(r[k + '_count']), s: pct(r[k + '_ratio']) })),
+      won(r.avg_monthly_cost),
+      { v: count(r.s4_conversion_cnt), s: has(r.s4_conversion_rate) ? '전환율 ' + pct(r.s4_conversion_rate) : null },
+      ...types.map((st) => ({ v: count((r.sessions_by_supply_type || {})[st]), s: r.complex_count_by_supply_type ? '등록 단지 ' + count(r.complex_count_by_supply_type[st], '곳') : null })),
+      r.top_fail_reason ? reasonLabel[r.top_fail_reason] || '그 밖의 사유' : DASH,
+    ])
+    const nums = [false, true, true, true, true, true, true, ...types.map(() => true), false]
+    return section('c12', '구별 판정',
+      table('구별 판정 표', '구마다 판정 건수와 판정별 건수·비율, 지원을 반영한 평균 월 부담, 집 보기로 들어간 횟수예요.', [head], nums, body),
+      fine(m.note))
+  }
+
+  const supportSection = (s, live) => {
+    const title = '대출·지원별 판정'
+    if (!s) return section('c6', title, empty(live ? EMPTY : '샘플 통계에는 대출·지원별 판정 기록이 없어요.'))
+    const items = s.items || []
+    if (!items.some((x) => Number(x.total) > 0)) return section('c6', title, empty(), fine(s.note))
+    const keys = ['eligible', 'needs_check', 'ineligible']
+    const head = [th('대출·지원'), th('종류'), ...PARTS.map(([, name]) => th(name, { cls: 'n' }))]
+    const body = items.map((x) => [named(x.name, '이름이 없는 항목'), KIND[x.kind] || '기타', ...keys.map((k) => ({ v: count(x[k]), s: pct(x[k + '_ratio']) }))])
+    return section('c6', title,
+      table('대출·지원별 판정 표', '대출과 지원마다 요건 충족, 확인 필요, 미충족으로 판정된 횟수와 비율이에요.', [head], [false, false, true, true, true], body),
+      fine(s.note))
+  }
+
+  // 단지 이름 칸: 순위 + 이름 + 아래 작은 글씨(구 · 공급유형)
+  const complexName = (c, i, typeLabels) => {
+    const name = String(c.name || '')
+    const where = [c.district, c.supply_type ? named((typeLabels || {})[c.supply_type], '') : ''].filter(Boolean).join(' · ')
+    return { pre: h('span', { class: 'rank', text: String(has(c.rank) ? c.rank : i + 1) }), v: name + (c.is_sample && !name.includes('샘플') ? ' (샘플)' : ''), s: where }
+  }
+  const complexSection = (r, typeLabels) => {
+    const items = (r && r.items) || []
+    if (!items.length) return section('c6', '단지별 이용', empty(), fine(r && r.note))
+    const head = [
+      [th('단지', { rowspan: '2' }), th('카드 열어 봄', { cls: 'n', rowspan: '2' }), th('집 보기', { cls: 'n', rowspan: '2' }), th('지도 불빛', { cls: 'grp', colspan: '3', scope: 'colgroup' })],
+      PARTS.map(([, name]) => th(name, { cls: 'n' })),
+    ]
+    const body = items.map((c, i) => [complexName(c, i, typeLabels), count(c.clicks), count(c.s4_conversions), ...PARTS.map(([k]) => count(c[k + '_count']))])
+    return section('c6', '단지별 이용',
+      table('단지별 이용 표', '단지마다 카드를 열어 본 횟수, 집 보기로 들어간 횟수, 지도에 켜진 불빛 수예요.', head, [false, true, true, true, true, true], body, [3, 3]),
+      fine(r.note))
+  }
+  const complexSectionPhone = (items, note) => {
+    if (!items || !items.length) return section('', '단지별 이용', empty(), fine(note))
+    const body = items.map((c, i) => [complexName(c, i), count(c.clicks), count(c.s4_conversions)])
+    return section('', '단지별 이용',
+      table('단지별 이용 표', '단지마다 카드를 열어 본 횟수와 집 보기로 들어간 횟수예요. 다섯 곳까지 보여요.', [[th('단지'), th('열어 봄', { cls: 'n' }), th('집 보기', { cls: 'n' })]], [false, true, true], body),
+      fine(note))
+  }
+
+  const renderPc = (d, live) => {
+    const kpis = d.kpis || []
+    const ratio = kpis.find((k) => k.key === 'on_ratio')
+    const fails = d.fail_reasons || {}
+    const reasonLabel = {}
+    for (const f of fails.items || []) reasonLabel[f.code] = named(f.label, '그 밖의 사유')
+    const matrix = d.district_matrix || {}
+    return [
+      // 세 판정 비율은 아래 "판정 분포" 한 곳에서만 보여요 (같은 숫자를 두 번 늘어놓지 않아요)
+      kpiSection(kpis.filter((k) => !/^(on|dim|off)_ratio$/.test(k.key))),
+      h('div', { class: 'grid' }, distSection(d.totals || {}, ratio && ratio.note), reasonSection('c5', fails.items, fails.note)),
+      districtSection(matrix, reasonLabel),
+      h('div', { class: 'grid grid--top' }, supportSection(d.support_status, live), complexSection(d.complex_ranking, matrix.supply_type_labels)),
+      h('p', { class: 'csv' },
+        h('a', { class: 'btn btn--ghost', href: API + '/dashboard/export.csv', download: true }, art(DOWNLOAD), 'CSV 내려받기'),
+        h('span', { text: '날짜와 구별로 센 횟수를 표 파일(CSV)로 받아요.' })),
+    ]
+  }
+  const renderPhone = (d) => [
+    kpiSection(d.kpis || []),
+    reasonSection('', d.fail_reasons_top3, null, '많이 나온 순서로 세 가지까지 보여요.'),
+    complexSectionPhone(d.complexes_top5, d.complexes_note),
+  ]
+
+  let hasData = false
+  const render = (d, device) => {
+    const live = d.source === 'live' || (!has(d.source) && d.is_sample === false)
+    const src = $('src')
+    src.className = 'src ' + (live ? 'src--live' : 'src--sample')
+    src.textContent = live ? '실제 집계' : '샘플'
+    src.hidden = false
+    const period = periodText(d.period)
+    $('period').textContent = period
+    $('period').hidden = !period
+    $('note').textContent = live ? LIVE_NOTE : plain(d.note) || '실제 이용 기록을 집계한 값이 아니에요.'
+    $('note').hidden = false
+    uid = 0
+    $('view').replaceChildren(...(device === 'mobile' ? renderPhone(d) : renderPc(d, live)))
+    hasData = true
+  }
+
+  let busy = false
+  const setBusy = (on) => {
+    busy = on
+    for (const id of ['refresh', 'retry']) { $(id).setAttribute('aria-disabled', String(on)); $(id).classList.toggle('is-busy', on) }
+    $('refreshTxt').textContent = on ? '불러오는 중' : '새로 고침'
+    $('retry').textContent = on ? '불러오는 중' : '다시 불러오기'
+    // 다시 불러오는 동안에도 앞의 숫자는 그대로 읽을 수 있게 둬요 (흐리게 하면 글자 대비가 모자라요). 단추 글자로만 알려요
+    $('view').setAttribute('aria-busy', String(on))
+  }
+
+  let turn = 0
+  let asked = '' // 마지막으로 달라고 한 자료 종류 (pc 또는 mobile)
+  const load = async () => {
+    const mine = ++turn
+    const device = phone.matches ? 'mobile' : 'pc'
+    asked = device
+    setBusy(true)
+    const ctl = new AbortController()
+    const timer = setTimeout(() => ctl.abort(), LIMIT_MS)
+    try {
+      const res = await fetch(API + '/dashboard/summary?device=' + device, { cache: 'no-store', headers: { Accept: 'application/json' }, signal: ctl.signal })
+      if (!res.ok) throw new Error('응답 ' + res.status)
+      const data = await res.json()
+      if (!data || !Array.isArray(data.kpis)) throw new Error('모양이 다른 응답')
+      if (mine !== turn) return
+      render(data, device)
+      const now = new Date()
+      $('loadedAt').dateTime = now.toISOString()
+      $('loadedAt').textContent = now.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', second: '2-digit' })
+      $('loaded').hidden = false
+      if (document.activeElement === $('retry')) $('refresh').focus()
+      $('alert').hidden = true
+      $('status').textContent = '이용 현황을 불러왔어요. 불러온 시각 ' + $('loadedAt').textContent
+    } catch {
+      if (mine !== turn) return
+      // 처음부터 실패하면 뼈대를 치우고 안내만 남겨요. 앞서 불러온 숫자가 있으면 그대로 둬요
+      if (!hasData) $('view').replaceChildren()
+      $('status').textContent = ''
+      $('alertMsg').textContent = DOWN
+      $('alert').hidden = false
+    } finally {
+      clearTimeout(timer)
+      if (mine === turn) setBusy(false)
+    }
+  }
+
+  $('refresh').addEventListener('click', () => { if (!busy) load() })
+  $('retry').addEventListener('click', () => { if (!busy) load() })
+  // 화면 폭이 휴대폰 ↔ PC 로 바뀌면 그 크기에 맞는 자료를 다시 받아요 (종류가 그대로면 다시 받지 않아요)
+  phone.addEventListener('change', () => { if ((phone.matches ? 'mobile' : 'pc') !== asked) load() })
+  load()
+})()
+</script>
+</body>
+</html>
