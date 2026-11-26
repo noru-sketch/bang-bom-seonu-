@@ -1,0 +1,6 @@
+One wide horizontal image that explains a 3-step journey into the SAME apartment, read left to right, with a thin dark-gray arrow between each step.
+The apartment: one simple rectangular Korean apartment unit, about 84 square meters. Its layout is: living room and kitchen in the center along the bottom (balcony side), master bedroom at the bottom-right, two small bedrooms at the top-left and top-right, one bathroom between them at the top-center, front door at the top-center.
+Step 1 (left third): top-down 2D architectural floor plan of exactly this layout, thin dark-gray lines on off-white paper, thin dimension lines with small tick marks, door swing arcs, no labels, no numbers.
+Step 2 (middle third): the exact same layout as a matte white isometric 3D cutaway model with no roof, seen from the same orientation as the plan, light oak floors, a few simple furniture blocks. The wall layout must match step 1 room for room.
+Step 3 (right third): an eye-level photo standing inside the top-right small bedroom of this unit: white walls, light oak floor, one window with soft daylight, empty room.
+Equal visual weight for the three steps, generous margins, clean off-white background, no frames around the steps.

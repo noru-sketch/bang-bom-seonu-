@@ -1,0 +1,6 @@
+One wide horizontal image explaining a 3-step journey into the SAME small apartment, read left to right, with a thin dark-gray arrow between steps.
+The apartment is very simple: a rectangle divided into exactly four spaces. Top half: two bedrooms side by side (left bedroom and right bedroom). Bottom half: one large open living room with kitchen counter on the left wall. A small bathroom is NOT needed. One front door on the bottom wall.
+Step 1 (left): top-down 2D floor plan of exactly these four spaces, thin dark-gray lines on off-white paper, door swing arcs, thin dimension lines with small tick marks, no labels, no numbers.
+Step 2 (middle): the same floor plan extruded straight up into a matte white 3D model with no roof, viewed from the front and above at a gentle angle, NOT rotated, so every wall lines up with step 1. Light oak floors, a bed block in each bedroom, a sofa block in the living room.
+Step 3 (right): eye-level photo standing inside the right bedroom of this model: white walls, light oak floor, a bed with light linen bedding, one window with soft daylight.
+Equal size for the three steps, generous margins, clean off-white background.
