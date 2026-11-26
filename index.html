@@ -10,12 +10,12 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="방봄 BANGBOM">
 <meta property="og:title" content="방봄 BANGBOM · 대구에 좋은 매물 있는데, 함께 보시겠어요?">
-<meta property="og:description" content="대구 노후주택, 고쳐 살까 이사 갈까? 우리 가구 그대로 3D로 미리 배치해 보고 리모델링 견적과 이사 비용, 집수리 지원금까지 한 번에 비교해요.">
+<meta property="og:description" content="내 조건을 넣으면 대구 미분양 지도에서 들어갈 수 있는 단지에 불이 켜지고, 집 안은 3D로 미리 둘러봐요.">
 <meta property="og:image" content="img/hero.jpg">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="방봄 BANGBOM · 대구에 좋은 매물 있는데, 함께 보시겠어요?">
-<meta name="twitter:description" content="우리 가구 그대로 3D로 미리 살아보고, 비용과 지원 정책을 비교해요.">
+<meta name="twitter:description" content="내 조건으로 들어갈 수 있는 대구 미분양 단지를 찾고, 집 안은 3D로 미리 둘러봐요.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,6 +220,7 @@ main{min-height:100vh}
 
 /* How it helps 탭 */
 .zz-tabs{display:flex;justify-content:center;gap:6px;margin:0 auto var(--s5);flex-wrap:wrap}
+.zz-tabs__sep{display:inline-flex;align-items:center;padding:0 6px 0 14px;margin-left:8px;border-left:1px solid var(--line);font-size:13px;font-weight:600;color:var(--sub);white-space:nowrap}
 .zz-tab{display:inline-flex;align-items:baseline;gap:8px;height:46px;padding:0 18px;border-radius:var(--r-pill);border:1px solid var(--line);background:#fff;font-weight:600;font-size:15px;white-space:nowrap;align-items:center}
 .zz-tab i{font-family:var(--en);font-style:italic;font-weight:400;font-size:17px;letter-spacing:0;color:var(--green)}
 .zz-tab.is-on{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -1129,18 +1130,18 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
     <div class="container stats__grid">
       <div class="stat reveal">
         <div class="stat__num"><span data-count="3077">0</span><small>세대</small></div>
-        <p class="stat__label">대구 준공 후 미분양</p>
+        <p class="stat__label">대구 준공 후 미분양, 전국 시·도 중 최다</p>
         <p class="stat__src">국토교통부 주택통계 · 2026.9</p>
       </div>
       <div class="stat reveal">
-        <div class="stat__num"><span data-count="70">0</span><small>%</small></div>
-        <p class="stat__label">30년 넘은 대구 주거용 건축물</p>
-        <p class="stat__src">국토교통부 건축물 현황 · 2023</p>
+        <div class="stat__num"><span data-count="43">0</span><small>시간</small></div>
+        <p class="stat__label">분양 0건이던 990가구 단지가 전세로 나오자 생긴 대기 줄</p>
+        <p class="stat__src">뉴시스·뉴스1 · 2026.9</p>
       </div>
       <div class="stat reveal">
-        <div class="stat__num"><span data-count="90">0</span><small>cm</small></div>
-        <p class="stat__label">아이 눈높이로 한 번 더 확인</p>
-        <p class="stat__src">방봄 90cm 시선</p>
+        <div class="stat__num"><span data-count="33.6">0</span><small>%</small></div>
+        <p class="stat__label">대구 청년 주거지원 예산 집행률</p>
+        <p class="stat__src">대구시 시의회 제출 자료 · 2026.10 기준</p>
       </div>
     </div>
   </div>
@@ -1166,66 +1167,18 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
     <div class="container">
       <div class="head-center reveal">
         <span class="eyebrow">How it helps</span>
-        <h2 class="title">견적서 대신, 살아보고 결정해요</h2>
+        <h2 class="title">가 보지 않고, 미분양 집을 골라요</h2>
       </div>
 
       <div class="zz-tabs" role="tablist" aria-label="방봄이 돕는 방법">
-        <button class="zz-tab is-on" role="tab" data-zz="0"><i>01</i>고쳐 살래?</button>
+        <button class="zz-tab is-on" role="tab" data-zz="0"><i>01</i>불 켜지는 지도</button>
         <button class="zz-tab" role="tab" data-zz="1"><i>02</i>이사 갈래?</button>
-        <button class="zz-tab" role="tab" data-zz="2"><i>03</i>아이 눈높이</button>
-        <button class="zz-tab" role="tab" data-zz="3"><i>04</i>불 켜지는 지도</button>
+        <span class="zz-tabs__sep" aria-hidden="true">입주 뒤까지 미리</span>
+        <button class="zz-tab" role="tab" data-zz="2"><i>03</i>고쳐 살래?</button>
+        <button class="zz-tab" role="tab" data-zz="3"><i>04</i>아이 눈높이</button>
       </div>
       <div class="zz zz--tabbed">
         <div class="zz__row is-on">
-          <div class="zz__media">
-            <div class="ba" id="ba">
-              <img src="img/fix_after.jpg" alt="도배와 바닥재를 새로 바꿔 밝아진 방" loading="lazy">
-              <img class="ba__before" src="img/fix_before.jpg" alt="벽지가 누렇게 바래고 장판이 낡은 지금의 방" loading="lazy">
-              <span class="ba__line" aria-hidden="true"></span>
-              <span class="ba__knob" aria-hidden="true">⟷</span>
-              <input class="ba__range" type="range" min="0" max="100" value="100" aria-label="지금과 고친 후 비교 위치">
-            </div>
-            <span class="pill-label pill-label--l">지금</span>
-            <span class="pill-label pill-label--r">고친 후</span>
-            <span class="tag-example">예시 이미지</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">01 · Fix</p>
-            <h3 class="zz__title">고쳐 살래?</h3>
-            <p>방 크기로 도배·장판 면적을 계산하고, 벽지와 바닥재를 바꾼 모습을 3D로 바로 보여줘요. 받을 수 있는 집수리 지원금은 빼고 계산해요.</p>
-            <span class="zz__hint">← 사진을 좌우로 밀어서 비교해보세요 →</span>
-            <a href="#house" class="link">평면도·3D로 집 보기 →</a>
-          </div>
-        </div>
-
-        <div class="zz__row is-rev">
-          <div class="zz__media">
-            <video muted playsinline preload="none" poster="img/move.jpg" data-autoplay aria-label="미분양 새 집에 가구를 옮겨 놓는 예시 영상"><source src="vid/move.mp4" type="video/mp4"></video>
-            <span class="tag-example">예시 영상</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">02 · Move</p>
-            <h3 class="zz__title">이사 갈래?</h3>
-            <p>대구 미분양 단지의 면적에 맞춘 구조에 우리 가구를 그대로 옮겨봐요. 안 들어가는 가구와 새로 사야 할 가구가 먼저 보여요.</p>
-            <a href="#house" class="link">새 집에 가구 놓아보기 →</a>
-          </div>
-        </div>
-
-        <div class="zz__row">
-          <div class="zz__media">
-            <video muted playsinline preload="none" poster="img/child.jpg" data-autoplay aria-label="아이 눈높이 90cm에서 거실을 걸어보는 예시 영상"><source src="vid/child.mp4" type="video/mp4"></video>
-            <div class="media-dim dim dim--v" aria-hidden="true">아이 눈높이</div>
-            <span class="tag-example">예시 영상</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">03 · Family</p>
-            <h3 class="zz__title">아이 눈높이 90cm</h3>
-            <p>어른 눈에는 무릎 높이였던 탁자 모서리가 아이 시선에서는 바로 얼굴 앞이에요. 부딪히기 쉬운 곳을 빨간 점으로 짚어줘요.</p>
-            <a href="#house" class="link">방 안 시점으로 보기 →</a>
-          </div>
-        </div>
-
-        <div class="zz__row is-rev">
           <div class="zz__media">
             <div class="mini-map" aria-hidden="true">
               <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
@@ -1247,12 +1200,61 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
             <span class="tag-example">예시 화면</span>
           </div>
           <div class="zz__text">
-            <p class="zz__no">04 · Match</p>
+            <p class="zz__no">01 · Match</p>
             <h3 class="zz__title">내 조건에 불이 켜지는 집</h3>
             <p>나이, 소득, 모은 돈만 넣으면 대출·지원 요건을 따져서 대구 미분양 지도에 들어갈 수 있는 집에만 불을 켜요. 단지를 누르면 역과 병원까지 거리와 실제 월 부담이 같이 보여요.</p>
             <a href="#input" class="link">내 조건으로 찾아보기 →</a>
           </div>
         </div>
+        <div class="zz__row is-rev">
+          <div class="zz__media">
+            <video muted playsinline preload="none" poster="img/move.jpg" data-autoplay aria-label="미분양 새 집에 가구를 옮겨 놓는 예시 영상"><source src="vid/move.mp4" type="video/mp4"></video>
+            <span class="tag-example">예시 영상</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">02 · Move</p>
+            <h3 class="zz__title">이사 갈래?</h3>
+            <p>대구 미분양 단지의 면적에 맞춘 구조에 우리 가구를 그대로 옮겨봐요. 안 들어가는 가구와 새로 사야 할 가구가 먼저 보여요.</p>
+            <a href="#house" class="link">새 집에 가구 놓아보기 →</a>
+          </div>
+        </div>
+
+        <div class="zz__row">
+          <div class="zz__media">
+            <div class="ba" id="ba">
+              <img src="img/fix_after.jpg" alt="도배와 바닥재를 새로 바꿔 밝아진 방" loading="lazy">
+              <img class="ba__before" src="img/fix_before.jpg" alt="벽지가 누렇게 바래고 장판이 낡은 지금의 방" loading="lazy">
+              <span class="ba__line" aria-hidden="true"></span>
+              <span class="ba__knob" aria-hidden="true">⟷</span>
+              <input class="ba__range" type="range" min="0" max="100" value="100" aria-label="지금과 고친 후 비교 위치">
+            </div>
+            <span class="pill-label pill-label--l">지금</span>
+            <span class="pill-label pill-label--r">고친 후</span>
+            <span class="tag-example">예시 이미지</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">03 · 입주 뒤까지 미리</p>
+            <h3 class="zz__title">고쳐 살래?</h3>
+            <p>방 크기로 도배·장판 면적을 계산하고, 벽지와 바닥재를 바꾼 모습을 3D로 바로 보여줘요. 받을 수 있는 집수리 지원금은 빼고 계산해요.</p>
+            <span class="zz__hint">← 사진을 좌우로 밀어서 비교해보세요 →</span>
+            <a href="#house" class="link">평면도·3D로 집 보기 →</a>
+          </div>
+        </div>
+
+        <div class="zz__row is-rev">
+          <div class="zz__media">
+            <video muted playsinline preload="none" poster="img/child.jpg" data-autoplay aria-label="아이 눈높이 90cm에서 거실을 걸어보는 예시 영상"><source src="vid/child.mp4" type="video/mp4"></video>
+            <div class="media-dim dim dim--v" aria-hidden="true">아이 눈높이</div>
+            <span class="tag-example">예시 영상</span>
+          </div>
+          <div class="zz__text">
+            <p class="zz__no">04 · 입주 뒤까지 미리</p>
+            <h3 class="zz__title">아이 눈높이 90cm</h3>
+            <p>어른 눈에는 무릎 높이였던 탁자 모서리가 아이 시선에서는 바로 얼굴 앞이에요. 부딪히기 쉬운 곳을 빨간 점으로 짚어줘요.</p>
+            <a href="#house" class="link">방 안 시점으로 보기 →</a>
+          </div>
+        </div>
+
       </div>
       <div class="zz-nav">
         <button class="round-btn" id="zzPrev" aria-label="이전"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
@@ -2947,7 +2949,7 @@ function observeReveals() { $$(".page.is-active .reveal:not(.is-in)").forEach(el
 const countIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return; countIO.unobserve(e.target);
   const el = e.target, to = +el.dataset.count, t0 = performance.now(), dur = REDUCED ? 0 : 1400;
-  const step = t => { const k = dur ? clamp((t - t0) / dur, 0, 1) : 1; el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))).toLocaleString("ko-KR"); if (k < 1) requestAnimationFrame(step); };
+  const step = t => { const k = dur ? clamp((t - t0) / dur, 0, 1) : 1; const dp = (el.dataset.count.split(".")[1] || "").length; el.textContent = (to * (1 - Math.pow(1 - k, 3))).toLocaleString("ko-KR", { minimumFractionDigits: dp, maximumFractionDigits: dp }); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }), { threshold: .5 }) : null;
 $$("[data-count]").forEach(el => countIO ? countIO.observe(el) : el.textContent = (+el.dataset.count).toLocaleString("ko-KR"));

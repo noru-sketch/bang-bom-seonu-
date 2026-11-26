@@ -52,7 +52,7 @@ function observeReveals() { $$(".page.is-active .reveal:not(.is-in)").forEach(el
 const countIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
   if (!e.isIntersecting) return; countIO.unobserve(e.target);
   const el = e.target, to = +el.dataset.count, t0 = performance.now(), dur = REDUCED ? 0 : 1400;
-  const step = t => { const k = dur ? clamp((t - t0) / dur, 0, 1) : 1; el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))).toLocaleString("ko-KR"); if (k < 1) requestAnimationFrame(step); };
+  const step = t => { const k = dur ? clamp((t - t0) / dur, 0, 1) : 1; const dp = (el.dataset.count.split(".")[1] || "").length; el.textContent = (to * (1 - Math.pow(1 - k, 3))).toLocaleString("ko-KR", { minimumFractionDigits: dp, maximumFractionDigits: dp }); if (k < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 }), { threshold: .5 }) : null;
 $$("[data-count]").forEach(el => countIO ? countIO.observe(el) : el.textContent = (+el.dataset.count).toLocaleString("ko-KR"));
