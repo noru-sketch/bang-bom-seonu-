@@ -216,7 +216,12 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 #mh .cc-plan svg{position:absolute;inset:0;width:100%;height:100%;padding:14px}
 #mh .cc-plan-tag{position:absolute;left:14px;bottom:12px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid var(--line);color:var(--sub)}
 #mh .panel-r .x{position:absolute;top:14px;right:14px;z-index:2;background:rgba(255,255,255,.92)}
-#mh .panel-r{overflow:auto;padding-bottom:0}
+/* 카드 빈 띠 버그: 카드(.panel-r)가 스크롤 상자이면서 안쪽 평면도가 음수 margin 을 쓰면 지도 위에 빈 띠가 생겼다.
+   카드는 넘침을 자르는 세로 flex 로 두고, 안쪽 .cc 만 스크롤한다 (휴대폰은 mobile_app.css 가 같은 구조) */
+@media (min-width:821px){
+  #mh .panel-r{overflow:hidden;padding-top:0;padding-bottom:0;display:flex;flex-direction:column}
+  #mh .panel-r .cc{overflow:auto;overscroll-behavior:contain;min-height:0;flex:1 1 auto;margin:0 -24px;padding:24px 24px 0}
+}
 /* 닫힌 단지 카드도 투명하게만 두면 Tab 이 그 안의 단추에 멈추고 눌리기까지 한다. 닫히면 숨긴다 */
 #mh .panel-r{visibility:hidden;transition:transform .3s,opacity .3s,visibility 0s .3s}
 #mh .panel-r.is-open{visibility:visible;transition:transform .3s,opacity .3s}
