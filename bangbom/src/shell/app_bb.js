@@ -208,6 +208,7 @@ function openUnsold(k) {
   p.innerHTML = `<div class="cc"><div class="cc-top"><div><span class="eyebrow-s">Public list</span><h2>${esc(u.name)}</h2><div class="tags"><span class="tag">${esc(u.gu)} ${esc(u.dong)}</span></div></div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
     <p class="why">대구시 공개 미분양 목록 · 현재 계약 가능 여부는 확인 필요</p>
+    ${u.jibun ? `<p class="small" style="margin-top:12px">지번 ${esc(u.jibun)}</p>` : ""}
     <p class="small muted" style="margin-top:12px">${esc(u.source)} · ${esc(u.as_of)} 기준</p>
     <div class="links" style="margin-top:8px"><a href="${esc(UNSOLD_SRC_URL)}" target="_blank" rel="noopener">대구시 원자료 ↗</a></div>
     ${u.approx ? `<p class="small muted" style="margin-top:8px">지도 위치는 동 중심 근사예요.</p>` : ""}</div>`;
