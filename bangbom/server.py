@@ -27,6 +27,8 @@ except Exception:
     pass
 ROOT = Path(__file__).resolve().parent
 ENV_PATH = ROOT / ".env"
+# --root <폴더>: 그 폴더를 화면으로 연다(예: 통합판 빌드 결과 dist). 키·.env는 이 파일 옆 그대로
+WEB_ROOT = Path(sys.argv[sys.argv.index("--root") + 1]).resolve() if "--root" in sys.argv else ROOT
 PORT = int(os.environ.get("PORT", "8765"))
 MAX_BODY = 64 * 1024
 
@@ -197,7 +199,7 @@ BLOCK = re.compile(r"^/(\.|server\.py|src/|env\.example|.*\.py$|.*\.cmd$)", re.I
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw):
-        super().__init__(*a, directory=str(ROOT), **kw)
+        super().__init__(*a, directory=str(WEB_ROOT), **kw)
 
     def log_message(self, fmt, *args):
         # 요청 로그는 조용히. 없는 파일(404)과 /api/ 요청만 한 줄로 남긴다.
