@@ -208,3 +208,5 @@ body.app-mode .to-top{display:none}
 @media (prefers-reduced-motion:reduce){.fp-dots button,.to-top{transition:none}}
 /* 맨 위로 단추가 푸터 맨 아래 줄(저작권)을 가리지 않게 PC 에서는 푸터 아래 여백을 늘린다 (휴대폰은 mobile_home.css) */
 @media (min-width:901px){.footer{padding-bottom:112px}}
+/* 휴대폰(820px 이하): 메뉴 단추를 뺀 자리에 작은 "내 조건 넣기". 나머지 이동은 아래 탭 */
+@media (max-width:820px){.nav__cta{display:inline-flex;height:40px;padding:0 16px;font-size:14px}}

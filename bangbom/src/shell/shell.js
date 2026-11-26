@@ -10,7 +10,7 @@ const NAVKEY = { home: "home", guide: "guide", input: "map", map: "map", house: 
 const TITLES = { home: "방봄 BANGBOM", guide: "이용 안내 · 방봄", input: "기본정보 입력 · 방봄", map: "미분양 지도 · 방봄", house: "집 보기 · 방봄" };
 const nav = $("#nav");
 let current = null;
-function updateNav() { nav.classList.toggle("is-clear", current === "home" && scrollY < 24 && !document.body.classList.contains("menu-open")); }
+function updateNav() { nav.classList.toggle("is-clear", current === "home" && scrollY < 24); }
 function route() {
   let name = location.hash.replace("#", "");
   if (name === "start") name = "home";
@@ -25,7 +25,7 @@ function route() {
     $$("[data-route]").forEach(a => { const on = a.dataset.route === NAVKEY[name]; a.classList.toggle("is-active", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
     document.title = TITLES[name];
     if (!app || !APP.includes(prev)) scrollTo(0, 0);
-    closeMenu(); updateNav();
+    updateNav();
     if (window.MH) MH.route(app ? name : null);
     requestAnimationFrame(observeReveals);
     if (window.BBfp) requestAnimationFrame(BBfp.sync);  /* 풀페이지 점·맨 위로 단추를 지금 화면에 맞춘다 */
@@ -34,12 +34,7 @@ function route() {
   if (bigJump && document.startViewTransition && !REDUCED) document.startViewTransition(swap); else swap();
 }
 if (!document.startViewTransition) document.documentElement.classList.add("no-vt");
-const openBtn = $("#menuOpen"), closeBtn = $("#menuClose");
-function openMenu() { document.body.classList.add("menu-open"); openBtn.setAttribute("aria-expanded", "true"); updateNav(); setTimeout(() => closeBtn.focus(), 60); }
-function closeMenu() { if (!document.body.classList.contains("menu-open")) return; document.body.classList.remove("menu-open"); openBtn.setAttribute("aria-expanded", "false"); updateNav(); }
-openBtn.addEventListener("click", openMenu); closeBtn.addEventListener("click", closeMenu); $("#scrim").addEventListener("click", closeMenu);
-addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
-$$(".panel a").forEach(a => a.addEventListener("click", closeMenu));
+/* 메뉴 단추·메뉴 패널은 위 막대(PC)·아래 탭(휴대폰)과 겹쳐서 뺐다. 이동은 위 막대 링크와 아래 탭으로 한다 */
 addEventListener("hashchange", route);
 addEventListener("scroll", updateNav, { passive: true });
 
@@ -125,7 +120,7 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
   const panels = () => [...$$("#page-home .hs"), $(".footer")];
   const nameOf = p => p.dataset.hs || "끝";
   const isDark = p => !!p && (p.classList.contains("hero") || p.classList.contains("footer"));
-  const on = () => current === "home" && innerWidth > 900 && innerHeight >= 560 && !document.body.classList.contains("menu-open");
+  const on = () => current === "home" && innerWidth > 900 && innerHeight >= 560;
   const maxY = () => document.documentElement.scrollHeight - innerHeight;
   /* k 번째 화면의 맨 위 스크롤 위치. 마지막(푸터)은 페이지 끝 */
   const topOf = k => { const ps = panels(); return k === ps.length - 1 ? maxY() : Math.min(Math.round(ps[k].getBoundingClientRect().top + scrollY), maxY()); };
@@ -134,7 +129,7 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
   const paint = k => {
     const ps = panels(); $$("button", dots).forEach((b, j) => { b.classList.toggle("is-on", j === k); b.toggleAttribute("aria-current", j === k); });
     dots.classList.toggle("is-light", isDark(ps[k]));
-    nav.classList.toggle("is-dark", current === "home" && isDark(ps[k]) && !nav.classList.contains("is-clear") && !document.body.classList.contains("menu-open"));
+    nav.classList.toggle("is-dark", current === "home" && isDark(ps[k]) && !nav.classList.contains("is-clear"));
   };
   const animate = (to, k) => {
     const from = scrollY, t0 = performance.now(), dur = REDUCED ? 0 : 760;

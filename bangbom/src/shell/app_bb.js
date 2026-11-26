@@ -931,10 +931,10 @@ function planSVG(L) {
 Consult.init();
 /* 화면 폭이 휴대폰 기준(820px)을 넘나들면 패널과 카드를 그 화면에 맞게 다시 맞춘다 */
 PHONE.addEventListener("change", () => { if (!VIEW) return; syncPl(); setTab(S.tab || "sum"); Consult.fit(); });
-/* Escape: 메뉴가 열려 있으면 메뉴만 닫히고(shell.js), 아니면 상담 서랍 → 단지 카드 순서로 닫는다 */
+/* Escape: 상담 서랍 → 단지 카드 순서로 닫는다 */
 addEventListener("keydown", e => {
   /* 크게 보기 중에는 크게 보기만 닫는다(위의 크게 보기 처리) */
-  if (e.key !== "Escape" || !VIEW || cardBig || document.body.classList.contains("menu-open")) return;
+  if (e.key !== "Escape" || !VIEW || cardBig) return;
   const p = $("#panelR");
   if (Consult.isOpen) Consult.close();
   else if (p.classList.contains("is-open")) { const u = MapView.units[S.sel], back = p.contains(document.activeElement); closeCard(); MapView.select(null); if (back && u) u.lbl.focus({ preventScroll: true }); }

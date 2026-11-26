@@ -420,6 +420,9 @@ b=R(b,'<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n','<li
 # 위의 R() 들이 예전 홈 문장을 찾아 바꾸므로(못 찾으면 멈춘다) 그 뒤에 끼워 넣는다. #map~#guide 앞 줄은 위에서 이미 잘라 냈다
 _i=b.index('<!-- ═══════════════ #home'); _j=b.index('<!-- ═══════════════ #guide')
 b=b[:_i]+open(os.path.join(HERE,'home.html'),encoding='utf-8').read()+b[_j:]
+# 메뉴 단추(#menuOpen)·메뉴 패널(#panel)·scrim 은 위 막대·아래 탭과 겹쳐서 뺀다. 휴대폰은 오른쪽 위에 "내 조건 넣기"(home.css)
+b,_n=re.subn(r'\s*<button class="btn btn--ghost menu-btn" id="menuOpen".*?</button>','',b,count=1,flags=re.S); assert _n==1, '메뉴 단추가 없어요'
+b,_n=re.subn(r'<div class="scrim" id="scrim"></div>\s*<aside class="panel" id="panel".*?</aside>\s*','',b,count=1,flags=re.S); assert _n==1, '메뉴 패널이 없어요'
 # 탭바 4칸
 h=h.replace('.tabbar{display:grid;grid-template-columns:repeat(5,1fr);','.tabbar{display:grid;grid-template-columns:repeat(4,1fr);')
 
