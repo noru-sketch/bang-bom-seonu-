@@ -1091,6 +1091,63 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
   /* 휴대폰에서 왼쪽 카드가 접기 단추(−)와 겹치지 않게 단추 아래에 둔다 */
   #mh .panel-l{top:220px}
 }
+/* ═══════ 홈 6화면 (문제 → 해결) · 뼈대 ═══════ */
+/* 섹션 틀은 p1_head.html 의 .section / .container 를 그대로 쓴다. 여기는 6화면에만 필요한 것만 둔다 */
+.hs__head{max-width:720px}
+.hs__body{margin-top:var(--s6)}
+.hs__body:empty{display:none}
+.hs__close{margin-top:var(--s6);font-size:clamp(18px,1.6vw,22px);font-weight:600;letter-spacing:-.03em;line-height:1.5}
+.hs__cta{margin-top:var(--s6);display:flex;justify-content:center}
+/* 2. 문제: 근거 카드 4개. 카드 틀(.card)·큰 숫자(.stat__num)는 p1_head.html 것을 그대로 쓴다 */
+.hp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3)}
+.hp{display:flex;flex-direction:column;padding:var(--s4) var(--s3)}
+.hp__k{font-size:14px;font-weight:600;color:var(--sub)}
+.hp .stat__num{margin:var(--s2) 0 0}
+.hp__t{margin:var(--s2) 0 0;font-weight:600;line-height:1.55}
+.hp__more{margin:var(--s1) 0 0;font-size:14px;color:var(--sub)}
+.hp__src{list-style:none;margin:auto 0 0;padding:var(--s3) 0 0;font-size:12px;line-height:1.5;color:var(--sub)}
+.hp__src li{padding-top:var(--s1);border-top:1px solid var(--line)}
+.hp__src li + li{margin-top:var(--s1)}
+.hp__src a{text-decoration:underline;text-underline-offset:2px}
+@media (max-width:1100px){.hp-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:820px){.hp-grid{grid-template-columns:1fr;gap:var(--s2)}.hp{padding:var(--s3)}}
+/* 3. 해결 1: 판정 미리보기 카드 + 세 단계 설명. 줄 배치는 .zz__row 를 그대로 쓴다 */
+.hsu{padding:var(--s4)}
+.hsu__head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s2)}
+.hsu__who{font-weight:600;line-height:1.5}
+.hsu__list{list-style:none;margin:var(--s3) 0 0;padding:0;border-top:1px solid var(--line)}
+.hsu__list li{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.hsu__sum{margin-top:var(--s3);font-weight:600}
+.hsu__sum b{color:var(--green)}
+.hsu__clash{margin-top:var(--s2);padding:12px 14px;border-radius:12px;background:var(--gray);font-size:14px;line-height:1.55}
+.hsu__clash b{display:block;font-size:12px;color:var(--sub)}
+.hsu__foot{margin-top:var(--s2);font-size:13px;color:var(--sub)}
+.hsu__steps{list-style:none;margin:0;padding:0;counter-reset:hsu}
+.hsu__steps li{position:relative;padding:0 0 var(--s3) 44px;color:#3d413d;counter-increment:hsu}
+.hsu__steps li::before{content:counter(hsu,decimal-leading-zero);position:absolute;left:0;top:0;font-family:var(--en);font-style:italic;font-size:20px;color:var(--green);line-height:1.4}
+.hsu__steps b{display:block;color:var(--ink);font-size:18px;font-weight:600;letter-spacing:-0.03em}
+/* 5. 해결 3: 방봄이 확인한 것 / 직접 확인할 것 / 기관이 정하는 것 */
+.hck-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3)}
+.hck{padding:var(--s4) var(--s3)}
+.hck__k{font-size:14px;font-weight:600;color:var(--green)}
+.hck__t{margin-top:var(--s1);font-size:18px;font-weight:600;letter-spacing:-0.03em;line-height:1.45}
+.hck ul{list-style:none;margin:var(--s3) 0 0;padding:0;border-top:1px solid var(--line)}
+.hck li{padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.55}
+.hck__supply li{display:flex;justify-content:space-between;gap:var(--s2)}
+.hck__supply span{color:var(--sub);font-size:14px;text-align:right}
+.hck__list li{position:relative;padding-left:26px}
+.hck__list li::before{content:"";position:absolute;left:0;top:15px;width:14px;height:14px;border:1.5px solid var(--ink);border-radius:4px}
+.hck__by li{color:#3d413d}
+.hck__note{margin-top:var(--s2);font-size:13px;color:var(--sub)}
+@media (max-width:1100px){.hck-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:820px){.hck-grid{grid-template-columns:1fr;gap:var(--s2)}.hsu,.hck{padding:var(--s3)}.hsu__head{flex-direction:column-reverse}}
+/* 4. 해결 2: 바탕이 밝은 그림(평면도 → 3D → 방)은 회색 바탕 대신 카드 바탕과 선을 쓴다 */
+.zz__media--plain{background:var(--card);border:1px solid var(--line)}
+/* 세 단계 그림은 넓은 칸(7fr)에 둔다. 휴대폰에서는 p1_head.html 의 .zz__row.is-rev 규칙(한 칸)이 이긴다 */
+.zz__row--wide{grid-template-columns:5fr 7fr}
+.zz__media--plain > img{object-fit:contain}
+.hs__links{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);margin-top:var(--s3)}
+.hs__links .link{margin-top:0}
 
 /* ═════════ 휴대폰 화면: 홈·이용 안내 (build.py가 맨 끝에 붙인다) ═════════ */
 
@@ -1492,17 +1549,19 @@ body.house-mode #mh .fab{display:none}
 <main id="main">
 
 <!-- ═══════════════ #home ═══════════════ -->
+<!-- 홈 6화면: 히어로 → 문제 → 해결 1·2·3 → 시작하기. build.py 가 p2_body.html 의 #page-home 자리에 이 파일을 끼워 넣는다 -->
+<!-- 지금은 뼈대만 있다. 근거 카드·판정 예시·체크리스트는 다음 단계에서 채운다 (docs/인수인계_혜원.md 3번) -->
 <section class="page" id="page-home" data-page="home" aria-label="홈">
 
-  <div class="hero">
+  <!-- 1. 히어로 -->
+  <div class="hero hs" id="home-hero" data-hs="처음">
     <video class="hero__media" autoplay muted playsinline preload="auto" poster="img/hero.jpg" aria-label="새 집 거실을 천천히 둘러보는 예시 영상">
       <source src="vid/hero.mp4" type="video/mp4">
     </video>
     <div class="hero__shade" aria-hidden="true"></div>
     <span class="tag-example">예시 영상</span>
     <div class="container hero__inner">
-      <p class="hero__en">Your furniture, your model house.</p>
-      <h1 class="hero__title"><span>방봄</span></h1>
+      <h1 class="hero__title"><span>가 보기 전에,</span><span class="thin">먼저 살아보는 집</span></h1>
       <p class="hero__desc">대구에 좋은 매물 있는데, 함께 보시겠어요?</p>
       <div class="hero__btns">
         <a href="#input" class="btn btn--white" data-go="input">기본정보 입력하고 더 알아보기 →</a>
@@ -1512,190 +1571,167 @@ body.house-mode #mh .fab{display:none}
     <div class="scroll-cue" aria-hidden="true">Scroll<i></i></div>
   </div>
 
-  <!-- 휴대폰(820px 이하)에서만 보이는 카테고리 칩. 고른 묶음(data-catp) 하나만 보여요. PC에서는 숨기고 모든 묶음을 이어서 보여요 -->
-  <div class="cats" id="homeCats" role="tablist" aria-label="홈 내용 고르기">
-    <button class="cat is-on" type="button" role="tab" aria-selected="true" data-cat="num"><span>숫자</span></button>
-    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="plan"><span>평면</span></button>
-    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="help"><span>돕는 방법</span></button>
-    <button class="cat" type="button" role="tab" aria-selected="false" data-cat="story"><span>우리 이야기</span></button>
+  <!-- 2. 문제 -->
+  <div class="section section--white hs" id="home-problem" data-hs="문제">
+    <div class="container">
+      <div class="hs__head reveal">
+        <span class="eyebrow">Why it's hard</span>
+        <h2 class="title">대구에서 집 구하기가 유독 어려운 이유</h2>
+      </div>
+      <!-- 근거 카드 4개(떠나는 청년 · 약한 벌이 · 모르는 정책 · 빈 집). 카드마다 출처와 기준일, 보도 숫자는 "보도 기준" -->
+      <!-- 숫자·출처는 docs/인수인계_혜원.md 3번 표 그대로. 확인 안 된 숫자는 넣지 않는다 -->
+      <div class="hs__body hp-grid" id="homeProblemCards">
+        <article class="card hp reveal">
+          <span class="hp__k">떠나는 청년</span>
+          <p class="stat__num">67.6<small>%</small></p>
+          <p class="hp__t">2026년 6월 대구를 떠난 822명 중 556명이 20~39세였어요.</p>
+          <p class="hp__more">2019년부터 2024년까지 대구에서 빠져나간 청년은 3만 5,700명이에요.</p>
+          <ul class="hp__src">
+            <li>국가데이터처 국내인구이동통계, 동북지방통계청 분석 · <a href="https://kbmaeil.com/article/20260730500246" target="_blank" rel="noopener">경북매일 2026.7.30</a></li>
+            <li>동북지방데이터청 · <a href="https://kbmaeil.com/article/20261027500130" target="_blank" rel="noopener">경북매일 2026.10.27</a></li>
+          </ul>
+        </article>
+        <article class="card hp reveal">
+          <span class="hp__k">약한 벌이</span>
+          <p class="stat__num">58.5<small>%</small></p>
+          <p class="hp__t">대구 고용률은 전국 시·도 중 가장 낮아요. (보도 기준)</p>
+          <p class="hp__more">1인당 지역내총생산과 1인당 가계 처분가능소득도 모두 전국 평균보다 낮아요.</p>
+          <ul class="hp__src">
+            <li>보도 기준 · <a href="https://www.hankyung.com/article/202607243355H" target="_blank" rel="noopener">한국경제 2026.7.24</a></li>
+            <li>국가데이터처 · <a href="https://mobile.newsis.com/view/NISX20260703_0003695527" target="_blank" rel="noopener">뉴시스 2026.7.3</a></li>
+          </ul>
+        </article>
+        <article class="card hp reveal">
+          <span class="hp__k">모르는 정책</span>
+          <p class="stat__num">84.5<small>%</small></p>
+          <p class="hp__t">청년 열 명 중 여덟 명은 청년정책 계획을 들어 본 적만 있거나 전혀 몰라요.</p>
+          <p class="hp__more">연 소득 2,400만 원 미만 청년 중 자세히 아는 사람은 7.1%뿐이에요.</p>
+          <ul class="hp__src">
+            <li>청년정책 플랫폼 설문(521명) · <a href="https://view.asiae.co.kr/article/2026022011075035575" target="_blank" rel="noopener">아시아경제 2026.2.20</a></li>
+          </ul>
+        </article>
+        <article class="card hp reveal">
+          <span class="hp__k">빈 집</span>
+          <p class="stat__num">3,077<small>세대</small></p>
+          <p class="hp__t">그런데 대구에는 다 지어 놓고도 비어 있는 집이 이만큼 있어요.</p>
+          <p class="hp__more">준공 후 미분양 기준이고, 전국 시·도 중 가장 많아요.</p>
+          <ul class="hp__src">
+            <li>국토교통부 주택통계 · 2026.9 기준</li>
+          </ul>
+        </article>
+      </div>
+      <p class="hs__close reveal">집은 있는데, 내 조건에 맞는 집과 지원을 한 번에 보여주는 곳이 없어요.</p>
+    </div>
   </div>
 
-  <div class="stats is-on" data-catp="num">
-    <div class="container stats__grid">
-      <div class="stat reveal">
-        <div class="stat__num"><span data-count="3077">0</span><small>세대</small></div>
-        <p class="stat__label">대구 준공 후 미분양(전체 미분양 3,889호 중 79.1%), 전국 시·도 중 최다</p>
-        <p class="stat__src">국토교통부 주택통계 · 2026년 9월 말</p>
+  <!-- 3. 해결 1 -->
+  <div class="section hs" id="home-support" data-hs="지원 찾기">
+    <div class="container">
+      <div class="hs__head reveal">
+        <span class="eyebrow">Solution 01</span>
+        <h2 class="title">받을 수 있는 지원을 대신 찾아줘요</h2>
       </div>
-      <div class="stat reveal">
-        <div class="stat__num"><span data-count="43">0</span><small>시간</small></div>
-        <p class="stat__label">분양 0건이던 990가구 단지가 전세로 나오자 생긴 대기 줄</p>
-        <p class="stat__src">뉴시스·뉴스1 · 2026.9</p>
+      <!-- 조건 입력 → 요건 충족 / 확인 필요 / 미충족, 같이 못 받는 지원 거르기, 24시간 상담 -->
+      <div class="hs__body" id="homeSupport"></div>
+    </div>
+  </div>
+
+  <!-- 4. 해결 2 -->
+  <div class="section section--gray hs" id="home-house" data-hs="지도·집 보기">
+    <div class="container">
+      <div class="hs__head reveal">
+        <span class="eyebrow">Solution 02</span>
+        <h2 class="title">지도에서 고르고, 방 안까지 들어가 봐요</h2>
       </div>
-      <div class="stat reveal">
-        <div class="stat__num"><span data-count="33.6">0</span><small>%</small></div>
-        <p class="stat__label">대구 청년 주거지원 예산 집행률</p>
-        <p class="stat__src">대구시 시의회 제출 자료 · 2026.10 기준</p>
+      <!-- 2.5D 지도 + 편의시설 연결선(vid/match.mp4), 평면도 → 3D → 방 하나하나, 가구 전·후 비교(img/furn_before.jpg · furn_after.jpg) -->
+      <div class="hs__body zz" id="homeHouse">
+        <div class="zz__row">
+          <div class="zz__media reveal">
+            <video muted playsinline preload="none" poster="img/match.jpg" data-autoplay aria-label="불이 켜진 단지를 누르면 다른 단지는 사라지고 주변 시설까지 선이 이어지는 방봄 지도 화면"><source src="vid/match.mp4" type="video/mp4"></video>
+            <span class="tag-example">예시 영상</span>
+          </div>
+          <div class="zz__text reveal">
+            <p class="zz__no">01 · Map</p>
+            <h3 class="zz__title">불 켜진 단지를 눌러 보세요</h3>
+            <p>내 조건으로 들어갈 수 있는 단지에만 불이 켜져요. 단지를 누르면 가까이 다가가고, 지하철역·병원·공원 같은 주변 시설까지 선으로 이어져요.</p>
+            <a href="#map" class="link" data-go="browse">지도 둘러보기 →</a>
+          </div>
+        </div>
+        <div class="zz__row is-rev zz__row--wide">
+          <div class="zz__media zz__media--plain reveal">
+            <!-- 나노바나나 프로로 만든 그림 (src/tools/make_images.py). 실제 단지 도면이 아니다 -->
+            <img src="img/house_flow.jpg" alt="침실 두 개와 거실이 있는 같은 집을 평면도, 지붕을 걷어 낸 3D 모형, 침실 안 모습 순서로 화살표를 따라 보여 주는 그림" loading="lazy">
+            <span class="tag-example">AI 연출 이미지</span>
+          </div>
+          <div class="zz__text reveal">
+            <p class="zz__no">02 · Plan to room</p>
+            <h3 class="zz__title">평면도에서 3D로, 방 안까지</h3>
+            <p>단지를 고르면 평면도가 먼저 보이고, 누르면 3D로 바뀌어요. 방을 하나 고르면 그 방 안으로 들어가 눈높이로 둘러볼 수 있어요.</p>
+            <p>아이 눈높이(90cm)로 보면 아이 얼굴 높이에 닿는 가구 모서리를 빨간 점으로 짚어 줘요. 참고값 (법적·안전 기준 아님)</p>
+            <div class="hs__links">
+              <a href="#map" class="link" data-go="browse">단지 고르고 집 보기 →</a>
+              <a href="#house" class="btn btn--line" data-eye="child">아이 눈높이 90cm로 보기 →</a>
+            </div>
+          </div>
+        </div>
+        <div class="zz__row">
+          <div class="zz__media reveal">
+            <div class="ba" id="ba">
+              <img src="img/furn_after.jpg" alt="침대, 책상, 원목 수납장, 러그를 놓은 새 집 작은방" loading="lazy">
+              <img class="ba__before" src="img/furn_before.jpg" alt="가구가 하나도 없는 새 집 작은방" loading="lazy">
+              <span class="ba__line" aria-hidden="true"></span>
+              <span class="ba__knob" aria-hidden="true">⟷</span>
+              <input class="ba__range" type="range" min="0" max="100" value="100" aria-label="가구 놓기 전과 놓은 후 비교 위치">
+            </div>
+            <span class="pill-label pill-label--l">놓기 전</span>
+            <span class="pill-label pill-label--r">놓은 후</span>
+            <span class="tag-example">예시 이미지</span>
+          </div>
+          <div class="zz__text reveal">
+            <p class="zz__no">03 · Furniture</p>
+            <h3 class="zz__title">우리 집 가구도 미리 놓아 봐요</h3>
+            <p>가구를 놓아 보면 부딪히는 곳과 지나다닐 통로를 먼저 알려줘요.</p>
+            <span class="zz__hint">← 사진을 좌우로 밀어서 비교해보세요 →</span>
+            <a href="#map" class="link" data-go="browse">단지 고르고 집 보기 →</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="section" data-catp="plan">
+  <!-- 5. 해결 3 -->
+  <div class="section section--white hs" id="home-check" data-hs="계약 전 확인">
+    <div class="container">
+      <div class="hs__head reveal">
+        <span class="eyebrow">Solution 03</span>
+        <h2 class="title">계약 전에 확인할 것까지</h2>
+      </div>
+      <!-- 공급 주체(LH · CR리츠 · 민간)와 보증 안내 표시 + 체크리스트(계약금 전 은행 사전 상담, 등기부, 임대인, 보증서) -->
+      <div class="hs__body" id="homeCheck"></div>
+    </div>
+  </div>
+
+  <!-- 6. 시작하기 -->
+  <div class="section hs" id="home-start" data-hs="시작하기">
     <div class="container">
       <div class="plans__head reveal">
         <div>
-          <span class="eyebrow">Plans</span>
-          <h2 class="title">미분양 단지, 평면부터 둘러보세요</h2>
+          <span class="eyebrow">Start</span>
+          <h2 class="title">대구 단지, 평면부터 둘러보세요</h2>
         </div>
         <p class="muted small">누르면 평면도·3D로 집 안을 보고 가구를 놓아볼 수 있어요.</p>
       </div>
       <div class="plans__track" id="plansTrack"></div>
       <div class="plans__btns">
-        <button class="round-btn" id="plansPrev" aria-label="이전 구조"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
-        <button class="round-btn" id="plansNext" aria-label="다음 구조"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
+        <button class="round-btn" id="plansPrev" aria-label="이전 단지"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
+        <button class="round-btn" id="plansNext" aria-label="다음 단지"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
+      </div>
+      <div class="hs__cta reveal">
+        <a href="#input" class="btn" data-go="input">내 조건 넣기 →</a>
       </div>
     </div>
   </div>
 
-  <div class="section section--gray" data-catp="help">
-    <div class="container">
-      <div class="head-center reveal">
-        <span class="eyebrow">How it helps</span>
-        <h2 class="title">가 보지 않고, 미분양 집을 골라요</h2>
-      </div>
-
-      <div class="zz-tabs" role="tablist" aria-label="방봄이 돕는 방법">
-        <button class="zz-tab is-on" role="tab" data-zz="0"><i>01</i>불 켜지는 지도</button>
-        <button class="zz-tab" role="tab" data-zz="1"><i>02</i>이사 갈래?</button>
-        <span class="zz-tabs__sep" aria-hidden="true">입주 뒤까지 미리</span>
-        <button class="zz-tab" role="tab" data-zz="2"><i>03</i>고쳐 살래?</button>
-        <button class="zz-tab" role="tab" data-zz="3"><i>04</i>아이 눈높이</button>
-      </div>
-      <div class="zz zz--tabbed">
-        <div class="zz__row is-on">
-          <div class="zz__media">
-            <div class="mini-map" aria-hidden="true">
-              <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
-                <style>.mmb{animation:blink 1.2s ease-in-out infinite}</style>
-                <rect width="600" height="400" fill="#20241f"/>
-                <path d="M-10 150 C110 120 180 170 280 120 S470 80 610 110" fill="none" stroke="#33413a" stroke-width="18" stroke-linecap="round"/>
-                <path d="M360 410 C350 330 330 260 320 170 S300 60 290 -10" fill="none" stroke="#33413a" stroke-width="10" stroke-linecap="round"/>
-                <path d="M40 340 L180 270 L300 210 L420 160 L560 120" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
-                <path d="M60 220 L200 200 L300 210 L430 240 L570 250" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
-                <g fill="#ffe2a8"><circle cx="150" cy="292" r="7"/><circle cx="430" cy="236" r="7"/></g>
-                <g fill="#ffe2a8" opacity=".25"><circle cx="150" cy="292" r="22"/><circle cx="430" cy="236" r="22"/></g>
-                <g fill="#ffe2a8" class="mmb"><circle cx="300" cy="170" r="7"/><circle cx="500" cy="300" r="7"/></g>
-                <g fill="#5b605a"><circle cx="230" cy="110" r="7"/><circle cx="80" cy="360" r="7"/><circle cx="520" cy="150" r="7"/></g>
-                <path d="M150 292 L180 270" stroke="#fff" stroke-dasharray="3 4" stroke-width="1.5"/>
-                <path d="M150 292 L96 250" stroke="#fff" stroke-dasharray="3 4" stroke-width="1.5"/>
-                <path d="M150 292 L205 330" stroke="#fff" stroke-dasharray="3 4" stroke-width="1.5"/>
-              </svg>
-            </div>
-            <span class="tag-example">예시 화면</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">01 · Match</p>
-            <h3 class="zz__title">내 조건에 불이 켜지는 집</h3>
-            <p>나이, 소득, 모은 돈만 넣으면 대출·지원 요건을 따져서 대구 미분양 지도에 들어갈 수 있는 집에만 불을 켜요. 단지를 누르면 역과 병원까지 거리와 실제 월 부담이 같이 보여요.</p>
-            <a href="#input" class="link">내 조건으로 찾아보기 →</a>
-          </div>
-        </div>
-        <div class="zz__row is-rev">
-          <div class="zz__media">
-            <video muted playsinline preload="none" poster="img/move.jpg" data-autoplay aria-label="미분양 새 집에 가구를 옮겨 놓는 예시 영상"><source src="vid/move.mp4" type="video/mp4"></video>
-            <span class="tag-example">예시 영상</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">02 · Move</p>
-            <h3 class="zz__title">이사 갈래?</h3>
-            <p>대구 미분양 단지의 면적에 맞춘 구조에 우리 가구를 그대로 옮겨봐요. 안 들어가는 가구와 새로 사야 할 가구가 먼저 보여요.</p>
-            <a href="#house" class="link">새 집에 가구 놓아보기 →</a>
-          </div>
-        </div>
-
-        <div class="zz__row">
-          <div class="zz__media">
-            <div class="ba" id="ba">
-              <img src="img/fix_after.jpg" alt="도배와 바닥재를 새로 바꿔 밝아진 방" loading="lazy">
-              <img class="ba__before" src="img/fix_before.jpg" alt="벽지가 누렇게 바래고 장판이 낡은 지금의 방" loading="lazy">
-              <span class="ba__line" aria-hidden="true"></span>
-              <span class="ba__knob" aria-hidden="true">⟷</span>
-              <input class="ba__range" type="range" min="0" max="100" value="100" aria-label="지금과 고친 후 비교 위치">
-            </div>
-            <span class="pill-label pill-label--l">지금</span>
-            <span class="pill-label pill-label--r">고친 후</span>
-            <span class="tag-example">예시 이미지</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">03 · 입주 뒤까지 미리</p>
-            <h3 class="zz__title">고쳐 살래?</h3>
-            <p>방 크기로 도배·장판 면적을 계산하고, 벽지와 바닥재를 바꾼 모습을 3D로 바로 보여줘요. 받을 수 있는 집수리 지원금은 빼고 계산해요.</p>
-            <span class="zz__hint">← 사진을 좌우로 밀어서 비교해보세요 →</span>
-            <a href="#house" class="link">평면도·3D로 집 보기 →</a>
-          </div>
-        </div>
-
-        <div class="zz__row is-rev">
-          <div class="zz__media">
-            <video muted playsinline preload="none" poster="img/child.jpg" data-autoplay aria-label="아이 눈높이 90cm에서 거실을 걸어보는 예시 영상"><source src="vid/child.mp4" type="video/mp4"></video>
-            <div class="media-dim dim dim--v" aria-hidden="true">아이 눈높이</div>
-            <span class="tag-example">예시 영상</span>
-          </div>
-          <div class="zz__text">
-            <p class="zz__no">04 · 입주 뒤까지 미리</p>
-            <h3 class="zz__title">아이 눈높이 90cm</h3>
-            <p>어른 눈에는 무릎 높이였던 탁자 모서리가 아이 시선에서는 바로 얼굴 앞이에요. 얼굴 높이의 가구 모서리를 빨간 점으로 짚어줘요(참고용).</p>
-            <a href="#house" class="link" data-eye="child">아이 눈높이 90cm로 보기 →</a>
-          </div>
-        </div>
-
-      </div>
-      <div class="zz-nav">
-        <button class="round-btn" id="zzPrev" aria-label="이전"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M11 4 6 9l5 5"/></svg></button>
-        <span class="zz-dots" id="zzDots" aria-hidden="true"><i class="is-on"></i><i></i><i></i><i></i></span>
-        <button class="round-btn" id="zzNext" aria-label="다음"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m7 4 5 5-5 5"/></svg></button>
-      </div>
-    </div>
-  </div>
-
-  <div class="section section--white" data-catp="story">
-    <div class="container story">
-      <figure class="story__fig reveal">
-        <div class="story__img">
-          <img src="img/story.jpg" alt="방봄 팀원 네 명이 노트북 앞에서 화면을 함께 보며 이야기하는 모습" loading="lazy">
-          <span class="tag-example">예시 이미지</span>
-        </div>
-        <figcaption>방봄 팀 · 대구 계명문화대학교에서 서로 다른 과 학생 네 명이 모여 만들었어요</figcaption>
-      </figure>
-      <div class="story__body reveal">
-        <span class="eyebrow">Our story</span>
-        <h2 class="title">집을 바꿀지 말지는, 살아보고 정해야 하니까요</h2>
-        <p>낡은 집에 사는 가족은 늘 같은 질문 앞에 서요. 고쳐서 계속 살지, 새 집으로 옮길지. 그런데 그 답을 정하는 도구는 견적서 몇 장과 남이 꾸민 모델하우스뿐이었어요.</p>
-        <p class="story__more" id="storyMoreText">방봄은 대구 계명문화대학교의 서로 다른 과 학생 네 명이 모인 팀이에요. 시작은 아이들 곁에서 일하며 '아이 눈높이에서 공간은 전혀 다르게 보인다'는 걸 알게 된 팀원의 경험이었어요. 그래서 우리 가구, 우리 가족, 90cm 시선까지 넣어서 두 집을 미리 걸어볼 수 있게 만들었어요.</p>
-        <button class="link story__toggle" id="storyToggle" type="button" aria-expanded="false" aria-controls="storyMoreText">팀 이야기 더 보기</button>
-        <ul class="story__list">
-          <li><b>대구의 실제 숫자로 시작해요</b><span>국토교통부·대구시 공공 통계에 출처와 기준일을 함께 적어요</span></li>
-          <li><b>아이 눈높이를 기준에 넣었어요</b><span>유아교육을 공부하는 팀원이 90cm 시선과 모서리 체크를 설계했어요</span></li>
-          <li><b>남의 도면을 가져오지 않아요</b><span>표준 구조와 실측, 공공데이터만 쓰고 예시 값은 예시라고 밝혀요</span></li>
-        </ul>
-        <a href="#input" class="btn">내 조건부터 넣어봐요 →</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="section" data-catp="story" style="padding-top:0;padding-bottom:var(--section-y)">
-    <div class="container">
-      <div class="cta reveal">
-        <img src="img/cta.jpg" alt="" loading="lazy">
-        <span class="tag-example">예시 이미지</span>
-        <div class="cta__inner">
-          <p class="cta__en">Your furniture, your model house.</p>
-          <h2 class="cta__title">우리 집부터 같이 걸어봐요</h2>
-          <a href="#input" class="btn btn--white">무료로 시작하기 →</a>
-        </div>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- ═══════════════ #guide ═══════════════ -->
@@ -2224,7 +2260,7 @@ const LAYOUTS = [
   { id: "storage", name: "수납형", items: ["bed_q", "ward_12", "shelf_8", "sofa_3", "table_4", "tv_16"] }
 ];
 /* 대구시 공개 미분양 목록 (판정 없음 · 지도에 작은 점). make_unsold.py가 만든 파일, 직접 고치지 않기.
-   9월 미분양 null = 비공개(0 아님). 좌표: OpenStreetMap Nominatim, approx=true는 동 중심 근사. 현재 계약 가능 여부는 확인 필요 */
+   9월 미분양 null = 비공개(0 아님). 좌표: jibun 이 있고 approx 가 없으면 브이월드 지번 좌표, 아니면 OpenStreetMap Nominatim. approx=true는 동 중심 근사. 현재 계약 가능 여부는 확인 필요 */
 const UNSOLD_SRC_URL = "https://www.daegu.go.kr/build/index.do?menu_link=/icms/bbs/selectBoardArticle.do&menu_id=00001338&bbsId=BBS_00153&nttId=829484";
 const UNSOLD_LIST = [
 {
@@ -2236,6 +2272,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-09",
 "builder": "에스케이 건설(주)",
+"jibun": "대구광역시 중구 삼덕동2가 5",
 "lat": 35.86499,
 "lng": 128.60442,
 "approx": true,
@@ -2251,6 +2288,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-12",
 "builder": "㈜한라공영",
+"jibun": "대구광역시 중구 태평로1가 11",
 "lat": 35.876,
 "lng": 128.59605,
 "approx": true,
@@ -2266,6 +2304,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-03",
 "builder": "㈜현대건설",
+"jibun": "대구광역시 중구 태평로3가 221-5",
 "lat": 35.87718,
 "lng": 128.58572,
 "approx": true,
@@ -2281,6 +2320,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-03",
 "builder": "㈜현대건설",
+"jibun": "대구광역시 중구 태평로3가 211-1",
 "lat": 35.87718,
 "lng": 128.58572,
 "approx": true,
@@ -2296,6 +2336,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-05",
 "builder": "현대엔지니어링",
+"jibun": "대구광역시 중구 동인동1가 211",
 "lat": 35.87218,
 "lng": 128.60357,
 "approx": true,
@@ -2311,6 +2352,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-09",
 "builder": "㈜서한",
+"jibun": "대구광역시 중구 대봉동 590-395",
 "lat": 35.85736,
 "lng": 128.59623,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
@@ -2325,6 +2367,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-11",
 "builder": "포스코건설",
+"jibun": "대구광역시 중구 공평동 58-1",
 "lat": 35.87032,
 "lng": 128.59819,
 "approx": true,
@@ -2340,6 +2383,7 @@ const UNSOLD_LIST = [
 "completed": false,
 "move_in": "2025-12",
 "builder": "㈜현창건설 ㈜유성건설",
+"jibun": "대구광역시 중구 남산동 2116-19",
 "lat": 35.86162,
 "lng": 128.58727,
 "approx": true,
@@ -2355,6 +2399,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-12",
 "builder": "(주)반도건설",
+"jibun": "대구광역시 중구 남산동 938-1",
 "lat": 35.86162,
 "lng": 128.58727,
 "approx": true,
@@ -2370,6 +2415,7 @@ const UNSOLD_LIST = [
 "completed": false,
 "move_in": "2026-10",
 "builder": "(주)포스코이앤씨",
+"jibun": "대구광역시 중구 사일동 15-1",
 "lat": 35.87135,
 "lng": 128.59535,
 "approx": true,
@@ -2385,6 +2431,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-03",
 "builder": "대우조선 해양건설㈜",
+"jibun": "대구광역시 동구 신암동 259-5",
 "lat": 35.88399,
 "lng": 128.62359,
 "approx": true,
@@ -2520,6 +2567,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-10",
 "builder": "(주)태영건설",
+"jibun": "대구광역시 동구 신천동 481-1",
 "lat": 35.87257,
 "lng": 128.62181,
 "approx": true,
@@ -2535,6 +2583,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-11",
 "builder": "디엘이앤씨㈜",
+"jibun": "대구광역시 동구 신천동 328-1",
 "lat": 35.87643,
 "lng": 128.62743,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
@@ -2549,6 +2598,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-03",
 "builder": "㈜대우건설",
+"jibun": "대구광역시 동구 신천동 311-4",
 "lat": 35.87257,
 "lng": 128.62181,
 "approx": true,
@@ -2564,6 +2614,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-04",
 "builder": "㈜현대건설",
+"jibun": "대구광역시 서구 비산동 934-1",
 "lat": 35.88112,
 "lng": 128.56658,
 "approx": true,
@@ -2579,6 +2630,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-08",
 "builder": "GS건설㈜",
+"jibun": "대구광역시 서구 내당동 220-1",
 "lat": 35.86256,
 "lng": 128.56189,
 "approx": true,
@@ -2594,6 +2646,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-06",
 "builder": "대우건설",
+"jibun": "대구광역시 서구 내당동 868-1",
 "lat": 35.86256,
 "lng": 128.56189,
 "approx": true,
@@ -2609,6 +2662,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-05",
 "builder": "현대건설㈜",
+"jibun": "대구광역시 남구 봉덕동 1067-35",
 "lat": 35.82896,
 "lng": 128.59856,
 "approx": true,
@@ -2624,6 +2678,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2022-02",
 "builder": "금화종합건설㈜",
+"jibun": "대구광역시 남구 대명동 1623-60",
 "lat": 35.83873,
 "lng": 128.5751,
 "approx": true,
@@ -2639,6 +2694,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-02",
 "builder": "현대건설㈜",
+"jibun": "대구광역시 남구 대명동 202-1",
 "lat": 35.83873,
 "lng": 128.5751,
 "approx": true,
@@ -2654,6 +2710,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2022-09",
 "builder": "㈜시온건설",
+"jibun": "대구광역시 남구 대명동 1128",
 "lat": 35.83873,
 "lng": 128.5751,
 "approx": true,
@@ -2669,6 +2726,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2021-05",
 "builder": "㈜문화종합건설",
+"jibun": "대구광역시 북구 칠성동2가 302-197",
 "lat": 35.876,
 "lng": 128.59605,
 "approx": true,
@@ -2684,6 +2742,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2020-08",
 "builder": "㈜대광건영",
+"jibun": "대구광역시 북구 연경동 994",
 "lat": 35.96102,
 "lng": 128.61361,
 "approx": true,
@@ -2699,6 +2758,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-02",
 "builder": "㈜대우건설",
+"jibun": "대구광역시 북구 노원동1가 228",
 "lat": 35.88901,
 "lng": 128.57974,
 "approx": true,
@@ -2714,6 +2774,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-04",
 "builder": "지에스건설㈜",
+"jibun": "대구광역시 북구 칠성동2가 500-2",
 "lat": 35.876,
 "lng": 128.59605,
 "approx": true,
@@ -2729,6 +2790,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-02",
 "builder": "주식회사 화성개발",
+"jibun": "대구광역시 북구 읍내동 1090",
 "lat": 35.94809,
 "lng": 128.55218,
 "approx": true,
@@ -2744,6 +2806,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-06",
 "builder": "㈜태왕이앤씨",
+"jibun": "대구광역시 북구 관음동 603",
 "lat": 35.93986,
 "lng": 128.54382,
 "approx": true,
@@ -2759,6 +2822,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-01",
 "builder": "㈜신세계건설",
+"jibun": "대구광역시 북구 칠성동2가 302-125",
 "lat": 35.876,
 "lng": 128.59605,
 "approx": true,
@@ -2774,6 +2838,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-04",
 "builder": "동부건설주식회사",
+"jibun": "대구광역시 북구 칠성동2가 302-141",
 "lat": 35.876,
 "lng": 128.59605,
 "approx": true,
@@ -2789,6 +2854,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-06",
 "builder": "현대엔지니어링(주)",
+"jibun": "대구광역시 북구 칠성동2가 321",
 "lat": 35.876,
 "lng": 128.59605,
 "approx": true,
@@ -2804,6 +2870,7 @@ const UNSOLD_LIST = [
 "completed": false,
 "move_in": "2027-06",
 "builder": "두산건설 주식회사",
+"jibun": "대구광역시 북구 학정동 732-1",
 "lat": 35.95291,
 "lng": 128.56546,
 "approx": true,
@@ -2819,6 +2886,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2021-02",
 "builder": "삼도주택㈜",
+"jibun": "대구광역시 수성구 파동 118-201",
 "lat": 35.81473,
 "lng": 128.61538,
 "approx": true,
@@ -2834,6 +2902,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2021-12",
 "builder": "보광종합 건설㈜",
+"jibun": "대구광역시 수성구 중동 356-7",
 "lat": 35.84506,
 "lng": 128.6116,
 "approx": true,
@@ -2849,6 +2918,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-03",
 "builder": "동광건설㈜",
+"jibun": "대구광역시 수성구 중동 485-1",
 "lat": 35.84506,
 "lng": 128.6116,
 "approx": true,
@@ -2864,6 +2934,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-12",
 "builder": "포스코건설",
+"jibun": "대구광역시 수성구 수성동1가 649-19",
 "lat": 35.85519,
 "lng": 128.61044,
 "approx": true,
@@ -2879,6 +2950,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-01",
 "builder": "주식회사 케이씨씨건설",
+"jibun": "대구광역시 수성구 파동 118-119",
 "lat": 35.81841,
 "lng": 128.61648,
 "source": "대구시 2026년 9월말 공동주택 미분양 현황",
@@ -2893,6 +2965,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-03",
 "builder": "GS건설",
+"jibun": "대구광역시 수성구 범어동 48-26",
 "lat": 35.85709,
 "lng": 128.63264,
 "approx": true,
@@ -2908,6 +2981,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-11",
 "builder": "현대건설㈜",
+"jibun": "대구광역시 수성구 황금동 891-1",
 "lat": 35.84085,
 "lng": 128.63181,
 "approx": true,
@@ -2923,6 +2997,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-11",
 "builder": "현대건설㈜",
+"jibun": "대구광역시 수성구 황금동 862-5",
 "lat": 35.84085,
 "lng": 128.63181,
 "approx": true,
@@ -2938,6 +3013,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-09",
 "builder": "㈜화성개발",
+"jibun": "대구광역시 수성구 지산동 1055-1",
 "lat": 35.82399,
 "lng": 128.63451,
 "approx": true,
@@ -2953,6 +3029,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-01",
 "builder": "㈜포스코이앤씨",
+"jibun": "대구광역시 수성구 범어동 1",
 "lat": 35.85709,
 "lng": 128.63264,
 "approx": true,
@@ -2968,6 +3045,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-05",
 "builder": "㈜이테크건설",
+"jibun": "대구광역시 달서구 본동 752",
 "lat": 35.8354,
 "lng": 128.53973,
 "approx": true,
@@ -2983,6 +3061,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2023-11",
 "builder": "㈜이테크건설",
+"jibun": "대구광역시 달서구 감삼동 573",
 "lat": 35.84855,
 "lng": 128.54092,
 "approx": true,
@@ -2998,6 +3077,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-06",
 "builder": "두산건설㈜",
+"jibun": "대구광역시 달서구 본리동 1234",
 "lat": 35.84091,
 "lng": 128.53927,
 "approx": true,
@@ -3013,6 +3093,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-09",
 "builder": "효성 중공업㈜",
+"jibun": "대구광역시 달서구 감삼동 505-1",
 "lat": 35.84855,
 "lng": 128.54092,
 "approx": true,
@@ -3028,6 +3109,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2025-12",
 "builder": "롯데건설",
+"jibun": "대구광역시 달서구 본동 743",
 "lat": 35.8354,
 "lng": 128.53973,
 "approx": true,
@@ -3043,6 +3125,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2026-03",
 "builder": "㈜대우건설",
+"jibun": "대구광역시 달서구 본리동 358-5",
 "lat": 35.84091,
 "lng": 128.53927,
 "approx": true,
@@ -3058,6 +3141,7 @@ const UNSOLD_LIST = [
 "completed": false,
 "move_in": "2026-06",
 "builder": "포스코건설",
+"jibun": "대구광역시 달서구 본동 888-2",
 "lat": 35.8354,
 "lng": 128.53973,
 "approx": true,
@@ -3073,6 +3157,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2022-11",
 "builder": "㈜우인종합건설",
+"jibun": "대구광역시 달서구 진천동 66-1",
 "lat": 35.81072,
 "lng": 128.52127,
 "approx": true,
@@ -3088,6 +3173,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2024-11",
 "builder": "주식회사 동부건설",
+"jibun": "대구광역시 달서구 두류동 638-19",
 "lat": 35.85661,
 "lng": 128.56483,
 "approx": true,
@@ -3103,6 +3189,7 @@ const UNSOLD_LIST = [
 "completed": false,
 "move_in": "2027-02",
 "builder": "gs건설㈜",
+"jibun": "대구광역시 달서구 본리동 661-9",
 "lat": 35.84091,
 "lng": 128.53927,
 "approx": true,
@@ -3118,6 +3205,7 @@ const UNSOLD_LIST = [
 "completed": true,
 "move_in": "2021-04",
 "builder": "동의건설",
+"jibun": "대구광역시 달성군 다사읍 매곡리 233-2",
 "lat": 35.86229,
 "lng": 128.462,
 "approx": true,
@@ -3677,6 +3765,7 @@ function openUnsold(k) {
   p.innerHTML = `<div class="cc"><div class="cc-top"><div><span class="eyebrow-s">Public list</span><h2>${esc(u.name)}</h2><div class="tags"><span class="tag">${esc(u.gu)} ${esc(u.dong)}</span></div></div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
     <p class="why">대구시 공개 미분양 목록 · 현재 계약 가능 여부는 확인 필요</p>
+    ${u.jibun ? `<p class="small" style="margin-top:12px">지번 ${esc(u.jibun)}</p>` : ""}
     <p class="small muted" style="margin-top:12px">${esc(u.source)} · ${esc(u.as_of)} 기준</p>
     <div class="links" style="margin-top:8px"><a href="${esc(UNSOLD_SRC_URL)}" target="_blank" rel="noopener">대구시 원자료 ↗</a></div>
     ${u.approx ? `<p class="small muted" style="margin-top:8px">지도 위치는 동 중심 근사예요.</p>` : ""}</div>`;
@@ -4281,6 +4370,84 @@ ${labels}
   close() { this.on = false; this.shown = null; }
 };
 
+/* ═══════ 홈 6화면 채우기 (해결 1 · 해결 3) ═══════
+   build.py 가 app_bb.js 바로 뒤에 붙인다. 같은 { } 범위라 RULES·COMPLEXES·profileResult·evaluate·appliedLists·PERSONA 를 그대로 쓴다.
+   판정·개수·이유는 모두 판정 코드가 계산한 값이다. 이 파일에 숫자를 직접 적지 않는다 */
+(function homeFill() {
+  const sup = $("#homeSupport"), chk = $("#homeCheck");
+  if (!sup && !chk) return;
+  const P = PERSONA, pr = profileResult(P);
+  const evs = COMPLEXES.map(c => ({ c, e: evaluate(P, c, pr) }));
+  const n = { on: 0, dim: 0, off: 0 }; evs.forEach(x => n[x.e.light]++);
+  const ST_CLASS = { eligible: "st--ok", needs_check: "st--check", ineligible: "st--no" };
+
+  /* 3. 해결 1: 예시 페르소나 판정 미리보기 */
+  if (sup) {
+    const rows = [...pr.loans, ...pr.policies].map(x =>
+      `<li><span class="hsu__name">${esc(x.name)}</span><span class="st ${ST_CLASS[x.status]}">${esc(ST_KO[x.status])}</span></li>`).join("");
+    /* 같이 못 받는 지원: 판정 코드가 "둘 중 하나만"으로 걸러 낸 첫 사례 */
+    let clash = null;
+    for (const { c, e } of evs) { const na = appliedLists(c, e, pr).not_applied.find(x => /하나만/.test(x.reason)); if (na) { clash = na; break; } }
+    const won = v => (v / 1).toLocaleString("ko-KR");
+    sup.innerHTML = `
+      <div class="zz__row">
+        <div class="card hsu reveal">
+          <div class="hsu__head">
+            <p class="hsu__who">김지훈(27) · 월 실수령 ${won(P.monthly_income)}만 · 모은 돈 ${won(P.assets)}만 · 월 예산 ${won(P.monthly_budget)}만</p>
+            <span class="tag-example">예시</span>
+          </div>
+          <ul class="hsu__list">${rows}</ul>
+          <p class="hsu__sum">대구 단지 ${COMPLEXES.length}곳 중 <b>● ${LIGHT_KO.on} ${n.on}</b> · ◐ ${LIGHT_KO.dim} ${n.dim} · ○ ${LIGHT_KO.off} ${n.off}</p>
+          ${clash ? `<p class="hsu__clash"><b>같이 못 받는 지원</b>${esc(clash.name)} · ${esc(clash.reason)}</p>` : ""}
+          <p class="hsu__foot">최종 판정은 은행과 기관이 해요. 방봄은 요건을 미리 따져 볼 뿐이에요.</p>
+        </div>
+        <div class="zz__text reveal">
+          <ol class="hsu__steps">
+            <li><b>조건만 넣으면</b>나이, 소득, 모은 돈을 넣으면 대출과 지원을 하나씩 따져서 요건 충족 · 확인 필요 · 미충족으로 알려줘요.</li>
+            <li><b>같이 못 받는 지원은 걸러요</b>둘 중 하나만 받을 수 있는 지원은 미리 빼고, 실제로 받을 수 있는 조합으로 월 부담을 계산해요.</li>
+            <li><b>모르는 건 24시간 상담으로</b>궁금한 게 생기면 지도와 집 보기 화면에서 상담을 열어 물어보세요. 판정과 숫자는 규칙대로 계산한 값만 보여줘요.</li>
+          </ol>
+          <a href="#input" class="link">내 조건 넣고 판정 보기 →</a>
+        </div>
+      </div>`;
+  }
+
+  /* 5. 해결 3: 방봄이 확인한 것 / 직접 확인할 것 / 기관이 정하는 것 */
+  if (chk) {
+    const byType = {}; COMPLEXES.forEach(c => { byType[c.supply_type] = (byType[c.supply_type] || 0) + 1; });
+    /* 공급 주체: 단지 자료에 있는 것(LH·CR리츠)은 개수까지, 민간은 지금 목록에 없어서 확인할 점만 적는다 */
+    const supply = Object.keys(byType).map(t =>
+      `<li><b>${esc(SUPPLY_KO[t] || t)}</b><span>${esc(LANDLORD_KO[t] || "")} · ${byType[t]}곳</span></li>`).join("")
+      + `<li><b>민간 임대</b><span>임대인 개인·법인 · 지금 목록에는 없어요</span></li>`;
+    const gf = RULES.badges.guarantee_fee;
+    /* 체크리스트 순서: 계약금 전 은행 사전 상담 → (해제 특약) → 등기부 → 임대인 → 보증서. 앞의 다섯 줄은 판정 자료(RULES) 그대로, 보증서 한 줄만 홈에서 더한다 */
+    const mine = [...RULES.fixed_checklist, ...RULES.safety_checklist, "보증에 가입했다면 보증서를 받아 두고, 이름·주소·보증금이 계약서와 같은지 확인하세요"]
+      .map(t => `<li>${esc(t)}</li>`).join("");
+    const by = [];
+    [...RULES.loans, RULES.market_loan, ...RULES.policies].forEach(x => { if (x.approval_by && !by.includes(x.approval_by)) by.push(x.approval_by); });
+    chk.innerHTML = `
+      <div class="hck-grid">
+        <div class="card hck reveal">
+          <span class="hck__k">방봄이 확인한 것</span>
+          <p class="hck__t">단지마다 공급 주체와 임대인을 먼저 보여줘요.</p>
+          <ul class="hck__supply">${supply}</ul>
+          <p class="hck__note"><b>보증 안내</b> ${esc(gf.text)} <a href="${esc(gf.source_url)}" target="_blank" rel="noopener">출처 ↗</a></p>
+          <p class="hck__note">민간 임대는 임대인이 보증에 가입했는지 계약 전에 꼭 확인하세요. 단지별 보증 안내와 공고 링크는 단지 카드에서 같이 볼 수 있어요.</p>
+        </div>
+        <div class="card hck reveal">
+          <span class="hck__k">직접 확인할 것</span>
+          <p class="hck__t">계약 전에 이것만은 꼭 챙겨요.</p>
+          <ul class="hck__list">${mine}</ul>
+        </div>
+        <div class="card hck reveal">
+          <span class="hck__k">기관이 정하는 것</span>
+          <p class="hck__t">대출 승인과 지원 선정은 기관이 정해요.</p>
+          <ul class="hck__by">${by.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+        </div>
+      </div>`;
+  }
+})();
+
 
 /* ═══════════════ S6 24시간 상담 (규칙이 답을 만들고 AI가 쉽게 풀어 쓴다) ═══════════════ */
 const QUICK = ["내 판정 결과 쉽게 설명해 줘", "확인 필요는 어떻게 확인해요?", "신청은 어디서, 뭐가 필요해요?", "이 단지 월 부담은 어떻게 계산했어요?", "계약 전에 꼭 확인할 것은?"];
@@ -4557,7 +4724,9 @@ if (zzBox) zzBox.addEventListener("scroll", () => {
   if (performance.now() >= zzBusy) zzSync();
 }, { passive: true });
 $$(".zz-tab").forEach(b => b.addEventListener("click", () => setZZ(+b.dataset.zz)));
-$("#zzPrev").addEventListener("click", () => setZZ(zzI - 1)); $("#zzNext").addEventListener("click", () => setZZ(zzI + 1));
+/* 홈 6화면(home.html)에는 이 넘김 단추가 없다. 없을 때 여기서 멈추면 아래 평면 갤러리와 BB.route 까지 멈춘다 */
+const zzPrev = $("#zzPrev"), zzNext = $("#zzNext");
+if (zzPrev) zzPrev.addEventListener("click", () => setZZ(zzI - 1)); if (zzNext) zzNext.addEventListener("click", () => setZZ(zzI + 1));
 /* 화면을 돌리거나 창 폭이 바뀌어 휴대폰 배치로 들어오면 넘김 위치를 지금 장에 맞춘다 */
 PHONE.addEventListener("change", () => { if (PHONE.matches && zzBox) requestAnimationFrame(() => { zzBox.scrollLeft = zzBox.clientWidth * zzI; }); });
 
