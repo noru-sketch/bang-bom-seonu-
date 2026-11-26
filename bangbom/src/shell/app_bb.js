@@ -258,6 +258,8 @@ function renderPrio() {
   $$("#prioChips button").forEach(b => b.addEventListener("click", () => { const k = b.dataset.p; prio = prio.includes(k) ? prio.filter(x => x !== k) : [...prio, k]; renderPrio(); formDirty = true; }));
 }
 $("#fillPersona").onclick = () => { fillForm(PERSONA); formDirty = true; };
+/* 부족 금액 예시: 김지훈 예시와 같고 모은 돈만 1,000만 원 (bangbom/CLAUDE.md 페르소나 규칙) */
+$("#fillShort").onclick = () => { fillForm(Object.assign({}, PERSONA, { assets: 1000 })); formDirty = true; };
 /* 칸을 고치면 그 칸의 빨간 알림을 바로 지운다 (다음을 다시 누를 때까지 남아 있으면 맞게 적어도 틀린 것처럼 보인다) */
 $$("#form input").forEach(i => i.addEventListener("input", () => { formDirty = true; const e = $("#e-" + i.id.slice(2)); if (e) e.textContent = ""; }));
 $("#formBack").onclick = () => { S.mode = "browse"; location.hash = "#map"; };

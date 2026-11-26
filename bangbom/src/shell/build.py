@@ -126,7 +126,7 @@ body.card-open #mh .pills-r{display:none}
 #mh .form-wrap{max-width:880px;margin:0 auto}
 #mh .form-head{margin-bottom:32px}
 #mh .form{width:100%;padding:32px;box-shadow:none}
-#mh .persona{gap:8px}
+#mh .persona{gap:8px;flex-wrap:wrap}
 #mh .fgrid{gap:20px 24px;margin-top:24px}
 #mh .f label,#mh .f .lb{font-size:14px;font-weight:600;margin-bottom:8px}
 #mh .f label small,#mh .f .lb small{font-size:12px}
@@ -377,6 +377,8 @@ mb=re.sub(r'<header class="top">\s*<a href="#start".*?</a>','<header class="top"
 mb=re.sub(r'<!-- S0 시작 -->.*?<!-- S1 정보 입력 -->','<!-- S1 정보 입력 -->',mb,flags=re.S)
 mb=mb.replace('<button type="button" class="btn btn--ghost" id="formBack">둘러보기로</button>','<button type="button" class="btn btn--ghost" id="formBack">그냥 둘러보기</button>')
 mb=mb.replace('<div class="toast" id="toast" role="status"></div>','<div class="toast" id="mhToast" role="status"></div>')
+# 입력 화면 예시 단추 하나 더: 김지훈 예시에서 모은 돈만 1,000만 원(부족 금액 예시). 누르면 app_bb.js 의 #fillShort 가 채운다
+mb=R(mb,'<button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button>','<button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button><button type="button" class="chip" id="fillShort">모은 돈이 부족할 때 · 1,000만</button>')
 mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>','')
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
 b=R(b,'<li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>','<li>단지 공개 보도 · 뉴시스·뉴스1<span>2026.9</span></li>\n          <li>대구광역시 공동주택 미분양 현황(공개 단지)<span>2026.9.30 기준</span></li>')
