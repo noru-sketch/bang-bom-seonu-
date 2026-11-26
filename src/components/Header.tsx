@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { EMBEDDED } from '../lib/embed.ts'
 import { actions, getState, useAppState } from '../state/store.ts'
+import { downloadDae } from '../lib/downloadDae.ts'
 import Icon from './Icon.tsx'
 
 /** 지금 프로젝트를 JSON 파일로 내려받는다 */
@@ -151,6 +152,21 @@ function SaveShareCard({ id, note, setNote, children }: SaveShareCardProps) {
         >
           <Icon name="link" size={18} />
           링크 공유하기
+        </button>
+        <button
+          type="button"
+          className="btn btn-quiet w-full justify-start"
+          onClick={() => {
+            try {
+              downloadDae(getState().project)
+              setNote('스케치업 파일(.dae)을 내려받았어요. 스케치업에서 [파일 > 가져오기]로 열어요.')
+            } catch {
+              setNote('파일을 만들지 못했어요.')
+            }
+          }}
+        >
+          <Icon name="download" size={18} />
+          스케치업 파일(.dae) 내려받기
         </button>
       </div>
       <p className="hint mt-2 px-1">링크에는 사이트 주소만 담겨요. 내 방 자료는 파일로 옮길 수 있어요.</p>

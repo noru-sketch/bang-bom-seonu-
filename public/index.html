@@ -2027,7 +2027,7 @@ body.house-mode .nav{background:var(--bg)}
     </div>
     <div class="footer__bottom">
       <span>"예시" 표시가 있는 숫자와 이미지는 시연용이에요. 대출·지원 자격은 각 기관이 최종으로 정해요.</span>
-      <span>© 2026 Bangbom</span>
+      <span><a href="dashboard.html" class="link">이용 현황</a> · © 2026 Bangbom</span>
     </div>
   </div>
 </footer>
@@ -3011,7 +3011,7 @@ function cardHTML(id) {
   }
   body += `<details class="fold" data-pane="near"><summary>${esc(c.infra_score.label)} · ${c.infra_score.score}점</summary><p class="pane-h m-only">${esc(c.infra_score.label)} · ${c.infra_score.score}점</p><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
   body += roomNote;
-  body += `</div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
+  body += `<p class="small muted" style="margin-top:10px">실제 평면도는 <a class="link" href="https://www.zigbang.com/home/apt/" target="_blank" rel="noopener">직방에서 이 단지 찾아보기 ↗</a> (새 창)</p></div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
   return `<div class="cc">${head}${body}</div>`;
 }
 /* 휴대폰 시트에서 칩으로 고른 항목 하나만 보여 준다. 접는 목록(details)은 고른 것만 펼친다 */
