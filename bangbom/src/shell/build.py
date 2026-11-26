@@ -423,6 +423,9 @@ b=b[:_i]+open(os.path.join(HERE,'home.html'),encoding='utf-8').read()+b[_j:]
 # 메뉴 단추(#menuOpen)·메뉴 패널(#panel)·scrim 은 위 막대·아래 탭과 겹쳐서 뺀다. 휴대폰은 오른쪽 위에 "내 조건 넣기"(home.css)
 b,_n=re.subn(r'\s*<button class="btn btn--ghost menu-btn" id="menuOpen".*?</button>','',b,count=1,flags=re.S); assert _n==1, '메뉴 단추가 없어요'
 b,_n=re.subn(r'<div class="scrim" id="scrim"></div>\s*<aside class="panel" id="panel".*?</aside>\s*','',b,count=1,flags=re.S); assert _n==1, '메뉴 패널이 없어요'
+# 이용 안내(#guide)는 guide.html 로 통째로 바꾼다 (세 걸음 + 자주 묻는 질문). 위의 R() 들이 예전 안내 문장을 바꾼 뒤에 끼워 넣는다
+_i=b.index('<!-- ═══════════════ #guide'); _j=b.index('</main>',_i)
+b=b[:_i]+open(os.path.join(HERE,'guide.html'),encoding='utf-8').read()+b[_j:]
 # 탭바 4칸
 h=h.replace('.tabbar{display:grid;grid-template-columns:repeat(5,1fr);','.tabbar{display:grid;grid-template-columns:repeat(4,1fr);')
 
