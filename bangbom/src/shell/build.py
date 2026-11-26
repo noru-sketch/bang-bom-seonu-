@@ -290,6 +290,8 @@ mobile=''.join(open(os.path.join(HERE,n),encoding='utf-8').read() for n in ('mob
 home_css=open(os.path.join(HERE,'home.css'),encoding='utf-8').read()
 # 조건 입력 한 문항씩(input_q.css)도 휴대폰 CSS 앞에 둔다
 home_css+=open(os.path.join(HERE,'input_q.css'),encoding='utf-8').read()
+# 단지 카드 순서·크게 보기(card.css)
+home_css+=open(os.path.join(HERE,'card.css'),encoding='utf-8').read()
 h=R(h,'</style>\n</head>', mscoped+over+home_css+mobile+'\n</style>\n</head>')
 
 # ---------- BODY ----------
