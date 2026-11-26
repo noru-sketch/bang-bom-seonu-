@@ -1,6 +1,6 @@
 // 공개 링크 미리보기 그림(thumb.png, 1200×630) 만들기
 // 사용: 저장소 맨 위에서  node bangbom/src/tools/make_thumb.mjs
-// 히어로 사진(bangbom/img/hero.jpg) 위에 "따져 보고, 살아 보고, 고르는 집" + "방봄 BANGBOM" 을 얹어 헤드리스 Edge 로 찍는다.
+// 히어로 사진(bangbom/img/hero.jpg, AI 연출 이미지) 위에 "따져 보고, 살아 보고, 고르는 집" + "방봄 BANGBOM" 을 얹고, 오른쪽 아래에 "AI 연출 이미지" 표시를 넣어 헤드리스 Edge 로 찍는다.
 // 결과는 public/thumb.png (vite 가 dist 루트로 복사한다). 1MB 를 넘으면 사진 쪽을 조금 더 어둡고 흐리게 해서 다시 찍는다.
 import { spawn } from 'node:child_process'
 import fs from 'node:fs'
@@ -26,8 +26,9 @@ html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#1d211d}
 .t h1 span{display:block;font-weight:400}
 .t p{margin:28px 0 0;font-size:28px;font-weight:600;letter-spacing:.02em;color:#e2efe7}
 .t p b{display:inline-block;width:10px;height:10px;border-radius:50%;background:#7ED6A8;margin-right:12px;vertical-align:4px}
+.ai{position:absolute;right:24px;bottom:22px;padding:5px 12px;border-radius:999px;background:rgba(20,23,20,.55);color:#fff;font-family:P,sans-serif;font-size:16px;font-weight:400;letter-spacing:-.01em}
 </style></head><body><div class="bg"></div><div class="shade"></div>
-<div class="t"><h1>따져 보고, 살아 보고,<span>고르는 집</span></h1><p><b></b>방봄 BANGBOM</p></div></body></html>`
+<div class="t"><h1>따져 보고, 살아 보고,<span>고르는 집</span></h1><p><b></b>방봄 BANGBOM</p></div><span class="ai">AI 연출 이미지</span></body></html>`
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'thumb-'))
@@ -50,3 +51,5 @@ for (const blur of [0, 2, 4, 8]) {
 }
 ed.kill()
 if (size > 1024 * 1024) { console.error('1MB 아래로 만들지 못했어요'); process.exit(1) }
+ws.close()
+process.exit(0)
