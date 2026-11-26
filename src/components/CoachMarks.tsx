@@ -22,7 +22,8 @@ const STEPS: { title: string; text: string; touchText?: string; category: Catego
 ]
 
 export default function CoachMarks() {
-  const [visible, setVisible] = useState(() => loadJson<boolean>(DONE_KEY) !== true)
+  // 주소에 tips=0 이 있으면 띄우지 않는다 (자동 검사가 처음 온 기기로 열 때)
+  const [visible, setVisible] = useState(() => !/[?&]tips=0(&|$)/.test(location.search) && loadJson<boolean>(DONE_KEY) !== true)
   const [index, setIndex] = useState(0)
   const inSheet = useInSheet()
 

@@ -14,6 +14,8 @@ function updateNav() { nav.classList.toggle("is-clear", current === "home" && sc
 function route() {
   let name = location.hash.replace("#", "");
   if (name === "start") name = "home";
+  /* #house/<방> 은 집 보기 안의 방 하나다. 어느 방인지는 집 보기(MH.route)가 주소에서 읽는다 */
+  if (name.startsWith("house/")) name = "house";
   if (![...PAGES, ...APP].includes(name)) name = "home";
   const first = current === null, prev = current;
   current = name;

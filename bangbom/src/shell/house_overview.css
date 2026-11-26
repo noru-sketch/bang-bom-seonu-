@@ -1,1 +1,96 @@
-/* 집 전체 구조 화면 모양. 아직 비어 있다 */
+
+/* ═════════ 집 보기 · 집 전체 구조: 평면도에서 꾸밀 방 고르기 (build.py 가 맨 끝에 붙인다) ═════════
+   #houseView.is-room 이면 방 화면(방꾸미 iframe), 아니면 전체 구조(#hvOver)다. house_view.js 의 mode() 가 붙인다.
+   - 꾸밀 수 있는 방: 흰 바닥 + 검정 이름표 단추(누르는 곳). 나머지 방: 옅은 바닥 + 조용한 글자(눌리지 않는다)
+   - 보조 글자는 바탕(#f3f2ee)과 옅은 바닥 위에서 4.5:1 이 넘는 #5f625d 를 쓴다 */
+/* [전체 구조] 단추: 방 칩과 헷갈리지 않게 작은 평면 그림을 앞에 붙인다 (글자색을 따라간다) */
+#mh #hvPlan::before{content:"";flex:none;width:14px;height:14px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M1.8 1.8h10.4v10.4H1.8zM7 1.8v10.4M1.8 7H7'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M1.8 1.8h10.4v10.4H1.8zM7 1.8v10.4M1.8 7H7'/%3E%3C/svg%3E") center/contain no-repeat}
+/* PC 방 화면: [전체 구조]가 더해져도 위쪽 줄이 두 줄로 꺾이지 않게, 좁은 창에서는 제목 칸이 먼저 줄어든다 (방 칩 237px + 단추 셋 261px + 간격) */
+@media (min-width:821px){#mh #houseView.is-room .hv-title{max-width:calc(100vw - var(--pad-x) * 2 - 524px)}}
+/* PC 집 보기: 위 막대 뒤에는 (집 보기 동안 그리지 않는) 지도뿐이다. 비쳐 보이면 막대가 어두워져서 불투명한 바탕으로 둔다 */
+body.house-mode .nav{background:var(--bg)}
+
+#mh .hv-over{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;--hvo-sub:#5f625d}
+#mh .hvo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);grid-template-rows:auto auto auto 1fr;grid-template-areas:"fig lead" "fig list" "fig note" "fig photo";column-gap:clamp(24px,4vw,56px);max-width:1240px;margin:0 auto;padding:24px var(--pad-x) 32px}
+#mh .hvo-lead{grid-area:lead;margin:0 0 16px;font-size:22px;font-weight:600;letter-spacing:-.04em;line-height:1.3}
+/* 평면도는 폭이 허락하는 만큼 크게, 다만 한 화면 높이를 넘지 않게 한다 (--ar = 가로 ÷ 세로). 이름표 크기는 그림 폭을 따라간다 */
+#mh .hvo-fig{grid-area:fig;justify-self:center;width:min(100%,max(320px,calc((100vh - 290px) * var(--ar))));container:hvo / inline-size}
+#mh .hvo-plan{position:relative;aspect-ratio:var(--ar);background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+#mh .hvo-plan > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#mh .hvo-fur rect{vector-effect:non-scaling-stroke;stroke-width:1px}
+
+/* 방 이름표: 방 자리 그대로 겹쳐 놓는다. 꾸밀 수 있는 방은 방 전체가 단추다.
+   기본은 작은 그림(휴대폰, 좁은 창)에 맞춘 크기다. 폭이 좁은 방(욕실 2, 드레스룸)은 크기 글자가 벽에 닿지 않게 자간을 줄인다 */
+#mh .hvo-rm,#mh .hvo-q{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2}
+#mh .hvo-q{pointer-events:none;font-size:11px;color:var(--hvo-sub)}
+#mh .hvo-q b{font-weight:600}
+#mh .hvo-q i,#mh .hvo-tag i{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
+#mh .hvo-q i{font-size:10px;letter-spacing:-.03em}
+#mh .hvo-q.is-sm i{letter-spacing:-.05em;word-spacing:-.2em}
+#mh .hvo-rm::before{content:"";position:absolute;inset:4px;border-radius:6px;transition:background-color .15s}
+#mh .hvo-tag{position:relative;display:flex;flex-direction:column;align-items:center;padding:5px 9px 6px;border-radius:12px;background:var(--ink);color:#fff;line-height:1.25;transition:background-color .15s}
+#mh .hvo-tag b{font-size:14px;font-weight:600;letter-spacing:-.02em}
+#mh .hvo-tag i{font-size:11px;opacity:.86}
+#mh .hvo-rm:active .hvo-tag{background:var(--green)}
+#mh .hvo-rm:focus-visible{outline:3px solid var(--green);outline-offset:-7px;border-radius:12px}
+@media (hover:hover){
+  #mh .hvo-rm:hover::before{background:rgba(31,107,79,.12)}
+  #mh .hvo-rm:hover .hvo-tag{background:var(--green)}
+  #mh .hvo-room:hover{border-color:var(--ink)}
+}
+/* 그림이 클 때(PC): 이름표를 키운다 */
+@container hvo (min-width:560px){
+  #mh .hvo-q{font-size:13px;line-height:1.25}
+  #mh .hvo-q i{font-size:12px;letter-spacing:inherit}
+  #mh .hvo-q.is-sm i{letter-spacing:inherit;word-spacing:normal}
+  #mh .hvo-rm::before{inset:7px}
+  #mh .hvo-tag{padding:7px 14px 8px;border-radius:14px}
+  #mh .hvo-tag b{font-size:15px}
+  #mh .hvo-tag i{font-size:12px}
+  #mh .hvo-rm:focus-visible{outline-offset:-10px}
+}
+
+/* 그림 설명과 꾸밀 방 목록 */
+#mh .hvo-key{display:flex;flex-wrap:wrap;gap:4px 16px;margin:10px 2px 0;font-size:13px;color:var(--hvo-sub)}
+#mh .hvo-key span{display:inline-flex;align-items:center;gap:6px}
+#mh .hvo-key svg{flex:none;width:20px;height:14px}
+#mh .hvo-list{grid-area:list;list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#mh .hvo-room{display:flex;flex-wrap:wrap;align-items:baseline;align-content:center;gap:2px 10px;width:100%;min-height:56px;padding:12px 18px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;transition:border-color .15s}
+#mh .hvo-room b{font-size:16px;font-weight:600;letter-spacing:-.02em}
+#mh .hvo-sz{font-size:14px;color:var(--hvo-sub);font-variant-numeric:tabular-nums}
+#mh .hvo-st{margin-left:auto;font-size:14px;color:var(--hvo-sub)}
+#mh .hvo-st.is-done{font-weight:600;color:var(--green)}
+#mh .hvo-room:active{border-color:var(--ink)}
+#mh .hvo-note{grid-area:note;margin:16px 2px 0;font-size:13px;line-height:1.55;color:var(--hvo-sub)}
+
+@media (max-width:820px){
+  /* 위쪽 틀: 전체 구조에서는 방 칩 줄이 없어서 한 줄, 방 화면에서는 칩 줄 앞에 [전체 구조]를 둔다 (칩 줄만 옆으로 넘어간다) */
+  #mh #houseView:not(.is-room) .hv-top{grid-template-rows:44px;grid-template-areas:"back title consult";padding-bottom:8px}
+  #mh #hvPlan{grid-area:rooms;justify-self:start;position:relative;width:104px;height:38px;padding:0;font-size:14px}
+  #mh #hvPlan::after{content:"";position:absolute;inset:-4px 0}
+  #mh #houseView.is-room #hvRooms{margin-left:112px;padding-left:0}
+  #mh #houseView.is-room .segw button{padding:0 13px}
+
+  /* 한 줄로 쌓는다: 안내 → 평면도 → 꾸밀 방 목록(두 칸) */
+  #mh .hvo{display:block;padding:12px var(--pad-x) calc(20px + env(safe-area-inset-bottom))}
+  #mh .hvo-lead{margin:0 0 10px;font-size:18px}
+  #mh .hvo-fig{width:min(100%,max(320px,calc((100vh - 330px) * var(--ar))));margin:0 auto}
+  #mh .hvo-key{margin-top:8px;font-size:12px}
+  #mh .hvo-list{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px}
+  #mh .hvo-room{min-height:64px;padding:10px 12px}
+  #mh .hvo-sz{font-size:13px}
+  #mh .hvo-st{flex-basis:100%;margin-left:0;font-size:13px}
+  #mh .hvo-note{margin-top:12px;font-size:12px}
+}
+
+/* 평면도 사진으로 실제 구조 만들기 (사진에서 읽은 값은 추정값이라고 밝힌다) */
+#mh .hvo-photo{grid-area:photo;margin-top:16px;padding-top:14px;border-top:1px solid var(--line,#e3e1db)}
+#mh .hvo-photo-lead{margin:0 0 10px;font-size:14px;line-height:1.5}
+#mh .hvo-photo-btns{display:flex;flex-wrap:wrap;gap:8px}
+#mh .hvo-photo-btns .btn{min-height:44px}
+#mh #hvoMsg{min-height:1.4em;margin:8px 0 0}
+#mh .hvo-fix{margin-top:8px}
+#mh .hvo-fix summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600;font-size:14px}
+#mh .hvo-fix ul{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+#mh .hvo-fix li{display:grid;grid-template-columns:minmax(60px,1fr) auto auto;gap:8px;align-items:center;font-size:14px}
+#mh .hvo-fix input{width:84px;height:40px;padding:0 8px;font-size:16px;border:1px solid var(--line,#e3e1db);border-radius:10px;background:#fff}

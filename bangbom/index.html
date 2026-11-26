@@ -913,9 +913,11 @@ body.card-open #mh .pills-r{display:none}
 #mh details.fold{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
 #mh details.fold summary{font-size:15px;font-weight:600;letter-spacing:-.02em}
 #mh .calc{font-size:14px;margin-top:10px}
-#mh .calc td{padding:10px 0;border-bottom:1px solid var(--line)}
+/* 줄 사이 선은 아래 줄의 위쪽 선으로 긋는다. 합계 줄 위의 선만 진하게 하려는 것인데, 위아래 칸이 선을 함께 가지면 브라우저가 위 칸의 연한 선을 고른다 */
+#mh .calc td{padding:10px 0;border-bottom:0;border-top:1px solid var(--line)}
+#mh .calc tr:first-child td{border-top:0}
 #mh .calc .neg{color:var(--green)}
-#mh .calc tr.tot td{font-size:16px;padding-top:14px;border-top:1px solid var(--ink)}
+#mh .calc tr.tot td{font-size:16px;padding-top:14px;border-top-color:var(--ink)}
 /* 합계 줄의 이름(.tot)이 아래 "합계 상자"(#mh .tot, display:flex)와 같아서 표의 줄이 상자로 바뀌어 금액 칸이 어긋났다. 표의 줄로 되돌린다 */
 #mh .calc tr.tot{display:table-row;margin:0;padding:0;border-top:0}
 #mh .calc td:first-child{padding-right:10px}
@@ -1426,22 +1428,224 @@ body.house-mode #mh .fab{display:none}
 @media (max-width:820px) and (max-height:480px){
   body.app-mode #mh .panel-r{height:calc(100vh - var(--nav-h) - var(--tab-h));height:calc(100dvh - var(--nav-h) - var(--tab-h) - env(safe-area-inset-bottom))}
   #mh .cc{overflow-y:auto;overscroll-behavior:contain}
+  /* 이름과 꼬리표를 한 줄에 두어 내용이 조금이라도 먼저 보이게 한다 */
   #mh .cc-top{padding-bottom:4px}
+  #mh .cc-top > div{padding-right:50px}
+  #mh .cc-top h2{flex:0 1 auto;margin:0 4px 0 0!important;padding-right:0}
   #mh .cc-panes{flex:none;overflow:visible}
   #mh .cc[data-tab="plan"] .cc-plan{flex:none;height:220px}
   #mh .cc-btns{position:sticky;bottom:0;z-index:1;margin-top:auto;background:var(--card);border-top:1px solid var(--line)}
+  /* 지도: 세로 화면처럼 펼친 패널을 상담 단추 위에서 끝내면 62px 만 남는다. 도움말을 빼고, 패널을 상담 단추 왼쪽에 두어 안내 문구 위까지 쓴다 */
+  body.app-mode #mh .map-hint{display:none}
+  #mh .panel-l{right:calc(var(--pad-x) + 141px);max-height:calc(100vh - var(--nav-h) - var(--tab-h) - 104px);max-height:calc(100dvh - var(--nav-h) - var(--tab-h) - 104px - env(safe-area-inset-bottom))}
 }
-/* 낮은 화면의 PC 배치(가로로 돌린 큰 휴대폰): 빠른 질문이 세 줄이면 상담 입력 칸이 화면 밖으로 밀린다. 한 줄로 두고 옆으로 넘긴다 */
-@media (min-width:821px) and (max-height:480px){
-  #mh .quick{flex-wrap:nowrap;overflow-x:auto}
+/* 가로로 돌린 큰 휴대폰(폭 821px 이상이라 PC 배치, 높이 480px 이하): 빠른 질문이 세 줄이면 상담 입력 칸이 화면 밖으로 밀린다.
+   한 줄로 두고 손가락으로 옆으로 넘긴다. 마우스를 쓰는 PC 는 그대로 둔다 */
+@media (min-width:821px) and (max-height:480px) and (pointer:coarse){
+  #mh .quick{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  #mh .quick::-webkit-scrollbar{display:none}
   #mh .quick button{flex:none;white-space:nowrap}
 }
 /* 창을 좁힌 PC(마우스): 옆으로 밀 수 없으니 빠른 질문을 여러 줄로 보여 준다 */
 @media (max-width:820px) and (hover:hover) and (pointer:fine){
   #mh .quick{flex-wrap:wrap}
 }
-/* 집 전체 구조 화면 모양. 아직 비어 있다 */
-/* 시작 화면과 튜토리얼 모양. 아직 비어 있다 */
+
+/* ═════════ 집 보기 · 집 전체 구조: 평면도에서 꾸밀 방 고르기 (build.py 가 맨 끝에 붙인다) ═════════
+   #houseView.is-room 이면 방 화면(방꾸미 iframe), 아니면 전체 구조(#hvOver)다. house_view.js 의 mode() 가 붙인다.
+   - 꾸밀 수 있는 방: 흰 바닥 + 검정 이름표 단추(누르는 곳). 나머지 방: 옅은 바닥 + 조용한 글자(눌리지 않는다)
+   - 보조 글자는 바탕(#f3f2ee)과 옅은 바닥 위에서 4.5:1 이 넘는 #5f625d 를 쓴다 */
+/* [전체 구조] 단추: 방 칩과 헷갈리지 않게 작은 평면 그림을 앞에 붙인다 (글자색을 따라간다) */
+#mh #hvPlan::before{content:"";flex:none;width:14px;height:14px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M1.8 1.8h10.4v10.4H1.8zM7 1.8v10.4M1.8 7H7'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'%3E%3Cpath d='M1.8 1.8h10.4v10.4H1.8zM7 1.8v10.4M1.8 7H7'/%3E%3C/svg%3E") center/contain no-repeat}
+/* PC 방 화면: [전체 구조]가 더해져도 위쪽 줄이 두 줄로 꺾이지 않게, 좁은 창에서는 제목 칸이 먼저 줄어든다 (방 칩 237px + 단추 셋 261px + 간격) */
+@media (min-width:821px){#mh #houseView.is-room .hv-title{max-width:calc(100vw - var(--pad-x) * 2 - 524px)}}
+/* PC 집 보기: 위 막대 뒤에는 (집 보기 동안 그리지 않는) 지도뿐이다. 비쳐 보이면 막대가 어두워져서 불투명한 바탕으로 둔다 */
+body.house-mode .nav{background:var(--bg)}
+
+#mh .hv-over{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;--hvo-sub:#5f625d}
+#mh .hvo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,360px);grid-template-rows:auto auto auto 1fr;grid-template-areas:"fig lead" "fig list" "fig note" "fig photo";column-gap:clamp(24px,4vw,56px);max-width:1240px;margin:0 auto;padding:24px var(--pad-x) 32px}
+#mh .hvo-lead{grid-area:lead;margin:0 0 16px;font-size:22px;font-weight:600;letter-spacing:-.04em;line-height:1.3}
+/* 평면도는 폭이 허락하는 만큼 크게, 다만 한 화면 높이를 넘지 않게 한다 (--ar = 가로 ÷ 세로). 이름표 크기는 그림 폭을 따라간다 */
+#mh .hvo-fig{grid-area:fig;justify-self:center;width:min(100%,max(320px,calc((100vh - 290px) * var(--ar))));container:hvo / inline-size}
+#mh .hvo-plan{position:relative;aspect-ratio:var(--ar);background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+#mh .hvo-plan > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#mh .hvo-fur rect{vector-effect:non-scaling-stroke;stroke-width:1px}
+
+/* 방 이름표: 방 자리 그대로 겹쳐 놓는다. 꾸밀 수 있는 방은 방 전체가 단추다.
+   기본은 작은 그림(휴대폰, 좁은 창)에 맞춘 크기다. 폭이 좁은 방(욕실 2, 드레스룸)은 크기 글자가 벽에 닿지 않게 자간을 줄인다 */
+#mh .hvo-rm,#mh .hvo-q{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2}
+#mh .hvo-q{pointer-events:none;font-size:11px;color:var(--hvo-sub)}
+#mh .hvo-q b{font-weight:600}
+#mh .hvo-q i,#mh .hvo-tag i{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
+#mh .hvo-q i{font-size:10px;letter-spacing:-.03em}
+#mh .hvo-q.is-sm i{letter-spacing:-.05em;word-spacing:-.2em}
+#mh .hvo-rm::before{content:"";position:absolute;inset:4px;border-radius:6px;transition:background-color .15s}
+#mh .hvo-tag{position:relative;display:flex;flex-direction:column;align-items:center;padding:5px 9px 6px;border-radius:12px;background:var(--ink);color:#fff;line-height:1.25;transition:background-color .15s}
+#mh .hvo-tag b{font-size:14px;font-weight:600;letter-spacing:-.02em}
+#mh .hvo-tag i{font-size:11px;opacity:.86}
+#mh .hvo-rm:active .hvo-tag{background:var(--green)}
+#mh .hvo-rm:focus-visible{outline:3px solid var(--green);outline-offset:-7px;border-radius:12px}
+@media (hover:hover){
+  #mh .hvo-rm:hover::before{background:rgba(31,107,79,.12)}
+  #mh .hvo-rm:hover .hvo-tag{background:var(--green)}
+  #mh .hvo-room:hover{border-color:var(--ink)}
+}
+/* 그림이 클 때(PC): 이름표를 키운다 */
+@container hvo (min-width:560px){
+  #mh .hvo-q{font-size:13px;line-height:1.25}
+  #mh .hvo-q i{font-size:12px;letter-spacing:inherit}
+  #mh .hvo-q.is-sm i{letter-spacing:inherit;word-spacing:normal}
+  #mh .hvo-rm::before{inset:7px}
+  #mh .hvo-tag{padding:7px 14px 8px;border-radius:14px}
+  #mh .hvo-tag b{font-size:15px}
+  #mh .hvo-tag i{font-size:12px}
+  #mh .hvo-rm:focus-visible{outline-offset:-10px}
+}
+
+/* 그림 설명과 꾸밀 방 목록 */
+#mh .hvo-key{display:flex;flex-wrap:wrap;gap:4px 16px;margin:10px 2px 0;font-size:13px;color:var(--hvo-sub)}
+#mh .hvo-key span{display:inline-flex;align-items:center;gap:6px}
+#mh .hvo-key svg{flex:none;width:20px;height:14px}
+#mh .hvo-list{grid-area:list;list-style:none;margin:0;padding:0;display:grid;gap:8px}
+#mh .hvo-room{display:flex;flex-wrap:wrap;align-items:baseline;align-content:center;gap:2px 10px;width:100%;min-height:56px;padding:12px 18px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;transition:border-color .15s}
+#mh .hvo-room b{font-size:16px;font-weight:600;letter-spacing:-.02em}
+#mh .hvo-sz{font-size:14px;color:var(--hvo-sub);font-variant-numeric:tabular-nums}
+#mh .hvo-st{margin-left:auto;font-size:14px;color:var(--hvo-sub)}
+#mh .hvo-st.is-done{font-weight:600;color:var(--green)}
+#mh .hvo-room:active{border-color:var(--ink)}
+#mh .hvo-note{grid-area:note;margin:16px 2px 0;font-size:13px;line-height:1.55;color:var(--hvo-sub)}
+
+@media (max-width:820px){
+  /* 위쪽 틀: 전체 구조에서는 방 칩 줄이 없어서 한 줄, 방 화면에서는 칩 줄 앞에 [전체 구조]를 둔다 (칩 줄만 옆으로 넘어간다) */
+  #mh #houseView:not(.is-room) .hv-top{grid-template-rows:44px;grid-template-areas:"back title consult";padding-bottom:8px}
+  #mh #hvPlan{grid-area:rooms;justify-self:start;position:relative;width:104px;height:38px;padding:0;font-size:14px}
+  #mh #hvPlan::after{content:"";position:absolute;inset:-4px 0}
+  #mh #houseView.is-room #hvRooms{margin-left:112px;padding-left:0}
+  #mh #houseView.is-room .segw button{padding:0 13px}
+
+  /* 한 줄로 쌓는다: 안내 → 평면도 → 꾸밀 방 목록(두 칸) */
+  #mh .hvo{display:block;padding:12px var(--pad-x) calc(20px + env(safe-area-inset-bottom))}
+  #mh .hvo-lead{margin:0 0 10px;font-size:18px}
+  #mh .hvo-fig{width:min(100%,max(320px,calc((100vh - 330px) * var(--ar))));margin:0 auto}
+  #mh .hvo-key{margin-top:8px;font-size:12px}
+  #mh .hvo-list{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px}
+  #mh .hvo-room{min-height:64px;padding:10px 12px}
+  #mh .hvo-sz{font-size:13px}
+  #mh .hvo-st{flex-basis:100%;margin-left:0;font-size:13px}
+  #mh .hvo-note{margin-top:12px;font-size:12px}
+}
+
+/* 평면도 사진으로 실제 구조 만들기 (사진에서 읽은 값은 추정값이라고 밝힌다) */
+#mh .hvo-photo{grid-area:photo;margin-top:16px;padding-top:14px;border-top:1px solid var(--line,#e3e1db)}
+#mh .hvo-photo-lead{margin:0 0 10px;font-size:14px;line-height:1.5}
+#mh .hvo-photo-btns{display:flex;flex-wrap:wrap;gap:8px}
+#mh .hvo-photo-btns .btn{min-height:44px}
+#mh #hvoMsg{min-height:1.4em;margin:8px 0 0}
+#mh .hvo-fix{margin-top:8px}
+#mh .hvo-fix summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600;font-size:14px}
+#mh .hvo-fix ul{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+#mh .hvo-fix li{display:grid;grid-template-columns:minmax(60px,1fr) auto auto;gap:8px;align-items:center;font-size:14px}
+#mh .hvo-fix input{width:84px;height:40px;padding:0 8px;font-size:16px;border:1px solid var(--line,#e3e1db);border-radius:10px;background:#fff}
+
+/* ═════════ 시작 화면(이름)·튜토리얼·이름 칩 (build.py 가 맨 끝에 붙인다) ═════════
+   창은 tutorial.js 가 만드는 <dialog class="bbt"> 하나다. 휴대폰(820px 이하)은 아래에서 올라오는 시트, PC 는 가운데 카드.
+   - 어두운 바탕은 ::backdrop 이 아니라 dialog 자신이 칠한다: 화면 전환(view transition) 중에도 창과 바탕이 한 덩어리로 남는다
+   - 보조 글자는 카드(#fcfbf9) 위에서 4.5:1 이 넘는 --sub, 회색 알약 위에서는 #5f625d 를 쓴다 */
+.bbt{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:16px;border:0;background:rgba(20,23,20,.42);color:var(--ink);overflow:hidden;view-transition-name:bbt}
+.bbt[open]{display:grid;place-items:center}
+.bbt::backdrop{background:transparent}
+.bbt ::selection{background:var(--green-soft);color:var(--ink)}
+.bbt__card{width:min(440px,100%);max-height:100%;overflow-y:auto;overscroll-behavior:contain;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 60px rgba(20,23,20,.2);word-break:keep-all;overflow-wrap:break-word}
+.bbt__title{font-size:22px;font-weight:600;letter-spacing:-.045em;line-height:1.3;text-wrap:balance;overflow-wrap:anywhere}
+/* 휴대폰에서는 키보드가 저절로 올라오지 않게 제목에 커서를 둔다. 누르는 곳이 아니라 테두리는 그리지 않는다 */
+.bbt__title:focus{outline:none}
+
+/* ── 시작 화면 ── */
+.bbt__field{margin-top:20px}
+.bbt__label{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:15px;font-weight:600;letter-spacing:-.02em}
+.bbt__label small{font-size:13px;font-weight:400;letter-spacing:-.01em;color:var(--sub)}
+/* 칸 테두리는 흰 바탕과 3:1 이 넘는 회색(#8a8780)으로 해서 어디가 입력 칸인지 바로 보이게 한다 */
+.bbt__input{display:block;width:100%;height:48px;padding:0 14px;border:1px solid #8a8780;border-radius:12px;background:#fff;font-size:16px;caret-color:var(--green)}
+.bbt__input::placeholder{color:var(--sub);opacity:1}
+.bbt__input:focus{border-color:var(--green)}
+.bbt__input:focus-visible{outline-offset:2px;border-radius:12px}
+.bbt__input[aria-invalid="true"]{border-color:var(--warn)}
+/* 알림은 색만이 아니라 표시(느낌표 동그라미)와 글로 알린다 */
+.bbt__err{display:flex;align-items:flex-start;gap:6px;margin-top:8px;font-size:14px;font-weight:500;line-height:1.5}
+.bbt__err[hidden]{display:none}
+.bbt__err svg{flex:none;width:16px;height:16px;margin-top:2.5px;color:var(--warn)}
+.bbt__note{margin-top:8px;font-size:13px;line-height:1.55;color:var(--sub)}
+.bbt__btns{display:flex;gap:8px;margin-top:20px}
+.bbt__btns .btn[hidden]{display:none}
+.bbt__card--start .bbt__btns{flex-direction:column;align-items:stretch;gap:4px}
+/* 조용한 선택지(건너뛰기 · 이름 없이 둘러보기 · 취소): 글자만 보이고 손가락이 닿는 높이는 44px */
+.bbt__quiet{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 10px;border-radius:var(--r-pill);font-size:14px;font-weight:600;letter-spacing:-.02em;color:var(--sub);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;white-space:nowrap}
+.bbt__quiet:hover{color:var(--ink)}
+
+/* ── 튜토리얼 ── */
+.bbt__top{display:flex;align-items:center;justify-content:space-between;margin:-10px -10px 6px 0}
+.bbt__count{font-size:14px;font-weight:600;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--sub)}
+.bbt__art{aspect-ratio:320/132;border-radius:16px;background:var(--gray);overflow:hidden}
+.bbt__art svg{display:block;width:100%;height:100%}
+.bbt__art text{font-family:inherit;font-weight:600;letter-spacing:-.02em}
+/* 글 묶음의 높이를 가장 긴 걸음에 맞춰 둔다: 걸음을 넘겨도 [다음] 단추가 제자리에 있다 */
+.bbt__text{margin-top:20px;min-height:128px}
+.bbt__body{margin-top:8px;font-size:15px;line-height:1.6;color:#3d413d;text-wrap:pretty}
+/* 지도·단지 카드와 같은 세 가지 표시: 모양(● ◐ ○)과 글로 가른다 */
+.bbt__marks{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:12px 0 0;padding:0}
+.bbt__marks li{display:inline-flex;align-items:center;height:28px;padding:0 11px;border:1px solid transparent;border-radius:var(--r-pill);font-size:13px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.bbt__marks .is-on{background:var(--green-soft);color:var(--green)}
+.bbt__marks .is-dim{background:#fff;color:var(--ink);border:1px dashed #b9b7b0}
+.bbt__marks .is-off{background:var(--gray);color:#5f625d}
+.bbt__small{margin-top:10px;font-size:13px;line-height:1.5;color:var(--sub)}
+.bbt__card--tour .bbt__btns .btn{min-width:112px}
+.bbt__card--tour .bbt__btns [data-act="next"]{margin-left:auto}
+
+@media (max-width:820px){
+  .bbt{padding:0}
+  .bbt[open]{place-items:end stretch}
+  .bbt__card{width:100%;max-height:calc(100% - 12px);padding:20px 16px calc(16px + env(safe-area-inset-bottom));border-width:1px 0 0;border-radius:20px 20px 0 0;box-shadow:0 -12px 40px rgba(20,23,20,.16)}
+  .bbt__note{font-size:14px}
+  .bbt__top{margin:-12px -8px 4px 0}
+  .bbt__text{margin-top:16px}
+  .bbt__small{font-size:14px}
+  .bbt__card--tour .bbt__btns .btn{flex:1 1 0;min-width:0}
+  .bbt__card--tour .bbt__btns [data-act="next"]{flex-grow:1.5}
+}
+
+/* 열릴 때 한 번만: 바탕이 어두워지고 카드(시트)가 조금 올라온다. 움직임을 줄인 기기에서는 바로 보인다 */
+@media (prefers-reduced-motion:no-preference){
+  .bbt[open]{animation:bbtDim .22s ease-out}
+  .bbt[open] .bbt__card{animation:bbtIn .38s cubic-bezier(.2,.7,.2,1)}
+}
+@keyframes bbtDim{from{background-color:rgba(20,23,20,0)}}
+@keyframes bbtIn{from{opacity:0;transform:translateY(20px)}}
+
+/* ── 이름 칩: PC 는 위 막대의 메뉴 단추 옆, 휴대폰은 메뉴 패널 안 ── */
+.bbu{position:relative}
+.bbu--panel{display:none}
+.bbu__name{display:block;max-width:13em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bbu__menu{position:absolute;top:calc(100% + 8px);right:0;z-index:2;width:232px;padding:6px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 32px rgba(20,23,20,.12);word-break:keep-all}
+.bbu__menu[hidden],.bbu__menu [hidden]{display:none}
+.bbu__items{display:grid}
+.bbu__item{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:15px;font-weight:600;letter-spacing:-.02em;text-align:left;white-space:nowrap}
+.bbu__item:hover{background:var(--gray)}
+.bbu__ask{padding:8px 8px 6px}
+.bbu__ask p{font-size:14px;line-height:1.5}
+.bbu__ask div{display:flex;gap:6px;margin-top:12px}
+/* 위 막대의 .btn 규칙(홈 맨 위에서는 흰 단추)이 섞이지 않게 여기 단추는 따로 그린다 */
+.bbu__yes,.bbu__no{flex:1 1 0;height:44px;border-radius:var(--r-pill);font-size:14px;font-weight:600;letter-spacing:-.02em}
+.bbu__yes{background:var(--ink);color:#fff}
+.bbu__yes:hover{background:#000}
+.bbu__no{border:1px solid var(--line)}
+.bbu__no:hover{background:var(--gray)}
+.nav.bbu-open{z-index:51}
+@media (max-width:820px){
+  .bbu--nav{display:none}
+  .bbu--panel{display:block;margin-top:20px}
+  .bbu--panel .bbu__chip{background:#fff;border-color:var(--line);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .bbu--panel .bbu__menu{position:static;width:auto;max-width:320px;margin-top:8px;box-shadow:none}
+}
 
 </style>
 </head>
@@ -1845,7 +2049,7 @@ body.house-mode #mh .fab{display:none}
     </div>
     <div class="footer__bottom">
       <span>"예시" 표시가 있는 숫자와 이미지는 시연용이에요. 대출·지원 자격은 각 기관이 최종으로 정해요.</span>
-      <span>© 2026 Bangbom</span>
+      <span><a href="dashboard.html" class="link">이용 현황</a> · © 2026 Bangbom</span>
     </div>
   </div>
 </footer>
@@ -3554,7 +3758,206 @@ function findSpot(L, items, F) {
   }
   return null;
 }
-/* 서버(파이썬 백엔드) 연결. 아직 비어 있다 */
+/* ═══════ 서버(파이썬 백엔드) 연결 · 서버가 답하지 못하면 화면은 브라우저 계산으로 돌아간다 ═══════
+   화면은 같은 사이트의 "/backend/<경로>" 로만 서버를 부른다 (서버의 "/api/<경로>" 로 전달된다).
+   build.py 가 이 파일을 페이지 스크립트의 { } 안에 그대로 붙인다. 다른 파일과 이름이 겹치지 않게 맨 위 이름은 createBackend 와 Backend 둘뿐이다. */
+
+/**
+ * @typedef {"checking" | "server" | "browser" | "off"} BackendMode
+ * @typedef {{ mode: BackendMode, failures: number, retryAt: number }} BackendState
+ * @typedef {{ llm: boolean, stats: string, rules_version: string | null, data_hash: string | null }} BackendInfo
+ * @typedef {"off" | "paused" | "network" | "timeout" | "http" | "json" | "shape" | "rejected"} BackendErrorKind
+ * @typedef {Error & { kind: BackendErrorKind, status?: number }} BackendError
+ *
+ * @typedef {object} BackendEnv 바깥 세상. 테스트가 가짜를 끼울 수 있게 모두 받아서 쓴다
+ * @property {(url: string, init: RequestInit) => Promise<Response>} fetch
+ * @property {{ search?: string, protocol?: string } | undefined} location
+ * @property {{ documentElement?: { dataset: Record<string, string | undefined> } | null } | undefined} document
+ * @property {() => number} now
+ * @property {(run: () => void, ms: number) => unknown} setTimeout
+ * @property {(timer: any) => void} clearTimeout
+ *
+ * @typedef {object} BackendApi
+ * @property {BackendState} state 지금 상태 (읽기만 한다)
+ * @property {BackendInfo | null} info 마지막으로 받은 health 답 (아직 없으면 null)
+ * @property {(listener: (state: BackendState) => void) => () => void} on 상태가 바뀔 때마다 부른다. 돌려받은 함수를 부르면 그만 듣는다
+ * @property {() => Promise<BackendInfo>} health
+ * @property {(profile: object, options?: { track?: boolean, ids?: string[] }) => Promise<any>} match
+ * @property {(type: "complex_view" | "house_view", complexId: string) => void} event
+ * @property {(payload: object) => Promise<any>} chat
+ */
+
+/**
+ * 서버 연결 하나를 만든다. 만들 때는 서버를 부르지 않는다.
+ * @param {BackendEnv} env
+ * @returns {BackendApi}
+ */
+function createBackend(env) {
+  "use strict";
+  /* 기다리는 시간(ms). 쉬던 공개 서버는 첫 답에 몇 초가 걸리고, 상담은 AI 답을 기다린다 */
+  const LIMIT_MS = { health: 4000, match: 6000, events: 3000, chat: 25000 };
+  /* 연달아 2번 실패하면 30초 쉰다. 죽은 서버를 기다리느라 화면이 매번 느려지지 않게 */
+  const MAX_FAILURES = 2, PAUSE_MS = 30000;
+  const LIGHTS = ["on", "dim", "off"];
+  const AMOUNTS = ["net_monthly", "net_monthly_best", "net_monthly_worst"];
+  /* 화면에 그대로 보여도 되게 쉬운 문장으로 둔다 */
+  const MESSAGES = {
+    off: "서버 연결을 꺼 둔 화면이에요",
+    paused: "서버가 답하지 않아서 잠시 쉬고 있어요",
+    network: "서버에 연결하지 못했어요",
+    timeout: "서버가 제때 답하지 않았어요",
+    http: "서버에서 오류가 났어요",
+    json: "서버의 답을 읽지 못했어요",
+    shape: "서버의 답이 약속한 모양과 달라요",
+    rejected: "서버가 이 요청을 받지 않았어요",
+  };
+
+  /* 시연·오프라인 스위치: 주소에 server=off 가 있거나 파일로 바로 연 화면은 서버를 절대 부르지 않는다 */
+  const loc = env.location;
+  const off = !loc || loc.protocol === "file:" || new URLSearchParams(loc.search || "").getAll("server").includes("off");
+
+  /** @type {BackendState} */
+  const state = { mode: off ? "off" : "checking", failures: 0, retryAt: 0 };
+  /** @type {((state: BackendState) => void)[]} */
+  const listeners = [];
+
+  /** @param {BackendErrorKind} kind @param {number} [status] @returns {BackendError} */
+  const problem = (kind, status) => Object.assign(new Error(MESSAGES[kind]), { name: "BackendError", kind, status });
+  /** @param {any} v */
+  const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+
+  /* 꾸밈(CSS)과 테스트가 지금 어느 쪽 계산인지 알 수 있게 <html data-server> 에 적어 둔다 */
+  function showMode() {
+    const root = env.document && env.document.documentElement;
+    if (root && root.dataset) root.dataset.server = state.mode;
+  }
+
+  /** @param {BackendMode} mode @param {number} failures @param {number} retryAt */
+  function update(mode, failures, retryAt) {
+    if (state.mode === mode && state.failures === failures && state.retryAt === retryAt) return;
+    const modeChanged = state.mode !== mode;
+    state.mode = mode; state.failures = failures; state.retryAt = retryAt;
+    if (modeChanged) showMode();
+    for (const listener of listeners.slice()) {
+      try { listener(state); } catch { /* 듣는 쪽의 오류로 요청 결과가 뒤바뀌지 않게 삼킨다 */ }
+    }
+  }
+
+  /**
+   * 요청 하나. 실패를 세고 쉬는 규칙은 이 함수 한 곳에만 있다.
+   * @param {"health" | "match" | "events" | "chat"} name
+   * @param {string} path
+   * @param {(data: any) => any} pick 답의 모양이 맞으면 돌려줄 값, 아니면 undefined
+   * @param {unknown} [body]
+   * @returns {Promise<any>}
+   */
+  async function request(name, path, pick, body) {
+    if (state.mode === "off") throw problem("off");
+    if (env.now() < state.retryAt) throw problem("paused");
+    const ctrl = new AbortController();
+    /* keepalive: 화면을 떠나는 순간에 보낸 이용 기록도 끝까지 전해지게 한다 */
+    /** @type {RequestInit} */
+    const init = name === "health"
+      ? { method: "GET", cache: "no-store", signal: ctrl.signal }
+      : { method: "POST", cache: "no-store", signal: ctrl.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), keepalive: name === "events" };
+    /** @type {unknown} */
+    let timer;
+    /* 거절을 먼저 하고 끊는다. 그래야 끊긴 요청의 오류보다 "제때 답하지 않음"이 먼저 전해진다 */
+    const late = new Promise((_, reject) => {
+      timer = env.setTimeout(() => { reject(problem("timeout")); ctrl.abort(); }, LIMIT_MS[name]);
+    });
+    const send = async () => {
+      let res;
+      try { res = await env.fetch("/backend/" + path, init); } catch { throw problem("network"); }
+      /* 4xx 는 보낸 값이 틀렸거나(422) 너무 자주 불렀다는(429) 뜻이라 서버 고장으로 세지 않는다 */
+      if (res.status >= 400 && res.status < 500) throw problem("rejected", res.status);
+      if (!res.ok) throw problem("http", res.status);
+      let data;
+      try { data = await res.json(); } catch { throw problem("json"); }
+      let value;
+      try { value = pick(data); } catch { /* 살펴보다 난 오류도 모양이 다른 답으로 본다 */ }
+      if (value === undefined) throw problem("shape");
+      return value;
+    };
+    let value;
+    try {
+      value = await Promise.race([send(), late]);
+    } catch (err) {
+      if (/** @type {BackendError} */ (err).kind !== "rejected") {
+        const failures = state.failures + 1;
+        update("browser", failures, failures >= MAX_FAILURES ? env.now() + PAUSE_MS : state.retryAt);
+      }
+      throw err;
+    } finally {
+      env.clearTimeout(timer);
+    }
+    /* 상태가 바뀌었다는 알림을 받은 쪽이 새 info 를 바로 읽을 수 있게 먼저 적는다 */
+    if (name === "health") api.info = value;
+    update("server", 0, 0);
+    return value;
+  }
+
+  /** @param {any} d @returns {BackendInfo | undefined} */
+  function pickHealth(d) {
+    if (!isObj(d) || d.status !== "ok") return undefined;
+    /** @param {unknown} v */
+    const text = (v) => (typeof v === "string" && v !== "" ? v : null);
+    return { llm: d.llm === true, stats: text(d.stats) || "off", rules_version: text(d.rules_version), data_hash: text(d.data_hash) };
+  }
+
+  /* 화면이 가진 단지(ids)가 하나라도 빠지거나 겹친 답으로는 카드를 그릴 수 없어서, 그런 답은 쓰지 않는다 */
+  /** @param {any} d @param {string[]} ids */
+  function pickMatch(d, ids) {
+    const pr = isObj(d) ? d.profile_result : null;
+    if (!isObj(pr) || !Array.isArray(pr.loans) || !Array.isArray(pr.policies) || !Array.isArray(d.complexes)) return undefined;
+    /** @type {Map<string, number>} */
+    const seen = new Map();
+    for (const c of d.complexes) {
+      if (!isObj(c) || typeof c.id !== "string" || !LIGHTS.includes(c.light)) return undefined;
+      if (!AMOUNTS.every((k) => c[k] === null || Number.isFinite(c[k]))) return undefined;
+      seen.set(c.id, (seen.get(c.id) || 0) + 1);
+    }
+    return ids.every((id) => seen.get(id) === 1) ? d : undefined;
+  }
+
+  /** @param {any} d */
+  const pickEvent = (d) => (isObj(d) && typeof d.recorded === "boolean" ? d : undefined);
+
+  /* mode 가 있어야 화면이 AI 답인지 미리 써 둔 답인지 정직하게 표시할 수 있다 */
+  /** @param {any} d */
+  const pickChat = (d) => (isObj(d) && typeof d.reply === "string" && d.reply.trim() !== "" && Array.isArray(d.status_mentions)
+    && Array.isArray(d.links) && Array.isArray(d.quick_replies) && (d.mode === "llm" || d.mode === "template") ? d : undefined);
+
+  /** @type {BackendApi} */
+  const api = {
+    state,
+    info: null,
+    on(listener) {
+      listeners.push(listener);
+      return () => { const i = listeners.indexOf(listener); if (i >= 0) listeners.splice(i, 1); };
+    },
+    health: () => request("health", "health", pickHealth),
+    match(profile, options) {
+      const o = options || {};
+      const ids = Array.isArray(o.ids) ? o.ids : [];
+      /* track=1 은 통계 1건으로 세어지므로, 분명히 true 로 부탁받았을 때만 붙인다 */
+      return request("match", "match?detail=1" + (o.track === true ? "&track=1" : ""), (d) => pickMatch(d, ids), profile);
+    },
+    event(type, complexId) {
+      /* 이용 기록은 화면과 상관없는 일이라, 어떤 오류도 화면으로 올라가지 않게 삼킨다 */
+      request("events", "events", pickEvent, { type, complex_id: complexId }).catch(() => {});
+    },
+    chat: (payload) => request("chat", "chat", pickChat, payload),
+  };
+  showMode();
+  return api;
+}
+
+/* 노드(테스트)에는 location·document 가 없다. 아랫줄이 멈추지 않게 빈 이름만 만들어 둔다 (브라우저에서는 건너뛴다) */
+if (typeof location === "undefined") globalThis.location = undefined;
+if (typeof document === "undefined") globalThis.document = undefined;
+const Backend = createBackend({ fetch: (...a) => fetch(...a), location, document, now: () => Date.now(), setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: (t) => clearTimeout(t) });
+
 {
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -3659,7 +4062,7 @@ function renderPanels() {
     $("#pillsR").innerHTML = `<span class="pill-n">모은 돈 <b>${won(S.profile.assets)}만</b></span><span class="pill-n">월 예산 <b>${won(S.profile.monthly_budget)}만</b></span>${mn != null ? `<span class="pill-n">지원 반영 최저 <b>월 ${man1(mn)}만</b></span>` : ""}`;
     $("#legend").innerHTML = "";
   } else {
-    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">단지를 누르면 주변 시설과 집 정보가 보여요</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(2026.9.30) + 언론 보도 단지, 판정 없음</p>
+    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">${MapView.ok ? "단지를 누르면 주변 시설과 집 정보가 보여요" : "조건을 넣으면 대출·지원 판정은 볼 수 있어요"}</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(2026.9.30) + 언론 보도 단지, 판정 없음</p>
       <div class="jp-btns"><button class="btn btn--sm" id="bMatch">${S.profile ? "내 조건으로 보기" : "내 조건 넣고 불 켜기"} →</button></div></div>`;
     $("#bMatch").onclick = () => S.profile ? setMode("match") : (location.hash = "#input");
     $("#panelL").dataset.mode = "browse";
@@ -3717,7 +4120,7 @@ function cardHTML(id) {
   body += safetyHTML(c) + saleHTML(c, match ? (ev.shortfall ? null : (ev.net_monthly != null ? ev.net_monthly : ev.net_monthly_best)) : null);
   body += `<details class="fold" data-pane="near"><summary>가까운 시설</summary><p class="pane-h m-only">가까운 시설</p><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 실제 위치예요(OpenStreetMap·Wikidata).</p></details>`;
   body += roomNote;
-  body += `</div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
+  body += `<p class="small muted" style="margin-top:10px">실제 평면도는 <a class="link" href="https://www.zigbang.com/home/apt/" target="_blank" rel="noopener">직방에서 이 단지 찾아보기 ↗</a> (새 창)</p></div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
   return `<div class="cc">${head}${body}</div>`;
 }
 /* 휴대폰 시트에서 칩으로 고른 항목 하나만 보여 준다. 접는 목록(details)은 고른 것만 펼친다 */
@@ -3962,7 +4365,8 @@ const MapView = {
     requestAnimationFrame(loop);
   },
   clampT() { this.target.x = clamp(this.target.x, -18 * MAP_K, 64 * MAP_K); this.target.z = clamp(this.target.z, -76 * MAP_K, 62 * MAP_K); },
-  resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); },
+  /* 크기를 바꾸면 그림이 지워져 검게 남는다. 지도를 그리지 않는 화면(조건 입력·집 보기)에서도 반투명한 위 막대 뒤로 비치므로 한 장은 바로 그려 둔다 */
+  resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); this.tick(0, performance.now() / 1000, true); },
   blocked(x, z, pad) {
     if (!inGeo(x, z, GEO.outline)) return true;
     for (const c of COMPLEX) if (Math.abs(x - c.map_x) < 2.0 + pad && Math.abs(z - c.map_z) < 1.8 + pad) return true;
@@ -4171,9 +4575,9 @@ const MapView = {
     });
   },
   project(v) { const p = v.clone().project(this.cam); return { x: (p.x + 1) / 2 * innerWidth, y: (1 - p.y) / 2 * innerHeight }; },
-  tick(dt, time) {
-    /* 지도가 완전히 가려진 동안(불투명한 조건 입력 화면, 휴대폰의 전체 화면 상담 서랍)에는 그리지 않는다 */
-    if (VIEW !== "map" || (Consult.isOpen && isPhone())) return;
+  tick(dt, time, force) {
+    /* 지도가 완전히 가려진 동안(불투명한 조건 입력 화면, 휴대폰의 전체 화면 상담 서랍)에는 그리지 않는다. force 는 크기가 바뀐 직후의 한 장 */
+    if (!force && (VIEW !== "map" || (Consult.isOpen && isPhone()))) return;
     if (this.fly0) { const f = this.fly0; f.t = Math.min(1, f.t + dt / .6); const k = 1 - Math.pow(1 - f.t, 3); this.target.set(f.fx + (f.x - f.fx) * k, 0, f.fz + (f.z - f.fz) * k); this.zoom = f.fzoom + (f.zoom - f.fzoom) * k; if (f.t >= 1) this.fly0 = null; }
     const off = new T3.Vector3(20, 20, 20); this.cam.position.copy(this.target).add(off); this.cam.lookAt(this.target); this.cam.zoom = this.zoom; this.cam.updateProjectionMatrix();
     this.sun.position.copy(this.target).add(new T3.Vector3(10, 15, 3)); this.sun.target.position.copy(this.target);
@@ -4235,6 +4639,12 @@ const House = {
     $("#hvPlan").onclick = () => { if (history.state && history.state.mhOver) history.back(); else this.go("#house", false); };
     /* 평면도와 목록의 방 단추: 새 기록을 쌓아서 뒤로 가면 전체 구조로 돌아온다 */
     $("#hvOver").addEventListener("click", e => { const b = e.target.closest("button[data-room]"); if (b) this.go("#house/" + b.dataset.room, true); });
+    $("#hvOver").addEventListener("click", e => {
+      if (e.target.closest("#hvoPick")) $("#hvoFile").click();
+      if (e.target.closest("#hvoReset")) { try { localStorage.removeItem("bangbom.plan." + this.cid); } catch (er) {} this.open(this.cid); }
+      if (e.target.closest("#hvoApply")) this.applySizes();
+    });
+    $("#hvOver").addEventListener("change", e => { if (e.target.id === "hvoFile" && e.target.files && e.target.files[0]) this.readPhoto(e.target.files[0]); });
   },
   /* 집 보기 안에서 주소를 바꾸고 다시 그린다 (이렇게 바꾸면 hashchange 가 오지 않는다). push 면 새 기록, 아니면 지금 기록을 바꾼다 */
   go(hash, push) {
@@ -4269,13 +4679,13 @@ const House = {
   },
   open(cid) {
     this.init();
-    const c = COMPLEX.find(x => x.id === cid) || COMPLEX[0], L = buildLayout(c.room_id || "room_84a"), rooms = this.rooms(L), ev = S.evals[c.id];
+    const c = COMPLEX.find(x => x.id === cid) || COMPLEX[0], L = buildLayout(this.layoutKey(c)), rooms = this.rooms(L), ev = S.evals[c.id];
     const living = (rooms.find(r => r.type === "living") || rooms[0]).id;
     /* 이 단지의 집 보기에 들어올 때 한 번만 알린다 (이용 통계가 듣는다) */
     if (!this.on || this.cid !== c.id) document.dispatchEvent(new CustomEvent("mh:house", { detail: { complexId: c.id } }));
     this.on = true;
     if (this.cid !== c.id || !rooms.some(r => r.id === this.room)) { this.cid = c.id; this.room = living; }
-    $("#hvTitle").innerHTML = `<span class="eyebrow-s">Model house</span><b><i class="hv-name">${esc(c.name)}</i><i class="hv-type"> · ${esc(L.name)}</i></b><span>${SUPPLY_KO[c.supply_type]} · ${c.area_m2}㎡${c.area_m2 !== L.area ? ` (${L.area}㎡ 구조로 대신 보기)` : ""} · 표준 구조 단순화, 공고 평면도 원본 미사용${ev && S.mode === "match" ? ` · ${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}` : ""}</span>`;
+    $("#hvTitle").innerHTML = `<span class="eyebrow-s">Model house</span><b><i class="hv-name">${esc(c.name)}</i><i class="hv-type"> · ${esc(L.name)}</i></b><span>${SUPPLY_KO[c.supply_type]} · ${c.area_m2}㎡${c.area_m2 !== L.area && !this.photo ? ` (${L.area}㎡ 구조로 대신 보기)` : ""} · ${this.photo ? "평면도 사진에서 읽은 추정값" : "표준 구조 단순화, 공고 평면도 원본 미사용"}${ev && S.mode === "match" ? ` · ${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}` : ""}</span>`;
     /* #house 는 전체 구조, #house/<방> 은 그 방. 이 집에 없는 방이면 전체 구조로 고친다 */
     let want = location.hash.startsWith("#house/") ? location.hash.slice(7) : "";
     if (want && !rooms.some(r => r.id === want)) { want = ""; history.replaceState(null, "", "#house"); }
@@ -4298,7 +4708,7 @@ const House = {
     old.replaceWith(frame);
   },
   showRoom(c, L, rooms, id) {
-    const r = rooms.find(x => x.id === id), key = c.id + "-" + r.id;
+    const r = rooms.find(x => x.id === id), key = this.sb + "-" + r.id;
     /* 방 단추를 누른 초점이 사라지지 않게, 화면을 바꾼 뒤 그 방의 칩으로 옮긴다 */
     const focused = $("#hvOver").contains(document.activeElement) || $("#hvRooms").contains(document.activeElement);
     this.room = id;
@@ -4334,36 +4744,94 @@ const House = {
     const P = v => Math.round((v + pad) * s), len = v => Math.round(v * s), pc = v => (v * 100).toFixed(2) + "%", n1 = v => Math.round(v * 10) / 10;
     const size = r => `${r.w.toFixed(1)} × ${r.d.toFixed(1)}m`;
     const box = r => `left:${pc(P(r.x) / vw)};top:${pc(P(r.z) / vh)};width:${pc(len(r.w) / vw)};height:${pc(len(r.d) / vh)}`;
-    const mine = {}; rooms.forEach(r => { mine[r.id] = this.saved(c.id + "-" + r.id); });
+    const mine = {}; rooms.forEach(r => { mine[r.id] = this.saved(this.sb + "-" + r.id); });
     const count = r => mine[r.id] ? mine[r.id].items.length : 0;
-    const fills = L.rooms.map(r => `<rect x="${P(r.x)}" y="${P(r.z)}" width="${len(r.w)}" height="${len(r.d)}" fill="${r.id in mine ? "#fff" : r.type === "bath" ? "#e6e8e4" : r.type === "kitchen" ? "#efe7da" : "#ece8e0"}"/>`).join("");
+    const fills = L.rooms.map(r => `<rect x="${P(r.x)}" y="${P(r.z)}" width="${len(r.w)}" height="${len(r.d)}" fill="${r.id in mine ? "#fff" : "#eceae5"}"/>`).join("");
     /* 방마다 저장된 방 크기(cm)를 그대로 좌표로 쓰는 작은 그림을 끼운다. 방 밖으로 나간 부분은 잘린다 */
     const furs = rooms.map(r => count(r) ? `<svg data-fur="${r.id}" x="${P(r.x)}" y="${P(r.z)}" width="${len(r.w)}" height="${len(r.d)}" viewBox="0 0 ${n1(mine[r.id].w)} ${n1(mine[r.id].d)}" preserveAspectRatio="none">${mine[r.id].items.map(f => {
       const turned = Math.abs(Math.round(f.rot / 90)) % 2 === 1, cx = f.x + (turned ? f.d : f.w) / 2, cy = f.y + (turned ? f.w : f.d) / 2;
       return `<rect x="${n1(cx - f.w / 2)}" y="${n1(cy - f.d / 2)}" width="${n1(f.w)}" height="${n1(f.d)}" rx="3" transform="rotate(${n1(f.rot)} ${n1(cx)} ${n1(cy)})"/>`;
     }).join("")}</svg>` : "").join("");
-    const walls = L.pieces.filter(p => p.kind === "solid").map(p => p.axis === "x" ? `<line x1="${P(p.a)}" y1="${P(p.c)}" x2="${P(p.b)}" y2="${P(p.c)}"/>` : `<line x1="${P(p.c)}" y1="${P(p.a)}" x2="${P(p.c)}" y2="${P(p.b)}"/>`).join("");
+    /* 벽 조각은 모서리에서 벽 두께 절반보다 조금 더 나와 있다. 집 테두리(벽 두께 절반)에서 잘라 모서리가 반듯하게 한다 */
+    const cut = (p, v) => P(Math.max(-.065, Math.min((p.axis === "x" ? L.W : L.D) + .065, v)));
+    const walls = L.pieces.filter(p => p.kind === "solid").map(p => p.axis === "x" ? `<line x1="${cut(p, p.a)}" y1="${P(p.c)}" x2="${cut(p, p.b)}" y2="${P(p.c)}"/>` : `<line x1="${P(p.c)}" y1="${cut(p, p.a)}" x2="${P(p.c)}" y2="${cut(p, p.b)}"/>`).join("");
     const wins = L.pieces.filter(p => p.kind === "glass").map(p => p.axis === "x" ? `<rect x="${P(p.a)}" y="${P(p.c) - 6.5}" width="${len(p.b - p.a)}" height="13"/>` : `<rect x="${P(p.c) - 6.5}" y="${P(p.a)}" width="13" height="${len(p.b - p.a)}"/>`).join("");
     /* 입구: 현관문 바깥에서 집 안쪽을 가리키는 세모 */
     const e = L.entry, m = P(e.m), out = e.side === "N" || e.side === "W" ? -1 : 1, tip = P(e.c) + out * 10, base = tip + out * 34;
     const tri = e.axis === "z" ? `${tip},${m} ${base},${m - 24} ${base},${m + 24}` : `${m},${tip} ${m - 24},${base} ${m + 24},${base}`;
     const labels = L.rooms.map(r => r.id in mine
       ? `<button type="button" class="hvo-rm" data-room="${r.id}" style="${box(r)}" aria-label="${esc(r.name)} ${size(r)} 꾸미기"><span class="hvo-tag"><b>${esc(r.name)}</b><i>${size(r)}</i></span></button>`
-      : `<span class="hvo-q" data-room="${r.id}" style="${box(r)}"><b>${esc(r.name)}</b><i>${size(r)}</i></span>`).join("");
+      : `<span class="hvo-q${r.w < 2.2 ? " is-sm" : ""}" data-room="${r.id}" style="${box(r)}"><b>${esc(r.name)}</b><i>${size(r)}</i></span>`).join("");
     const list = rooms.map(r => `<li><button type="button" class="hvo-room" data-room="${r.id}"><b>${esc(r.name)}</b><span class="hvo-sz">${size(r)}</span><span class="hvo-st${count(r) ? " is-done" : ""}">${count(r) ? `가구 ${count(r)}개` : "아직 꾸미지 않았어요"}</span></button></li>`).join("");
     const key = (d, t) => `<span><svg viewBox="0 0 20 14" aria-hidden="true">${d}</svg>${t}</span>`;
     return `<div class="hvo">
 <h2 class="hvo-lead">꾸미고 싶은 방을 눌러 주세요.</h2>
 <div class="hvo-fig" style="--ar:${(vw / vh).toFixed(4)}">
-<div class="hvo-plan" role="group" aria-label="${esc(L.name)} 평면도 (표준 구조 단순화)">
-<svg viewBox="0 0 ${vw} ${vh}" aria-hidden="true" focusable="false">${fills}<g class="hvo-fur" fill="#f4ede1" stroke="#a39a86" stroke-width="2">${furs}</g><g stroke="#1f6b4f" stroke-width="13" stroke-linecap="square">${walls}</g><g fill="#fff" stroke="#1f6b4f" stroke-width="3">${wins}</g><polygon class="hvo-entry" points="${tri}" fill="#141714"/></svg>
+<div class="hvo-plan" role="group" aria-label="${esc(L.name)} 평면도 (${this.photo ? "사진에서 읽은 추정값" : "표준 구조 단순화"})">
+<svg viewBox="0 0 ${vw} ${vh}" aria-hidden="true" focusable="false">${fills}<g class="hvo-fur" fill="#f1e6d3" stroke="#9a8f79" stroke-width="2">${furs}</g><g stroke="#1f6b4f" stroke-width="13">${walls}</g><g fill="#fff" stroke="#1f6b4f" stroke-width="3">${wins}</g><polygon class="hvo-entry" points="${tri}" fill="#141714"/></svg>
 ${labels}
 </div>
-<p class="hvo-key">${key('<path d="M4 7 16 1v12z" fill="#141714"/>', "입구")}${key('<rect x="1.5" y="4" width="17" height="6" fill="#fff" stroke="#1f6b4f" stroke-width="1.5"/>', "창문")}${rooms.some(count) ? key('<rect x="2.5" y="1.5" width="15" height="11" rx="1.5" fill="#f4ede1" stroke="#a39a86"/>', "놓아 둔 가구") : ""}</p>
+<p class="hvo-key">${key('<path d="M4 7 16 1v12z" fill="#141714"/>', "입구")}${key('<rect x="1.5" y="4" width="17" height="6" fill="#fff" stroke="#1f6b4f" stroke-width="1.5"/>', "창문")}${rooms.some(count) ? key('<rect x="2.5" y="1.5" width="15" height="11" rx="1.5" fill="#f1e6d3" stroke="#9a8f79"/>', "놓아 둔 가구") : ""}</p>
 </div>
 <ul class="hvo-list">${list}</ul>
-<p class="hvo-note">표준 구조로 단순화한 평면이에요. 공고 평면도 원본이 아니에요. 꾸민 배치는 이 브라우저에만 저장돼요.</p>
+${this.photo ? `<p class="hvo-note">평면도 사진에서 읽은 추정값이에요. 실제 치수와 다를 수 있어요. 방 크기는 아래에서 고칠 수 있고, 꾸민 배치는 이 브라우저에만 저장돼요.</p>` : `<p class="hvo-note">표준 구조로 단순화한 평면이에요.${c.area_m2 !== L.area ? ` 이 단지는 ${c.area_m2}㎡인데 ${L.area}㎡ 구조로 대신 보여 드려요.` : ""} 공고 평면도 원본이 아니고, 방 크기도 실제와 다를 수 있어요. 꾸민 배치는 이 브라우저에만 저장돼요.</p>`}${this.photoHTML(L)}
 </div>`;
+  },
+  /* 이 단지에 저장된 사진 구조가 있으면 그것을, 없으면 표준 구조를 쓴다. 저장된 값이 망가졌으면 지운다 */
+  layoutKey(c) {
+    const std = c.room_id || "room_84a", k = "photo_" + c.id;
+    this.photo = false; this.sb = c.id;
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem("bangbom.plan." + c.id) || "null"); } catch (e) {}
+    if (!saved || !saved.fromPhoto || !Array.isArray(saved.rooms) || !saved.rooms.length) return std;
+    ROOMS[k] = saved;
+    try { if (!this.rooms(buildLayout(k)).length) throw 0; } catch (e) { delete ROOMS[k]; try { localStorage.removeItem("bangbom.plan." + c.id); } catch (er) {} return std; }
+    this.photo = true; this.sb = c.id + "-p";
+    return k;
+  },
+  /* 사진 올리기 단추, 사진 구조일 때는 방 크기 고치기와 표준 구조로 되돌리기 */
+  photoHTML(L) {
+    const rows = this.photo ? L.rooms.map(r => `<li><span>${esc(r.name)}</span><label>가로 <input type="number" inputmode="numeric" min="100" max="3000" step="5" data-fix="${r.id}" data-k="w" value="${Math.round(r.w * 100)}"></label><label>세로 <input type="number" inputmode="numeric" min="100" max="3000" step="5" data-fix="${r.id}" data-k="d" value="${Math.round(r.d * 100)}"></label></li>`).join("") : "";
+    return `<div class="hvo-photo"><p class="hvo-photo-lead">${this.photo ? "다른 사진으로 다시 읽거나 표준 구조로 돌아갈 수 있어요." : "직방 등에서 본 실제 평면도를 캡처해 올리면, 방 자리와 크기를 읽어 이 집 구조로 바꿔요."}</p>
+<div class="hvo-photo-btns"><button type="button" class="btn btn--ghost btn--sm" id="hvoPick">평면도 사진으로 실제 구조 만들기</button>${this.photo ? '<button type="button" class="btn btn--ghost btn--sm" id="hvoReset">표준 구조로 되돌리기</button>' : ""}</div>
+<input type="file" id="hvoFile" accept="image/png,image/jpeg,image/webp" hidden>
+<p class="small muted" id="hvoMsg" role="status" aria-live="polite"></p>
+${this.photo ? `<details class="hvo-fix"><summary>방 크기 고치기 (cm)</summary><ul>${rows}</ul><button type="button" class="btn btn--sm" id="hvoApply">고친 크기 적용</button></details>` : ""}
+<p class="small muted">사진은 방 구조를 읽는 데만 쓰고 저장하지 않아요.</p></div>`;
+  },
+  /* 사진을 줄여서(긴 변 1600px) 서버에 보내고, 읽은 구조를 이 단지의 구조로 저장한다. 실패하면 표준 구조를 그대로 둔다 */
+  async readPhoto(file) {
+    const msg = t => { const m = $("#hvoMsg"); if (m) m.textContent = t; };
+    msg("사진을 읽고 있어요. 20초쯤 걸릴 수 있어요.");
+    try {
+      const url = URL.createObjectURL(file), img = new Image();
+      await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = url; });
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height)), cv = document.createElement("canvas");
+      cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 40000);
+      const res = await fetch("/api/homeplan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imageBase64: cv.toDataURL("image/jpeg", .85) }), signal: ctl.signal });
+      clearTimeout(timer);
+      const data = await res.json();
+      if (!res.ok || !data.layout) { msg((data && (data.note || (data.error && data.error.message))) || "사진에서 집 구조를 읽지 못했어요."); return; }
+      localStorage.setItem("bangbom.plan." + this.cid, JSON.stringify(data.layout));
+      this.open(this.cid);
+      msg(data.note);
+    } catch (e) { msg("사진을 읽지 못했어요. 인터넷 연결을 확인하고 다시 해 보세요."); }
+  },
+  /* 고친 크기(cm)를 집 안에 들어가게 맞춰 저장한다 */
+  applySizes() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem("bangbom.plan." + this.cid) || "null"); } catch (e) {}
+    if (!saved) return;
+    $$("#hvOver input[data-fix]").forEach(i => {
+      const r = saved.rooms.find(x => x.id === i.dataset.fix), v = Math.round(Number(i.value) / 5) * 5 / 100;
+      if (!r || !Number.isFinite(v)) return;
+      const max = i.dataset.k === "w" ? saved.W - r.x : saved.D - r.z;
+      r[i.dataset.k] = Math.max(1, Math.min(max, v));
+    });
+    try { localStorage.setItem("bangbom.plan." + this.cid, JSON.stringify(saved)); } catch (e) {}
+    this.open(this.cid);
   },
   /* 집 보기를 떠난다. 열어 둔 방은 그대로 두어서 뒤로 가기로 돌아오면 바로 보인다 */
   close() { this.on = false; this.shown = null; }
@@ -4511,7 +4979,347 @@ window.MH = {
   }
 };
 }
-/* 시작 화면(이름)과 튜토리얼. 아직 비어 있다 */
+/* ═════════ 시작 화면(이름)과 튜토리얼 ═════════
+   처음 온 사람이 집 찾기 흐름(#input · #map · #house)에 들어오면 시작 화면 → 튜토리얼을 한 번만 보여 준다. 홈과 이용 안내는 그냥 볼 수 있다.
+   - 이름: localStorage "bangbom.user.v1" = {"name","since"}. 계정이 아니다. 이 브라우저에만 두고 요청·주소·상담 질문 어디에도 넣지 않는다
+   - 튜토리얼을 본 기록: localStorage "bangbom.tutorial.v1" = "done"
+   - 주소에 tutorial=0 이 있으면 둘 다 저절로 뜨지 않는다(자동 검사용). tutorial=1 이면 튜토리얼을 다시 연다
+   - app_bb.js 의 { } 밖이라 window.MH 와 화면(DOM), location 만 쓴다. 이름은 textContent·value 로만 넣어서 HTML 로 읽히지 않게 한다 */
+(function () {
+  "use strict";
+  const K_USER = "bangbom.user.v1", K_TUT = "bangbom.tutorial.v1", MAX = 12;
+  const APP = ["input", "map", "house"];
+  /* mobile_app.css 와 같은 휴대폰 기준 */
+  const PHONE = matchMedia("(max-width:820px)");
+  const MH = window.MH || (window.MH = {});
+  /* 창(dialog)을 못 여는 오래된 브라우저에서는 시작 화면과 튜토리얼만 건너뛴다. 나머지 화면은 그대로 쓴다 */
+  const CAN = typeof HTMLDialogElement === "function" && typeof HTMLDialogElement.prototype.showModal === "function";
+
+  /* ── 저장: 저장소가 막힌 브라우저에서는 이 탭이 열려 있는 동안만 기억한다 ── */
+  const mem = {};
+  const read = k => { try { const v = localStorage.getItem(k); if (v != null) return v; } catch (e) {} return k in mem ? mem[k] : null; };
+  const write = (k, v) => { try { localStorage.setItem(k, v); delete mem[k]; } catch (e) { mem[k] = v; } };
+  const drop = k => { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} };
+
+  /* 이름 다듬기: 앞뒤 빈칸을 떼고 가운데 빈칸은 하나로. 글자 수는 눈에 보이는 글자 단위로 센다(어느 나라 글자든) */
+  const tidy = v => { let s = String(v == null ? "" : v); try { s = s.normalize("NFC"); } catch (e) {} return s.replace(/\s+/g, " ").trim(); };
+  const count = s => Array.from(s).length;
+  const user = {
+    /* 깨진 값은 없는 것으로 본다 */
+    get() {
+      try {
+        const o = JSON.parse(read(K_USER) || "null");
+        if (!o || typeof o !== "object" || typeof o.name !== "string") return null;
+        return { name: Array.from(tidy(o.name)).slice(0, MAX).join("").trim(), since: typeof o.since === "string" ? o.since : "" };
+      } catch (e) { return null; }
+    },
+    /* 빈 이름("")도 저장한다: 시작은 한 것이라 시작 화면이 다시 뜨지 않는다. 12자를 넘으면 저장하지 않는다 */
+    set(name) {
+      name = tidy(name);
+      if (count(name) > MAX) return null;
+      const old = user.get(), rec = { name, since: (old && old.since) || new Date().toISOString() };
+      write(K_USER, JSON.stringify(rec)); chips();
+      return rec;
+    },
+    clear() { drop(K_USER); drop(K_TUT); chips(); }
+  };
+  const seen = () => read(K_TUT) === "done";
+  /* 주소의 tutorial 값은 물을 때마다 다시 읽는다 (화면을 새로 읽지 않고 주소만 바뀔 수 있다) */
+  const param = () => { try { return new URLSearchParams(location.search).get("tutorial"); } catch (e) { return null; } };
+  const inApp = () => APP.includes(location.hash.replace("#", ""));
+
+  /* ── 튜토리얼 네 걸음: 그림은 방봄 화면의 모양(불빛·단지 카드·평면·말풍선)을 그대로 줄여 그린 것 ── */
+  const svg = inner => `<svg viewBox="0 0 320 132" focusable="false">${inner}</svg>`;
+  const wins = (x, y, cols, rows, lit) => { let s = ""; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) s += `<rect x="${x + c * 14}" y="${y + r * 12}" width="8" height="8" rx="1.5" fill="${lit(r, c) ? "#FFC46B" : "#dcd9d1"}"/>`; return s; };
+  /* 단지 이름표(지도의 알약)와 그 안의 표시. 표시는 색이 아니라 모양(꽉 참·반·빈 동그라미)으로 가른다 */
+  const pin = (cx, y, mark, ink) => `<rect x="${cx - 17}" y="${y}" width="34" height="22" rx="11" fill="${ink ? "#141714" : "#fff"}" stroke="${ink ? "#141714" : "#cfccc4"}"/><path d="M${cx - 5} ${y + 21.4}l5 5.1 5-5.1" fill="${ink ? "#141714" : "#fff"}" stroke="${ink ? "#141714" : "#cfccc4"}"/>${mark}`;
+  const ground = (a, b) => `<path d="M${a} 108.75H${b}" stroke="#cfccc4" stroke-width="1.5" stroke-linecap="round"/>`;
+  const STEPS = [
+    {
+      title: "방봄은 이렇게 써요.",
+      body: "조건을 넣으면 대출·지원 요건을 따져서 단지마다 불이 켜져요. 불빛은 세 가지예요.",
+      more: '<ul class="bbt__marks"><li class="is-on">● 요건 충족</li><li class="is-dim">◐ 확인 필요</li><li class="is-off">○ 미충족</li></ul>',
+      art: svg(ground(22, 298)
+        + '<rect x="30" y="92" width="20" height="16" rx="2" fill="#e1dfd8"/><rect x="116" y="96" width="14" height="12" rx="2" fill="#e1dfd8"/><rect x="190" y="90" width="14" height="18" rx="2" fill="#e1dfd8"/><rect x="266" y="94" width="26" height="14" rx="2" fill="#e1dfd8"/>'
+        + '<rect x="62" y="64" width="48" height="44" rx="3" fill="#fcfbf9" stroke="#141714" stroke-width="1.5"/>' + wins(70, 72, 3, 3, () => true)
+        + pin(86, 28, '<circle cx="86" cy="39" r="5.5" fill="#1f6b4f"/>')
+        + '<rect x="136" y="48" width="48" height="60" rx="3" fill="#fcfbf9" stroke="#141714" stroke-width="1.5"/>' + wins(144, 56, 3, 4, (r, c) => (r + c) % 2 === 0)
+        + pin(160, 12, '<circle cx="160" cy="23" r="4.75" fill="#fff" stroke="#141714" stroke-width="1.5"/><path d="M160 18.25a4.75 4.75 0 0 0 0 9.5z" fill="#141714"/>')
+        + '<rect x="210" y="72" width="48" height="36" rx="3" fill="#eceae4" stroke="#8a8780" stroke-width="1.5"/>' + wins(218, 80, 3, 2, () => false)
+        + pin(234, 36, '<circle cx="234" cy="47" r="4.75" fill="#fff" stroke="#8a8780" stroke-width="1.5"/>'))
+    },
+    {
+      title: "불빛을 누르면 월 부담이 보여요",
+      body: "단지 카드에서 지원을 반영한 월 부담을 확인해요. 월세·관리비·대출이자에서 지원을 뺀 계산 내역도 같이 보여줘요.",
+      art: svg(ground(22, 88)
+        + '<rect x="30" y="72" width="40" height="36" rx="3" fill="#fcfbf9" stroke="#141714" stroke-width="1.5"/>' + wins(38, 80, 2, 2, () => true).replace(/width="8"/g, 'width="10"')
+        + pin(50, 36, '<circle cx="50" cy="47" r="5.5" fill="#7ED6A8"/>', true)
+        + '<path d="M73 47H102" stroke="#141714" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="1 5"/>'
+        + '<rect x="108" y="12" width="190" height="108" rx="14" fill="#fff" stroke="#e3e1db" stroke-width="1.5"/>'
+        + '<text x="124" y="34" font-size="10.5" fill="#71746f">지원 반영 후 월 부담</text><rect x="124" y="42" width="84" height="14" rx="4" fill="#1f6b4f"/>'
+        + '<text x="124" y="78" font-size="11" fill="#141714">월세·관리비</text><rect x="252" y="71" width="30" height="6" rx="3" fill="#cfccc4"/><path d="M124 84.5H282" stroke="#efeeea"/>'
+        + '<text x="124" y="94" font-size="11" fill="#141714">대출이자</text><rect x="258" y="87" width="24" height="6" rx="3" fill="#cfccc4"/><path d="M124 100.5H282" stroke="#efeeea"/>'
+        + '<text x="124" y="110" font-size="11" fill="#1f6b4f">지원</text><path d="M244 106h6" stroke="#1f6b4f" stroke-width="1.5" stroke-linecap="round"/><rect x="256" y="103" width="26" height="6" rx="3" fill="#1f6b4f"/>')
+    },
+    {
+      title: "집 보기에서 집 안을 미리 봐요",
+      body: "집 전체 구조를 보고 방을 골라 가구를 놓아봐요. 아이 눈높이(90cm, 참고값)로도 둘러볼 수 있어요.",
+      more: '<p class="bbt__small">평면은 표준 구조를 단순하게 그린 예시예요.</p>',
+      art: svg('<rect x="30" y="20" width="56" height="40" fill="#efe7da"/><rect x="86" y="20" width="32" height="40" fill="#e6e8e4"/><rect x="30" y="60" width="88" height="52" fill="#f4ede1"/><rect x="118" y="20" width="58" height="92" fill="#e2efe7"/>'
+        + '<rect x="134" y="30" width="32" height="42" rx="3" fill="#fff" stroke="#141714" stroke-width="1.2"/><path d="M134 42.5h32" stroke="#141714" stroke-width="1.2"/><rect x="128" y="94" width="40" height="10" rx="2" fill="#fff" stroke="#141714" stroke-width="1.2"/>'
+        + '<rect x="48" y="70" width="26" height="12" rx="2" fill="#fff" stroke="#141714" stroke-width="1.2"/><rect x="40" y="92" width="42" height="12" rx="3" fill="#fff" stroke="#1f6b4f" stroke-width="1.5" stroke-dasharray="3 3"/>'
+        + '<path d="M30 20H176V112H30ZM118 20V70M118 88V112M30 60H52M70 60H118M86 20V34M86 48V60" fill="none" stroke="#1f6b4f" stroke-width="4" stroke-linecap="square"/>'
+        + ground(204, 294)
+        + '<path d="M244 48V108M239.5 48h9M239.5 108h9" fill="none" stroke="#141714"/><text x="253" y="83" font-size="12" fill="#141714">90cm</text>'
+        + '<path d="M210 48q12-10 24 0q-12 10-24 0z" fill="#fff" stroke="#141714" stroke-width="1.3"/><circle cx="222" cy="48" r="3.2" fill="#141714"/>')
+    },
+    {
+      title: "궁금한 건 24시간 상담에 물어봐요",
+      body: "판정과 숫자는 정해진 규칙이 계산하고, 상담은 그 결과를 쉬운 말로 풀어 줘요. 최종 결정은 각 기관이 해요.",
+      art: svg('<rect x="136" y="14" width="154" height="32" rx="16" fill="#141714"/><text x="213" y="34.5" font-size="11.5" text-anchor="middle" fill="#fff">월 부담은 어떻게 나와요?</text>'
+        + '<rect x="30" y="58" width="158" height="58" rx="16" fill="#fff" stroke="#e3e1db" stroke-width="1.5"/><rect x="46" y="73" width="118" height="5" rx="2.5" fill="#cfccc4"/><rect x="46" y="84" width="94" height="5" rx="2.5" fill="#cfccc4"/><rect x="46" y="96" width="60" height="10" rx="5" fill="#e2efe7"/>'
+        + '<rect x="204" y="84" width="92" height="30" rx="15" fill="#141714"/><circle cx="220" cy="99" r="4" fill="#7ED6A8"/><text x="230" y="103" font-size="11.5" fill="#fff">24시간 상담</text>')
+    }
+  ];
+
+  /* ── 창 하나(<dialog>)를 시작 화면과 튜토리얼이 같이 쓴다: 둘 사이에 뒤 화면이 깜빡이지 않는다 ── */
+  let dlg = null, mode = null, step = 0, back = null;
+  function box() {
+    if (dlg) return dlg;
+    dlg = document.createElement("dialog");
+    dlg.className = "bbt"; dlg.id = "bbt";
+    dlg.setAttribute("aria-modal", "true"); dlg.setAttribute("aria-labelledby", "bbtTitle");
+    dlg.addEventListener("click", onClick);
+    dlg.addEventListener("keydown", onKey);
+    dlg.addEventListener("submit", onSubmit);
+    dlg.addEventListener("input", onInput);
+    /* 휴대폰의 뒤로 가기처럼 Esc 글쇠가 아닌 닫기 요청도 같은 길로 보낸다 */
+    dlg.addEventListener("cancel", e => { e.preventDefault(); leave(); });
+    /* 브라우저가 스스로 닫은 경우에도(뒤로 가기를 거듭 누름 등) 뒷정리를 한다 */
+    dlg.addEventListener("close", () => { if (mode && !dlg.open) shut(); });
+    dlg.addEventListener("wheel", hold, { passive: false });
+    dlg.addEventListener("touchmove", hold, { passive: false });
+    document.body.appendChild(dlg);
+    return dlg;
+  }
+  /* 창이 떠 있는 동안 뒤 화면(홈·이용 안내)이 휠·손가락·글쇠로 따라 움직이지 않게 한다.
+     body 의 overflow 를 바꾸면 세로 막대가 사라지면서 화면이 옆으로 밀리므로, 움직임만 막는다. 카드 안이 넘칠 때는 카드만 움직인다.
+     두 손가락으로 화면을 키우는 동작은 막지 않는다 */
+  function hold(e) {
+    if (e.touches && e.touches.length > 1) return;
+    const c = dlg.querySelector(".bbt__card");
+    if (!c || !c.contains(e.target) || c.scrollHeight <= c.clientHeight) e.preventDefault();
+  }
+  const MOVE_KEYS = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "];
+  /* 휴대폰: 화면 키보드가 올라오면 실제로 보이는 높이에 맞춰 시트가 키보드 위에 오게 한다 (상담 서랍과 같은 방법) */
+  function fit() {
+    if (!dlg) return;
+    const vv = window.visualViewport;
+    if (!vv || !dlg.open || !PHONE.matches) { dlg.style.height = dlg.style.top = ""; return; }
+    dlg.style.height = vv.height + "px"; dlg.style.top = vv.offsetTop + "px";
+  }
+  function show(m, html, focusSel, prep) {
+    box();
+    /* 닫으면 돌아갈 자리. 시작 화면에서 튜토리얼로 넘어갈 때는 처음 자리를 그대로 둔다 */
+    if (!dlg.open) back = document.activeElement;
+    mode = m; dlg.dataset.mode = m; dlg.innerHTML = html;
+    dlg.setAttribute("aria-describedby", m === "tour" ? "bbtBody" : "bbtNote");
+    prep();
+    const f = dlg.querySelector(focusSel);
+    if (f) f.setAttribute("autofocus", "");
+    if (!dlg.open) {
+      try { dlg.showModal(); } catch (e) { mode = null; back = null; return false; }
+    }
+    fit();
+    if (f) f.focus({ preventScroll: true });
+    return true;
+  }
+  function shut() {
+    if (!dlg || !mode) return;
+    const m = mode, b = back; mode = null; back = null;
+    /* 튜토리얼은 어떻게 닫든(끝까지 봄·건너뛰기·Esc) 본 것으로 적어서 다시 저절로 뜨지 않게 한다 */
+    if (m === "tour") write(K_TUT, "done");
+    if (dlg.open) dlg.close();
+    fit(); dlg.innerHTML = ""; chips();
+    /* 열기 전에 있던 자리로 커서를 돌려준다 */
+    if (b && b.isConnected && typeof b.focus === "function") b.focus({ preventScroll: true });
+  }
+  /* Esc: 처음 뜬 시작 화면에서는 '이름 없이 둘러보기'와 같고, 그 밖에는 닫는다 */
+  function leave() { if (mode === "start") { user.set(""); tour(); } else shut(); }
+
+  /* ── 시작 화면 (이름 바꾸기도 같은 화면) ── */
+  const WARN = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 4.75v3.9M8 11.2v.05"/></svg>';
+  function start(rename) {
+    if (!CAN) return false;
+    const u = user.get(), name = rename && u ? u.name : "";
+    const ok = show(rename ? "rename" : "start", `<form class="bbt__card bbt__card--start" method="dialog" novalidate>
+<h2 class="bbt__title" id="bbtTitle" tabindex="-1">${name ? "이름을 바꿔요" : "어떻게 불러 드릴까요?"}</h2>
+<div class="bbt__field">
+<label class="bbt__label" for="bbtName">이름 <small>별명도 좋아요 · ${MAX}자까지</small></label>
+<input class="bbt__input" id="bbtName" type="text" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="예: 봄이" aria-describedby="bbtErr bbtNote">
+<p class="bbt__err" id="bbtErr" role="alert" hidden></p>
+<p class="bbt__note" id="bbtNote">이름은 이 브라우저에만 저장해요. 계정이 아니고 서버로 보내지 않아요.</p>
+</div>
+<div class="bbt__btns"><button class="btn" type="submit">${rename ? "저장하기" : "시작하기"}</button><button class="bbt__quiet" type="button" data-act="${rename ? "close" : "noname"}">${rename ? "취소" : "이름 없이 둘러보기"}</button></div>
+</form>`, PHONE.matches ? "#bbtTitle" : "#bbtName", () => { dlg.querySelector("#bbtName").value = name; });
+    /* PC 에서 이름을 바꿀 때는 적혀 있던 이름을 통째로 골라 두어 바로 새로 칠 수 있게 한다 */
+    if (ok && name && !PHONE.matches) dlg.querySelector("#bbtName").select();
+    return ok;
+  }
+  function judge(raw) {
+    const name = tidy(raw), n = count(name);
+    return { name, err: !n ? "이름을 한 글자 이상 적어 주세요." + (mode === "start" ? " 적지 않으려면 아래 '이름 없이 둘러보기'를 눌러요." : "") : n > MAX ? `이름은 ${MAX}자까지예요. 지금 ${n}자라서 ${n - MAX}자를 줄여 주세요.` : "" };
+  }
+  function warn(msg) {
+    const i = dlg.querySelector("#bbtName"), p = dlg.querySelector("#bbtErr");
+    p.innerHTML = msg ? WARN + "<span></span>" : ""; if (msg) p.lastChild.textContent = msg;
+    p.hidden = !msg;
+    msg ? i.setAttribute("aria-invalid", "true") : i.removeAttribute("aria-invalid");
+  }
+  function onSubmit(e) {
+    /* 주소로 보내는 기본 동작을 막는다: 이름이 주소나 요청에 실리지 않는다 */
+    e.preventDefault();
+    const i = dlg.querySelector("#bbtName"); if (!i) return;
+    const first = mode === "start", r = judge(i.value);
+    if (r.err) { warn(r.err); i.focus(); return; }
+    user.set(r.name);
+    first ? tour() : shut();
+  }
+  /* 알림이 떠 있는 동안에는 고치는 대로 알림도 바꾼다 */
+  function onInput(e) { const p = dlg.querySelector("#bbtErr"); if (p && !p.hidden && e.target.id === "bbtName") warn(judge(e.target.value).err); }
+
+  /* ── 튜토리얼 ── */
+  function tour() {
+    if (!CAN) return false;
+    step = 0;
+    return show("tour", `<div class="bbt__card bbt__card--tour">
+<div class="bbt__top"><p class="bbt__count" id="bbtCount"></p><button class="bbt__quiet" type="button" data-act="skip">건너뛰기</button></div>
+<div class="bbt__art" id="bbtArt" aria-hidden="true"></div>
+<div class="bbt__text" aria-live="polite" aria-atomic="true"><h2 class="bbt__title" id="bbtTitle"></h2><p class="bbt__body" id="bbtBody"></p><div id="bbtMore"></div></div>
+<div class="bbt__btns"><button class="btn btn--line" type="button" data-act="prev">이전</button><button class="btn" type="button" data-act="next" id="bbtNext"></button></div>
+</div>`, "#bbtNext", paint);
+  }
+  function paint() {
+    const s = STEPS[step], u = user.get(), q = x => dlg.querySelector(x), prev = q('[data-act="prev"]'), next = q("#bbtNext");
+    /* 첫 걸음으로 돌아오면 [이전]이 사라진다. 커서가 거기 있었으면 [다음]으로 옮긴다 */
+    const lost = step === 0 && document.activeElement === prev;
+    q("#bbtCount").textContent = (step + 1) + " / " + STEPS.length;
+    q("#bbtArt").innerHTML = s.art;
+    q("#bbtTitle").textContent = (step === 0 && u && u.name ? u.name + "님, " : "") + s.title;
+    q("#bbtBody").textContent = s.body;
+    q("#bbtMore").innerHTML = s.more || "";
+    prev.hidden = step === 0;
+    next.textContent = step === STEPS.length - 1 ? "시작하기" : "다음";
+    if (lost) next.focus();
+  }
+  function onClick(e) {
+    const b = e.target.closest ? e.target.closest("[data-act]") : null; if (!b) return;
+    const a = b.dataset.act;
+    if (a === "noname") { user.set(""); tour(); }
+    else if (a === "prev") { step = Math.max(0, step - 1); paint(); }
+    else if (a === "next" && step < STEPS.length - 1) { step++; paint(); }
+    else shut(); /* 건너뛰기 · 마지막 걸음의 시작하기 · 취소 */
+  }
+  function onKey(e) {
+    /* Esc 를 여기서 처리하고 위로 올리지 않는다: 뒤에 열려 있는 메뉴 패널까지 같이 닫히지 않게 */
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); leave(); return; }
+    /* 뒤 화면을 움직이는 글쇠는 막는다. 이름 칸 안의 커서 옮기기와 단추의 스페이스(누르기)는 그대로 둔다 */
+    if (MOVE_KEYS.includes(e.key) && !e.target.matches("input") && !(e.key === " " && e.target.matches("button"))) { e.preventDefault(); return; }
+    if (e.key !== "Tab") return;
+    /* 커서(포커스)가 창 밖으로 나가지 않게 처음과 끝을 잇는다 */
+    const f = Array.from(dlg.querySelectorAll("button, input")).filter(el => !el.hidden && !el.disabled);
+    const i = f.indexOf(document.activeElement);
+    if (f.length && (e.shiftKey ? i <= 0 : i === f.length - 1)) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); }
+  }
+  /* 처음 온 사람(이름도, 본 기록도 없음)이 집 찾기 흐름 안에 있을 때만 연다 */
+  function maybeStart() {
+    if (!CAN || mode || param() === "0" || !inApp() || user.get() || seen()) return false;
+    return start(false);
+  }
+
+  /* ── 이름 칩: PC 는 위 막대의 메뉴 단추 옆, 휴대폰은 자리가 없어서 메뉴 패널 안 ── */
+  const SLOTS = [["nav", "#menuOpen", "beforebegin"], ["panel", "#panel .panel__list", "afterend"]];
+  const chip = {};
+  function chips() {
+    const u = user.get(), on = !!u || seen(), named = !!(u && u.name);
+    SLOTS.forEach(([where, sel, pos]) => {
+      let w = chip[where];
+      if (!on) { if (w) { w.remove(); chip[where] = null; } return; }
+      if (!w) {
+        const at = document.querySelector(sel); if (!at) return;
+        w = chip[where] = document.createElement("div"); w.className = "bbu bbu--" + where;
+        w.innerHTML = `<button class="btn btn--ghost bbu__chip" type="button" aria-expanded="false" aria-controls="bbuMenu-${where}"><span class="bbu__name"></span><span class="sr-only"> 메뉴</span></button>
+<div class="bbu__menu" id="bbuMenu-${where}" hidden>
+<div class="bbu__items"><button class="bbu__item" type="button" data-bbu="rename"></button><button class="bbu__item" type="button" data-tutorial="open">사용법 다시 보기</button><button class="bbu__item" type="button" data-bbu="ask">이 브라우저에서 지우기</button></div>
+<div class="bbu__ask" hidden><p>이름과 튜토리얼을 본 기록을 이 브라우저에서 지울까요?</p><div><button class="bbu__yes" type="button" data-bbu="clear">지우기</button><button class="bbu__no" type="button" data-bbu="cancel">취소</button></div></div>
+</div>`;
+        w.addEventListener("click", onChip); w.addEventListener("keydown", onChipKey);
+        at.insertAdjacentElement(pos, w);
+      }
+      w.querySelector(".bbu__name").textContent = named ? u.name + "님" : "이름 정하기";
+      w.querySelector('[data-bbu="rename"]').textContent = named ? "이름 바꾸기" : "이름 정하기";
+    });
+    lift();
+  }
+  /* 집 보기 틀이 위 막대와 같은 높이(z-index)라서 펼친 메뉴를 덮는다. 메뉴가 열린 동안만 위 막대를 한 칸 올린다 */
+  function lift() { const nav = document.getElementById("nav"); if (nav) nav.classList.toggle("bbu-open", !!chip.nav && !chip.nav.querySelector(".bbu__menu").hidden); }
+  function menu(w, open) {
+    const m = w.querySelector(".bbu__menu");
+    w.querySelector(".bbu__chip").setAttribute("aria-expanded", String(open)); m.hidden = !open;
+    m.querySelector(".bbu__items").hidden = false; m.querySelector(".bbu__ask").hidden = true;
+    lift();
+  }
+  function shutMenus(keep) { SLOTS.forEach(([where]) => { const w = chip[where]; if (w && !w.querySelector(".bbu__menu").hidden && !(keep instanceof Node && w.contains(keep))) menu(w, false); }); }
+  function say(msg) { const t = document.getElementById("toast"); if (!t) return; t.textContent = msg; t.classList.add("is-on"); clearTimeout(say.t); say.t = setTimeout(() => t.classList.remove("is-on"), 2600); }
+  function onChip(e) {
+    const w = e.currentTarget, b = e.target.closest ? e.target.closest("button") : null; if (!b) return;
+    const head = w.querySelector(".bbu__chip"), m = w.querySelector(".bbu__menu"), act = b.dataset.bbu;
+    if (b === head) menu(w, m.hidden);
+    else if (act === "ask") { m.querySelector(".bbu__items").hidden = true; m.querySelector(".bbu__ask").hidden = false; m.querySelector('[data-bbu="cancel"]').focus(); }
+    else if (act === "cancel") { menu(w, true); m.querySelector('[data-bbu="ask"]').focus(); }
+    else if (act === "clear") {
+      /* 칩이 사라지므로 커서는 바로 옆 단추(메뉴 열기·닫기)로 옮긴다 */
+      const next = document.getElementById(w.classList.contains("bbu--panel") ? "menuClose" : "menuOpen");
+      user.clear(); if (next) next.focus();
+      say("이름과 튜토리얼 기록을 이 브라우저에서 지웠어요.");
+    } else {
+      /* 이름 바꾸기 · 사용법 다시 보기: 창을 닫으면 칩으로 돌아오게 칩에 커서를 두고 연다 */
+      menu(w, false); head.focus();
+      if (act === "rename") start(true);
+    }
+  }
+  function onChipKey(e) {
+    const w = e.currentTarget;
+    if (e.key !== "Escape" || w.querySelector(".bbu__menu").hidden) return;
+    e.stopPropagation(); menu(w, false); w.querySelector(".bbu__chip").focus();
+  }
+  document.addEventListener("click", e => {
+    shutMenus(e.target);
+    /* 어디에 있든 data-tutorial="open" 을 누르면 튜토리얼을 다시 연다 */
+    if (e.target instanceof Element && e.target.closest('[data-tutorial="open"]')) { e.preventDefault(); tour(); }
+  });
+  document.addEventListener("focusin", e => shutMenus(e.target));
+  /* 집 보기의 방 배치 도구(iframe) 안을 누르면 이 문서에는 누름이 오지 않는다. 창이 커서를 잃을 때도 메뉴를 접는다 */
+  addEventListener("blur", () => shutMenus(null));
+  /* 다른 탭에서 이름을 바꾸거나 지우면 이 탭의 칩도 맞춘다 */
+  addEventListener("storage", e => { if (!e.key || e.key === K_USER || e.key === K_TUT) chips(); });
+  if (window.visualViewport) { visualViewport.addEventListener("resize", fit); visualViewport.addEventListener("scroll", fit); }
+
+  MH.user = { get: () => user.get(), set: name => user.set(name), clear: () => user.clear() };
+  MH.tutorial = { open: () => tour(), maybeStart, reset() { drop(K_TUT); chips(); } };
+
+  chips();
+  /* shell.js 가 화면을 바꾼 다음에 판단하도록, 문서를 다 읽은 뒤에 듣기 시작한다 */
+  function boot() {
+    addEventListener("hashchange", () => {
+      /* 시작 화면이 떠 있는데 홈·이용 안내로 나가면 그냥 닫는다(저장하지 않는다). 다음에 들어올 때 다시 묻는다 */
+      if (mode === "start" && !inApp()) { shut(); return; }
+      maybeStart();
+    });
+    if (!maybeStart() && param() === "1") tour();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
+})();
 
 }
 </script>
@@ -4532,6 +5340,8 @@ function updateNav() { nav.classList.toggle("is-clear", current === "home" && sc
 function route() {
   let name = location.hash.replace("#", "");
   if (name === "start") name = "home";
+  /* #house/<방> 은 집 보기 안의 방 하나다. 어느 방인지는 집 보기(MH.route)가 주소에서 읽는다 */
+  if (name.startsWith("house/")) name = "house";
   if (![...PAGES, ...APP].includes(name)) name = "home";
   const first = current === null, prev = current;
   current = name;

@@ -100,9 +100,11 @@ body.card-open #mh .pills-r{display:none}
 #mh details.fold{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
 #mh details.fold summary{font-size:15px;font-weight:600;letter-spacing:-.02em}
 #mh .calc{font-size:14px;margin-top:10px}
-#mh .calc td{padding:10px 0;border-bottom:1px solid var(--line)}
+/* 줄 사이 선은 아래 줄의 위쪽 선으로 긋는다. 합계 줄 위의 선만 진하게 하려는 것인데, 위아래 칸이 선을 함께 가지면 브라우저가 위 칸의 연한 선을 고른다 */
+#mh .calc td{padding:10px 0;border-bottom:0;border-top:1px solid var(--line)}
+#mh .calc tr:first-child td{border-top:0}
 #mh .calc .neg{color:var(--green)}
-#mh .calc tr.tot td{font-size:16px;padding-top:14px;border-top:1px solid var(--ink)}
+#mh .calc tr.tot td{font-size:16px;padding-top:14px;border-top-color:var(--ink)}
 /* 합계 줄의 이름(.tot)이 아래 "합계 상자"(#mh .tot, display:flex)와 같아서 표의 줄이 상자로 바뀌어 금액 칸이 어긋났다. 표의 줄로 되돌린다 */
 #mh .calc tr.tot{display:table-row;margin:0;padding:0;border-top:0}
 #mh .calc td:first-child{padding-right:10px}

@@ -102,7 +102,7 @@ function renderPanels() {
     $("#pillsR").innerHTML = `<span class="pill-n">모은 돈 <b>${won(S.profile.assets)}만</b></span><span class="pill-n">월 예산 <b>${won(S.profile.monthly_budget)}만</b></span>${mn != null ? `<span class="pill-n">지원 반영 최저 <b>월 ${man1(mn)}만</b></span>` : ""}`;
     $("#legend").innerHTML = "";
   } else {
-    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">단지를 누르면 주변 시설과 집 정보가 보여요</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(2026.9.30) + 언론 보도 단지, 판정 없음</p>
+    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">${MapView.ok ? "단지를 누르면 주변 시설과 집 정보가 보여요" : "조건을 넣으면 대출·지원 판정은 볼 수 있어요"}</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(2026.9.30) + 언론 보도 단지, 판정 없음</p>
       <div class="jp-btns"><button class="btn btn--sm" id="bMatch">${S.profile ? "내 조건으로 보기" : "내 조건 넣고 불 켜기"} →</button></div></div>`;
     $("#bMatch").onclick = () => S.profile ? setMode("match") : (location.hash = "#input");
     $("#panelL").dataset.mode = "browse";
@@ -160,7 +160,7 @@ function cardHTML(id) {
   body += safetyHTML(c) + saleHTML(c, match ? (ev.shortfall ? null : (ev.net_monthly != null ? ev.net_monthly : ev.net_monthly_best)) : null);
   body += `<details class="fold" data-pane="near"><summary>가까운 시설</summary><p class="pane-h m-only">가까운 시설</p><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 실제 위치예요(OpenStreetMap·Wikidata).</p></details>`;
   body += roomNote;
-  body += `</div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
+  body += `<p class="small muted" style="margin-top:10px">실제 평면도는 <a class="link" href="https://www.zigbang.com/home/apt/" target="_blank" rel="noopener">직방에서 이 단지 찾아보기 ↗</a> (새 창)</p></div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
   return `<div class="cc">${head}${body}</div>`;
 }
 /* 휴대폰 시트에서 칩으로 고른 항목 하나만 보여 준다. 접는 목록(details)은 고른 것만 펼친다 */
@@ -405,7 +405,8 @@ const MapView = {
     requestAnimationFrame(loop);
   },
   clampT() { this.target.x = clamp(this.target.x, -18 * MAP_K, 64 * MAP_K); this.target.z = clamp(this.target.z, -76 * MAP_K, 62 * MAP_K); },
-  resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); },
+  /* 크기를 바꾸면 그림이 지워져 검게 남는다. 지도를 그리지 않는 화면(조건 입력·집 보기)에서도 반투명한 위 막대 뒤로 비치므로 한 장은 바로 그려 둔다 */
+  resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); this.tick(0, performance.now() / 1000, true); },
   blocked(x, z, pad) {
     if (!inGeo(x, z, GEO.outline)) return true;
     for (const c of COMPLEX) if (Math.abs(x - c.map_x) < 2.0 + pad && Math.abs(z - c.map_z) < 1.8 + pad) return true;
@@ -614,9 +615,9 @@ const MapView = {
     });
   },
   project(v) { const p = v.clone().project(this.cam); return { x: (p.x + 1) / 2 * innerWidth, y: (1 - p.y) / 2 * innerHeight }; },
-  tick(dt, time) {
-    /* 지도가 완전히 가려진 동안(불투명한 조건 입력 화면, 휴대폰의 전체 화면 상담 서랍)에는 그리지 않는다 */
-    if (VIEW !== "map" || (Consult.isOpen && isPhone())) return;
+  tick(dt, time, force) {
+    /* 지도가 완전히 가려진 동안(불투명한 조건 입력 화면, 휴대폰의 전체 화면 상담 서랍)에는 그리지 않는다. force 는 크기가 바뀐 직후의 한 장 */
+    if (!force && (VIEW !== "map" || (Consult.isOpen && isPhone()))) return;
     if (this.fly0) { const f = this.fly0; f.t = Math.min(1, f.t + dt / .6); const k = 1 - Math.pow(1 - f.t, 3); this.target.set(f.fx + (f.x - f.fx) * k, 0, f.fz + (f.z - f.fz) * k); this.zoom = f.fzoom + (f.zoom - f.fzoom) * k; if (f.t >= 1) this.fly0 = null; }
     const off = new T3.Vector3(20, 20, 20); this.cam.position.copy(this.target).add(off); this.cam.lookAt(this.target); this.cam.zoom = this.zoom; this.cam.updateProjectionMatrix();
     this.sun.position.copy(this.target).add(new T3.Vector3(10, 15, 3)); this.sun.target.position.copy(this.target);

@@ -167,14 +167,22 @@ body.house-mode #mh .fab{display:none}
 @media (max-width:820px) and (max-height:480px){
   body.app-mode #mh .panel-r{height:calc(100vh - var(--nav-h) - var(--tab-h));height:calc(100dvh - var(--nav-h) - var(--tab-h) - env(safe-area-inset-bottom))}
   #mh .cc{overflow-y:auto;overscroll-behavior:contain}
+  /* 이름과 꼬리표를 한 줄에 두어 내용이 조금이라도 먼저 보이게 한다 */
   #mh .cc-top{padding-bottom:4px}
+  #mh .cc-top > div{padding-right:50px}
+  #mh .cc-top h2{flex:0 1 auto;margin:0 4px 0 0!important;padding-right:0}
   #mh .cc-panes{flex:none;overflow:visible}
   #mh .cc[data-tab="plan"] .cc-plan{flex:none;height:220px}
   #mh .cc-btns{position:sticky;bottom:0;z-index:1;margin-top:auto;background:var(--card);border-top:1px solid var(--line)}
+  /* 지도: 세로 화면처럼 펼친 패널을 상담 단추 위에서 끝내면 62px 만 남는다. 도움말을 빼고, 패널을 상담 단추 왼쪽에 두어 안내 문구 위까지 쓴다 */
+  body.app-mode #mh .map-hint{display:none}
+  #mh .panel-l{right:calc(var(--pad-x) + 141px);max-height:calc(100vh - var(--nav-h) - var(--tab-h) - 104px);max-height:calc(100dvh - var(--nav-h) - var(--tab-h) - 104px - env(safe-area-inset-bottom))}
 }
-/* 낮은 화면의 PC 배치(가로로 돌린 큰 휴대폰): 빠른 질문이 세 줄이면 상담 입력 칸이 화면 밖으로 밀린다. 한 줄로 두고 옆으로 넘긴다 */
-@media (min-width:821px) and (max-height:480px){
-  #mh .quick{flex-wrap:nowrap;overflow-x:auto}
+/* 가로로 돌린 큰 휴대폰(폭 821px 이상이라 PC 배치, 높이 480px 이하): 빠른 질문이 세 줄이면 상담 입력 칸이 화면 밖으로 밀린다.
+   한 줄로 두고 손가락으로 옆으로 넘긴다. 마우스를 쓰는 PC 는 그대로 둔다 */
+@media (min-width:821px) and (max-height:480px) and (pointer:coarse){
+  #mh .quick{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  #mh .quick::-webkit-scrollbar{display:none}
   #mh .quick button{flex:none;white-space:nowrap}
 }
 /* 창을 좁힌 PC(마우스): 옆으로 밀 수 없으니 빠른 질문을 여러 줄로 보여 준다 */
