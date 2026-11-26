@@ -1,0 +1,32 @@
+/* ═══════ 조건 입력: 한 화면에 한 문항 (PC·휴대폰 같음) ═══════
+   마크업은 build.py 의 FORM_Q, 움직임은 app_bb.js 의 setQ. 휴대폰 CSS(mobile_app.css)보다 앞에 붙으므로 #mh .qform 로 한 단계 더 구체적으로 쓴다 */
+#mh .qform [hidden]{display:none!important}
+#mh .qform .qhead{display:flex;align-items:center;gap:12px;margin-top:20px}
+#mh .qform .qprog{flex:none;font-size:14px;font-weight:600;color:var(--sub);font-variant-numeric:tabular-nums}
+#mh .qform .qbar{flex:1;height:4px;border-radius:999px;background:var(--gray);overflow:hidden}
+#mh .qform .qbar i{display:block;width:12.5%;height:100%;background:var(--green);transition:width .25s}
+#mh .qform .qlist{display:block;margin-top:24px;min-height:230px}
+#mh .qform .q{display:none}
+#mh .qform .q.is-on{display:block;animation:qIn .25s ease both}
+@keyframes qIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#mh .qform .q.is-on{animation:none}#mh .qform .qbar i{transition:none}}
+#mh .qform .q .qt{display:block;margin:0 0 8px;font-size:clamp(20px,2vw,26px);font-weight:600;letter-spacing:-.03em;line-height:1.35;color:var(--ink)}
+#mh .qform .q .qt em{font-style:normal;font-size:13px;font-weight:600;color:var(--green);background:var(--green-soft);padding:2px 8px;border-radius:999px;margin-right:8px;vertical-align:3px;letter-spacing:0}
+#mh .qform .q .qd{margin:0 0 16px;font-size:14px;line-height:1.55;color:var(--sub)}
+#mh .qform .q .in input{height:56px;font-size:20px}
+#mh .qform .q .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+#mh .qform .q .seg button{height:56px;font-size:16px}
+#mh .qform .qprev{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:22px;margin-top:8px;font-size:14px;font-weight:600;color:var(--green)}
+#mh .qform .qfix{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:#fbf1de;color:#835a10;border:1px solid #e9cf9c}
+#mh .qform .form-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+#mh .qform #formBack{margin-right:auto}
+@media (max-width:820px){
+  #mh .qform .qhead{order:2;margin-top:14px}
+  #mh .qform .qlist{order:3;min-height:0;margin-top:16px}
+  #mh .qform .q .qt{font-size:21px}
+  #mh .qform .form-btns .btn{flex:1 1 0}
+  #mh .qform #formBack{margin-right:0}
+}
+/* 판정 결과: 대구 거주·전입 예정 기준 바꾸기 (작은 글씨) */
+#mh .jp-daegu{margin:2px 0 8px 30px;font-size:13px;color:var(--sub)}
+#mh .jp-daegu button{font-size:13px;font-weight:600;color:var(--green);text-decoration:underline;text-underline-offset:2px}

@@ -49,7 +49,7 @@ function route(v) {
   const house = v === "house";
   $("#houseView").classList.toggle("is-on", house);
   house ? House.open(S.sel) : House.close();
-  if (v === "input" && !formDirty) { fillForm(S.profile || null); setStep(1); }
+  if (v === "input" && !formDirty) { fillForm(S.profile || null); setQ(1); }
   if (v !== "map") Consult.fit();
   renderTop(v); renderPanels();
 }
@@ -83,7 +83,9 @@ function renderPanels() {
   if (S.mode === "match" && S.pr) {
     const n = counts(), tot = n.on + n.dim + n.off || 1;
     const row = x => `<div class="jp-row" role="button" tabindex="0"><span class="ico ${x.status}">${ST_ICON[x.status]}</span><span class="nm">${esc(x.name)}</span><span class="st st--${x.status}">${ST_KO[x.status]}</span>
-      <span class="jp-more">${esc(x.reason)}${x.rate_label ? `<br>금리 ${esc(x.rate_label)}` : ""}${x.check_items && x.check_items.length ? `<br>직접 확인할 것: ${esc(x.check_items.join(", "))}` : ""}<br>최종 결정: ${esc(x.approval_by)}${x.source_url ? ` · <a href="${esc(x.source_url)}" target="_blank" rel="noopener" style="pointer-events:auto">출처</a>` : ""}${x.checked_at ? ` · 확인일 ${esc(x.checked_at)}` : " · 기준일 확인 전(시연용)"}</span></div>`;
+      <span class="jp-more">${esc(x.reason)}${x.rate_label ? `<br>금리 ${esc(x.rate_label)}` : ""}${x.check_items && x.check_items.length ? `<br>직접 확인할 것: ${esc(x.check_items.join(", "))}` : ""}<br>최종 결정: ${esc(x.approval_by)}${x.source_url ? ` · <a href="${esc(x.source_url)}" target="_blank" rel="noopener" style="pointer-events:auto">출처</a>` : ""}${x.checked_at ? ` · 확인일 ${esc(x.checked_at)}` : " · 기준일 확인 전(시연용)"}</span></div>`
+      /* "대구 거주·전입 예정"은 입력 문항에서 빼고 기본값 예로 둔다. 대구 청년 이자지원 줄 아래에서 예/아니요를 바꾸면 다시 판정한다 */
+      + (x.id === "daegu_interest" ? `<p class="jp-daegu">대구 거주·전입 예정${S.profile && S.profile.daegu_resident_or_moving === false ? "이 아닌" : ""} 기준이에요 · <button type="button" id="jpDaegu">바꾸기</button></p>` : "");
     $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp${jpOpen ? " is-open" : ""}"><button class="jp-line m-only" id="jpLine" aria-expanded="${jpOpen}"><span>요건 충족 <b>${n.on}</b> · 확인 필요 <b>${n.dim}</b> · 미충족 <b>${n.off}</b></span><i>${jpOpen ? "접기" : "펼치기"}</i></button><span class="eyebrow-s">Your result</span><div class="jp-head"><h2>내 조건 판정</h2><button class="jp-fold" id="jpFold">${jpOpen ? "접기" : "대출·지원 보기"}</button></div>
       <div class="jp-list" ${jpOpen ? "" : "hidden"}>
         <p class="jp-date">기준 ${esc(RULES.version)} · 공고 확인값 + 가정치(시중금리 4.5% 등)</p>
@@ -97,6 +99,7 @@ function renderPanels() {
     /* 패널을 새로 그려도 누른 단추에 초점이 남게 한다 (키보드로 쓸 때 초점이 사라지지 않게) */
     $("#jpFold").onclick = $("#jpLine").onclick = e => { const id = e.currentTarget.id; jpOpen = !jpOpen; renderPanels(); $("#" + id).focus({ preventScroll: true }); };
     $("#jpEdit").onclick = () => location.hash = "#input"; $("#jpBrowse").onclick = () => setMode("browse");
+    const dg = $("#jpDaegu"); if (dg) dg.onclick = () => { S.profile.daegu_resident_or_moving = S.profile.daegu_resident_or_moving === false; fval.daegu_resident_or_moving = S.profile.daegu_resident_or_moving ? 1 : 0; try { localStorage.setItem("mh-profile", JSON.stringify(S.profile)); } catch (er) {} recompute(); renderPanels(); MapView.applyMode(false); const n = $("#jpDaegu"); if (n) n.focus({ preventScroll: true }); };
     $("#panelL").dataset.mode = "match";
     $("#jpConsult").onclick = () => { Consult.open(); Consult.ask("내 판정 결과 쉽게 설명해 줘"); };
     const mn = minNet();
@@ -247,7 +250,7 @@ function closeCard() {
 /* ─── S1 입력 ─── */
 const fval = { homeless: 1, lives_with_parents: 0, daegu_resident_or_moving: 1 };
 let prio = [];
-function fillForm(p) {
+let fillForm = function (p) {
   p = p || {};
   $("#f-age").value = p.age ?? ""; $("#f-income").value = p.monthly_income ?? ""; $("#f-gross").value = p.annual_income_gross ?? "";
   $("#f-assets").value = p.assets ?? ""; $("#f-budget").value = p.monthly_budget ?? "";
@@ -260,51 +263,76 @@ function renderPrio() {
   $("#prioChips").innerHTML = Object.entries(CAT_KO).map(([k, v]) => `<button type="button" class="chip${prio.includes(k) ? " is-on" : ""}" data-p="${k}" aria-pressed="${prio.includes(k)}">${v}</button>`).join("");
   $$("#prioChips button").forEach(b => b.addEventListener("click", () => { const k = b.dataset.p; prio = prio.includes(k) ? prio.filter(x => x !== k) : [...prio, k]; renderPrio(); formDirty = true; }));
 }
-$("#fillPersona").onclick = () => { fillForm(PERSONA); formDirty = true; };
-/* 부족 금액 예시: 김지훈 예시와 같고 모은 돈만 1,000만 원 (bangbom/CLAUDE.md 페르소나 규칙) */
-$("#fillShort").onclick = () => { fillForm(Object.assign({}, PERSONA, { assets: 1000 })); formDirty = true; };
 /* 칸을 고치면 그 칸의 빨간 알림을 바로 지운다 (다음을 다시 누를 때까지 남아 있으면 맞게 적어도 틀린 것처럼 보인다) */
 $$("#form input").forEach(i => i.addEventListener("input", () => { formDirty = true; const e = $("#e-" + i.id.slice(2)); if (e) e.textContent = ""; }));
 $("#formBack").onclick = () => { S.mode = "browse"; location.hash = "#map"; };
-/* 휴대폰에서는 세 걸음(기본 정보 → 주거 상황 → 예산·시설)으로 나눠 묻는다. PC 는 한 화면에 모두 보인다.
-   걸음을 넘길 때 그 걸음의 값만 검사하고, 틀리면 그 칸으로 간다 */
-const STEP_OF = { age: 1, income: 1, assets: 1, budget: 3 };
-let fstep = 1;
+/* 조건 입력은 PC·휴대폰 모두 한 화면에 한 문항(8문항, build.py 의 FORM_Q). 위에 진행 표시(3 / 8)와 이전·다음.
+   Enter 로 다음, 선택형은 고르면 0.2초 뒤 다음, 7·8번은 건너뛰기, 마지막 문항에서 "판정 결과 보기". 틀리면 그 문항으로 돌아가 알린다.
+   폼 값 이름·판정 계산·저장 방식은 예전 그대로다(readForm·checkForm·S.profile·localStorage) */
+const Q_OF = { age: 1, income: 4, assets: 5, budget: 6 }, QN = 8;
+let qi = 1;
 const num = id => { const v = $("#" + id).value.trim(); return v === "" ? null : Number(v); };
 function readForm() {
   return { age: num("f-age"), monthly_income: num("f-income"), annual_income_gross: num("f-gross"), assets: num("f-assets"), monthly_budget: num("f-budget"),
     homeless: !!fval.homeless, lives_with_parents: !!fval.lives_with_parents, daegu_resident_or_moving: !!fval.daegu_resident_or_moving, priorities: prio };
 }
-/* only 가 있으면 그 걸음의 칸만 검사한다. 틀린 첫 칸의 이름을 돌려준다 */
+/* only(칸 이름)가 있으면 그 칸만 검사한다. 틀린 첫 칸의 이름을 돌려준다 */
 function checkForm(p, only) {
   const errs = { age: p.age == null || p.age < 19 || p.age > 70 ? "19~70 사이로 넣어주세요" : "", income: p.monthly_income == null || p.monthly_income < 0 ? "월 실수령을 넣어주세요" : "",
     assets: p.assets == null || p.assets < 0 ? "모은 돈을 넣어주세요 (없으면 0)" : "", budget: p.monthly_budget == null || p.monthly_budget <= 0 ? "월 예산을 넣어주세요" : "" };
   let bad = null;
-  Object.entries(errs).forEach(([k, v]) => { if (only && STEP_OF[k] !== only) return; $("#e-" + k).textContent = v; if (v && !bad) bad = k; });
+  Object.entries(errs).forEach(([k, v]) => { if (only && k !== only) return; $("#e-" + k).textContent = v; if (v && !bad) bad = k; });
   return bad;
 }
-function focusBad(k) { if (isPhone() && STEP_OF[k] !== fstep) setStep(STEP_OF[k]); const el = $("#f-" + k); el.focus(); if (isPhone()) el.scrollIntoView({ block: "center" }); }
-function setStep(n) {
-  fstep = clamp(n, 1, 3); $("#vInput").dataset.step = fstep;
-  $$("#fSteps button").forEach(b => { const on = +b.dataset.step === fstep; b.classList.toggle("is-on", on); on ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current"); });
+const curQ = () => $(`#form .q[data-q="${qi}"]`);
+function setQ(n, focus = true) {
+  qi = clamp(n, 1, QN);
+  $$("#form .q").forEach(q => q.classList.toggle("is-on", +q.dataset.q === qi));
+  $("#qProg").textContent = `${qi} / ${QN}`; $("#qBar").style.width = (qi / QN * 100) + "%";
+  const last = qi === QN;
+  $("#fPrev").hidden = qi === 1; $("#fNext").hidden = last; $("#fSubmit").hidden = !last; $("#fSkip").hidden = !curQ().dataset.optional;
+  $("#formBack").hidden = qi !== 1;
   $("#vInput .form-wrap").scrollTop = 0;
+  const inp = $("input", curQ()); if (focus && inp && !isPhone()) setTimeout(() => inp.focus(), 60);
 }
-function goStep(n) {
-  for (let s = fstep; s < n; s++) { const bad = checkForm(readForm(), s); if (bad) { setStep(s); focusBad(bad); return; } }
-  setStep(n);
+/* 이 문항이 맞으면 true. 틀리면 알림을 보이고 그 칸에 커서 */
+function okQ(n) {
+  const k = Object.keys(Q_OF).find(x => Q_OF[x] === n); if (!k) return true;
+  const bad = checkForm(readForm(), k); if (bad) { $("#f-" + bad).focus(); return false; } return true;
 }
-$$("#fSteps button").forEach(b => b.onclick = () => goStep(+b.dataset.step));
-$("#fPrev").onclick = () => setStep(fstep - 1);
-$("#fNext").onclick = () => goStep(fstep + 1);
+function nextQ() { if (okQ(qi)) setQ(qi + 1); }
+function focusBad(k) { setQ(Q_OF[k], false); const el = $("#f-" + k); el.focus(); if (isPhone()) el.scrollIntoView({ block: "center" }); }
+$("#fPrev").onclick = () => setQ(qi - 1);
+$("#fNext").onclick = nextQ;
+/* 건너뛰기: 7번은 세전 연소득을 비우고 다음, 8번은 고른 시설을 비우고 바로 판정 */
+$("#fSkip").onclick = () => { if (qi === 7) { $("#f-gross").value = ""; preview($("#f-gross")); setQ(8); } else if (qi === QN) { prio = []; renderPrio(); $("#form").requestSubmit(); } };
+$$("#form .seg button").forEach(b => b.addEventListener("click", () => { const at = qi; setTimeout(() => { if (qi === at && qi < QN) setQ(qi + 1); }, 200); }));
+/* 금액 미리보기("4,500만 원")와, 원 단위로 넣은 듯한 큰 값(월 금액 10,000 이상, 모은 돈·연소득 1,000,000 이상) 고치기 */
+function preview(inp) {
+  const box = $("#p-" + inp.id.slice(2)); if (!box) return;
+  const v = inp.value.trim() === "" ? null : Number(inp.value), big = +inp.dataset.big || Infinity;
+  if (v == null || !isFinite(v)) { box.innerHTML = ""; return; }
+  const fix = Math.round(v / 10000);
+  box.innerHTML = `<span>${esc(wonK(v))}</span>` + (v >= big ? `<button type="button" class="qfix">원 단위로 넣으셨나요? ${esc(wonK(fix))}으로 바꿀게요</button>` : "");
+  const b = $(".qfix", box); if (b) b.onclick = () => { inp.value = fix; inp.dispatchEvent(new Event("input", { bubbles: true })); inp.focus(); };
+}
+$$("#form input[data-big]").forEach(i => i.addEventListener("input", () => preview(i)));
+/* Enter 로 다음 문항. "판정 결과 보기" 단추가 숨어 있으면 브라우저가 Enter 로 폼을 보내지 않아서 직접 받는다 */
+$$("#form .q input").forEach(i => i.addEventListener("keydown", e => { if (e.key !== "Enter" || e.isComposing) return; e.preventDefault(); if (qi < QN) nextQ(); else $("#form").requestSubmit(); }));
+const _fill = fillForm; fillForm = p => { _fill(p); $$("#form input[data-big]").forEach(preview); };
+/* 예시 단추: 값을 다 채우고 마지막 문항으로 */
+$("#fillPersona").onclick = () => { fillForm(PERSONA); formDirty = true; setQ(QN); };
+$("#fillShort").onclick = () => { fillForm(Object.assign({}, PERSONA, { assets: 1000 })); formDirty = true; setQ(QN); };
 $("#form").addEventListener("submit", e => {
   e.preventDefault();
-  /* 휴대폰에서 마지막 걸음 전에 엔터(이동)를 누르면 다음 걸음으로 간다 */
-  if (isPhone() && fstep < 3) { goStep(fstep + 1); return; }
+  /* 마지막 문항 전에 Enter 를 누르면 다음 문항으로 간다 */
+  if (qi < QN) { nextQ(); return; }
   const p = readForm(), bad = checkForm(p);
   if (bad) { focusBad(bad); return; }
-  S.profile = p; try { localStorage.setItem("mh-profile", JSON.parse(JSON.stringify(p)) && JSON.stringify(p)); } catch (er) {}
+  S.profile = p; try { localStorage.setItem("mh-profile", JSON.stringify(p)); } catch (er) {}
   recompute(); S.mode = "match"; jpOpen = false; formDirty = false; location.hash = "#map"; MapView.applyMode(true);
 });
+setQ(1, false);
 
 /* ═══════════════ 3D 공통 ═══════════════ */
 const matCache = {};

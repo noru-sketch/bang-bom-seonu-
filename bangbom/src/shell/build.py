@@ -288,6 +288,8 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 mobile=''.join(open(os.path.join(HERE,n),encoding='utf-8').read() for n in ('mobile_home.css','mobile_app.css','house_overview.css','tutorial.css'))
 # 홈 6화면 CSS(home.css)는 휴대폰 CSS보다 앞에 둔다. 휴대폰 규칙이 마지막에 덮어써야 해서
 home_css=open(os.path.join(HERE,'home.css'),encoding='utf-8').read()
+# 조건 입력 한 문항씩(input_q.css)도 휴대폰 CSS 앞에 둔다
+home_css+=open(os.path.join(HERE,'input_q.css'),encoding='utf-8').read()
 h=R(h,'</style>\n</head>', mscoped+over+home_css+mobile+'\n</style>\n</head>')
 
 # ---------- BODY ----------
@@ -378,7 +380,32 @@ mb=re.sub(r'<!-- S0 시작 -->.*?<!-- S1 정보 입력 -->','<!-- S1 정보 입�
 mb=mb.replace('<button type="button" class="btn btn--ghost" id="formBack">둘러보기로</button>','<button type="button" class="btn btn--ghost" id="formBack">그냥 둘러보기</button>')
 mb=mb.replace('<div class="toast" id="toast" role="status"></div>','<div class="toast" id="mhToast" role="status"></div>')
 # 입력 화면 예시 단추 하나 더: 김지훈 예시에서 모은 돈만 1,000만 원(부족 금액 예시). 누르면 app_bb.js 의 #fillShort 가 채운다
-mb=R(mb,'<button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button>','<button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button><button type="button" class="chip" id="fillShort">모은 돈이 부족할 때 · 1,000만</button>')
+FORM_Q='''<form class="card form qform" id="form" novalidate aria-labelledby="fTitle">
+    <div class="persona"><button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button><button type="button" class="chip" id="fillShort">모은 돈이 부족할 때 · 1,000만</button><span class="sample">시연용</span></div>
+    <div class="qhead"><span class="qprog" id="qProg" aria-live="polite">1 / 8</span><span class="qbar" aria-hidden="true"><i id="qBar"></i></span></div>
+    <div class="fgrid qlist">
+      <div class="f q" data-q="1"><label class="qt" for="f-age">만 나이가 어떻게 되세요?</label><p class="qd">청년 지원은 대부분 만 19~34세 기준이에요</p><div class="in"><input id="f-age" type="number" inputmode="numeric" min="19" max="70" required><span>세</span></div><p class="err" id="e-age"></p></div>
+      <div class="f q" data-q="2"><span class="lb qt">지금 집이 있나요?</span><div class="seg" data-k="homeless"><button type="button" data-v="1">무주택</button><button type="button" data-v="0">집 있음</button></div></div>
+      <div class="f q" data-q="3"><span class="lb qt">부모님과 따로 사나요?</span><div class="seg" data-k="lives_with_parents"><button type="button" data-v="0">따로 살아요</button><button type="button" data-v="1">함께 살아요</button></div></div>
+      <div class="f q" data-q="4"><label class="qt" for="f-income">한 달에 손에 들어오는 돈은 얼마예요?</label><p class="qd">세금 떼고 받는 실수령액이에요</p><div class="in"><input id="f-income" type="number" inputmode="numeric" min="0" step="10" required data-big="10000"><span>만 원</span></div><p class="qprev" id="p-income"></p><p class="err" id="e-income"></p></div>
+      <div class="f q" data-q="5"><label class="qt" for="f-assets">보증금에 쓸 수 있는 돈은 얼마예요?</label><p class="qd">모은 돈 중 집에 쓸 수 있는 만큼</p><div class="in"><input id="f-assets" type="number" inputmode="numeric" min="0" step="100" required data-big="1000000"><span>만 원</span></div><p class="qprev" id="p-assets"></p><p class="err" id="e-assets"></p></div>
+      <div class="f q" data-q="6"><label class="qt" for="f-budget">집에 한 달에 얼마까지 쓸 수 있어요?</label><p class="qd">월세 + 관리비 + 대출이자 합쳐서</p><div class="in"><input id="f-budget" type="number" inputmode="numeric" min="0" step="5" required data-big="10000"><span>만 원</span></div><p class="qprev" id="p-budget"></p><p class="err" id="e-budget"></p></div>
+      <div class="f q" data-q="7" data-optional="1"><label class="qt" for="f-gross"><em>선택</em>작년 세전 연소득을 알면 알려주세요</label><p class="qd">모르면 건너뛰어도 돼요. 대신 일부 판정이 '확인 필요'로 나와요</p><div class="in"><input id="f-gross" type="number" inputmode="numeric" min="0" step="100" data-big="1000000"><span>만 원</span></div><p class="qprev" id="p-gross"></p></div>
+      <div class="f q full" data-q="8" data-optional="1"><span class="lb qt"><em>선택</em>가까우면 좋은 곳을 골라주세요</span><p class="qd">여러 개 고를 수 있어요. 가까운 시설 목록에서 먼저 보여줘요</p><div class="persona" id="prioChips" style="margin-top:0"></div></div>
+    </div>
+    <div class="form-btns">
+      <button type="button" class="btn btn--ghost" id="formBack">그냥 둘러보기</button>
+      <button type="button" class="btn btn--ghost" id="fPrev">← 이전</button>
+      <button type="button" class="btn btn--ghost" id="fSkip" hidden>건너뛰기</button>
+      <button type="button" class="btn" id="fNext">다음 →</button>
+      <button type="submit" class="btn" id="fSubmit" hidden>판정 결과 보기 →</button>
+    </div>
+  </form>'''
+# 조건 입력을 한 문항씩(8문항): 폼 부분만 새 마크업으로 바꾼다. 칸 id(f-age 등)·.seg data-k 는 그대로라 readForm·fillForm·저장 방식은 같다.
+# "대구 거주·전입 예정"은 문항에서 빼고 기본값 예(판정 결과에서 바꾸기). 세 걸음 칩(#fSteps)은 뺀다. 움직임은 app_bb.js 의 Q
+_fi=mb.index('<form class="card form" id="form"'); _fj=mb.index('</form>',_fi)+len('</form>')
+mb=mb[:_fi]+FORM_Q+mb[_fj:]
+mb=re.sub(r'\s*<nav class="fsteps m-only" id="fSteps".*?</nav>','',mb,count=1,flags=re.S)
 mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>','')
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
 b=R(b,'<li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>','<li>단지 공개 보도 · 뉴시스·뉴스1<span>2026.9</span></li>\n          <li>대구광역시 공동주택 미분양 현황(공개 단지)<span>2026.9.30 기준</span></li>')
