@@ -998,6 +998,8 @@ body.card-open #mh .pills-r{display:none}
 #mh .rlabel{font-size:12px;font-weight:600;background:rgba(255,255,255,.88);border-radius:999px;padding:3px 9px}
 #mh .dimlabel{color:var(--green);background:transparent;font-weight:600}
 #mh .toast{background:var(--ink)}
+#mh .why-line{margin-top:10px;font-size:13px;color:var(--sub);line-height:1.5}
+#mh .why-line b{color:var(--green);font-weight:600;margin-right:4px}
 #mh .hv-side-open{position:absolute;right:var(--pad-x);top:120px;z-index:4;display:none}
 #mh #houseView.side-closed .hv-side{display:none}
 #mh #houseView.side-closed .hv-side-open{display:inline-flex;align-items:center}
@@ -1745,6 +1747,9 @@ const MOUNTS = [[[0, 33], [26, 33.5], [30, 36], [30, 40], [0, 40]], [[41, 20], [
 const LAKES = [[27.6, 25.2, 1.6, 1.0]];
 const DISTRICTS = [["달서구", 9.3, 23.3], ["북구", 17.6, 6.0], ["동구", 23.2, 9.0], ["수성구", 29.2, 16.7], ["서구", 12.0, 10.6]];
 const SUPPLY_KO = { cr_reits_jeonse: "CR리츠 전세", lh_dundeun: "LH 든든전세" };
+/* 단지 카드 "왜 이 집?" 한 줄. built: 준공 연도(null = 확인 전), below: 주변 시세 대비 낮은 비율. 시세 비교는 모두 샘플 값 */
+const LANDLORD_KO = { cr_reits_jeonse: "임대인 리츠(CR리츠)", lh_dundeun: "임대인 LH" };
+const WHY = { c01: { built: null, below: 10 }, c02: { built: 2024, below: 12 }, c03: { built: 2023, below: 10 }, c04: { built: 2024, below: 8 }, c05: { built: 2025, below: 9 }, c06: { built: 2023, below: 11 }, c07: { built: 2024, below: 13 }, c08: { built: 2025, below: 7 } };
 const APPLY_LINKS = {
   cr_reits_jeonse: [{ label: "단지 임대 공고 (공급사 안내)", url: null }],
   lh_dundeun: [{ label: "LH청약플러스", url: "https://apply.lh.or.kr" }]
@@ -2172,13 +2177,18 @@ function bindPl() { const x = $("#panelL .pl-x"); if (x) x.onclick = () => { plO
 function legendCats() { return Object.keys(CAT_KO).map(k => `<span class="cat"><i style="background:${CAT_LIGHT[k]}"></i>${CAT_KO[k]}</span>`).join(""); }
 
 /* ─── 단지 카드 ─── */
+function whyLine(c) {
+  const w = WHY[c.id]; if (!w) return "";
+  const built = w.built ? `${w.built}년 준공${c.is_sample ? "(샘플)" : ""}` : "준공 연도 확인 중";
+  return `<p class="why-line"><b>왜 이 집?</b> ${built} · ${LANDLORD_KO[c.supply_type]} · 주변 시세 대비 약 ${w.below}% 낮음(샘플)</p>`;
+}
 function cardHTML(id) {
   const c = COMPLEX.find(x => x.id === id), ev = S.evals[id], match = S.mode === "match" && ev;
   const pr = (S.profile && S.profile.priorities) || [], near = c.nearby.slice().sort((a, b) => pr.includes(b.category) - pr.includes(a.category)).map(n => `<li><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${CAT_DARK[n.category]};margin-right:6px"></i>${esc(n.name)} · ${n.walk_min != null ? `도보 ${n.walk_min}분` : `차 ${n.drive_min}분`}</span></li>`).join("");
   const mg = c.mgmt_known ? `${c.mgmt}만 원` : `미확인 (추정 ${c.mgmt}만 원)`;
   const roomNote = c.room_id === "room_84a" && c.area_m2 !== 84 ? `<p class="small muted" style="margin-top:6px">집 보기는 ${c.area_m2}㎡ 평면이 아직 없어 84㎡ 구조로 대신 보여줘요.</p>` : "";
   let head = `<div class="cc-plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2>
-    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div></div>
+    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div>${whyLine(c)}</div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>`;
   let body = "";
   if (match) {

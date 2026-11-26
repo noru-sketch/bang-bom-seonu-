@@ -95,13 +95,18 @@ function bindPl() { const x = $("#panelL .pl-x"); if (x) x.onclick = () => { plO
 function legendCats() { return Object.keys(CAT_KO).map(k => `<span class="cat"><i style="background:${CAT_LIGHT[k]}"></i>${CAT_KO[k]}</span>`).join(""); }
 
 /* ─── 단지 카드 ─── */
+function whyLine(c) {
+  const w = WHY[c.id]; if (!w) return "";
+  const built = w.built ? `${w.built}년 준공${c.is_sample ? "(샘플)" : ""}` : "준공 연도 확인 중";
+  return `<p class="why-line"><b>왜 이 집?</b> ${built} · ${LANDLORD_KO[c.supply_type]} · 주변 시세 대비 약 ${w.below}% 낮음(샘플)</p>`;
+}
 function cardHTML(id) {
   const c = COMPLEX.find(x => x.id === id), ev = S.evals[id], match = S.mode === "match" && ev;
   const pr = (S.profile && S.profile.priorities) || [], near = c.nearby.slice().sort((a, b) => pr.includes(b.category) - pr.includes(a.category)).map(n => `<li><span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${CAT_DARK[n.category]};margin-right:6px"></i>${esc(n.name)} · ${n.walk_min != null ? `도보 ${n.walk_min}분` : `차 ${n.drive_min}분`}</span></li>`).join("");
   const mg = c.mgmt_known ? `${c.mgmt}만 원` : `미확인 (추정 ${c.mgmt}만 원)`;
   const roomNote = c.room_id === "room_84a" && c.area_m2 !== 84 ? `<p class="small muted" style="margin-top:6px">집 보기는 ${c.area_m2}㎡ 평면이 아직 없어 84㎡ 구조로 대신 보여줘요.</p>` : "";
   let head = `<div class="cc-plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2>
-    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div></div>
+    <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div>${whyLine(c)}</div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>`;
   let body = "";
   if (match) {

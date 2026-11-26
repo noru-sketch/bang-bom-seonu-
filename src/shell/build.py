@@ -185,6 +185,8 @@ body.card-open #mh .pills-r{display:none}
 #mh .rlabel{font-size:12px;font-weight:600;background:rgba(255,255,255,.88);border-radius:999px;padding:3px 9px}
 #mh .dimlabel{color:var(--green);background:transparent;font-weight:600}
 #mh .toast{background:var(--ink)}
+#mh .why-line{margin-top:10px;font-size:13px;color:var(--sub);line-height:1.5}
+#mh .why-line b{color:var(--green);font-weight:600;margin-right:4px}
 #mh .hv-side-open{position:absolute;right:var(--pad-x);top:120px;z-index:4;display:none}
 #mh #houseView.side-closed .hv-side{display:none}
 #mh #houseView.side-closed .hv-side-open{display:inline-flex;align-items:center}
