@@ -240,7 +240,8 @@ $$(".faq details").forEach(d => d.addEventListener("toggle", () => { if (d.open 
 /* 평형 갤러리 (모델하우스 집 보기 구조) */
 (function () {
   const track = $("#plansTrack"); if (!track || !window.MH) return;
-  track.innerHTML = MH.galleryCards();
+  /* 홈 시작하기 카드는 home_bb.js 가 판정 결과와 함께 먼저 채운다. 비어 있을 때만 예전 평면 카드로 채운다 */
+  if (!track.children.length) track.innerHTML = MH.galleryCards();
   $$("[data-cid]", track).forEach(b => b.addEventListener("click", () => MH.openHouse(b.dataset.cid)));
   const go = dir => { const c = $(".plan-card", track); const w = c ? c.getBoundingClientRect().width + 24 : 300; track.scrollBy({ left: dir * w, behavior: REDUCED ? "auto" : "smooth" }); };
   $("#plansPrev").addEventListener("click", () => go(-1)); $("#plansNext").addEventListener("click", () => go(1));

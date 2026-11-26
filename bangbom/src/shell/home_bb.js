@@ -1,9 +1,9 @@
-/* ═══════ 홈 5화면 채우기 (해결 1) ═══════
+/* ═══════ 홈 5화면 채우기 (해결 1 · 시작하기) ═══════
    build.py 가 app_bb.js 안 표시 줄 자리에 끼워 넣는다. 같은 { } 범위라 RULES·COMPLEXES·profileResult·evaluate·appliedLists·PERSONA 를 그대로 쓴다.
    판정·개수·이유·월 부담은 모두 판정 코드(engine.js)가 계산한 값이다. 이 파일에 숫자를 직접 적지 않는다 */
 (function homeFill() {
-  const sup = $("#homeSupport");
-  if (!sup) return;
+  const sup = $("#homeSupport"), track = $("#plansTrack");
+  if (!sup && !track) return;
   const P = PERSONA, pr = profileResult(P);
   const evs = COMPLEXES.map(c => ({ c, e: evaluate(P, c, pr) }));
   const n = { on: 0, dim: 0, off: 0 }; evs.forEach(x => n[x.e.light]++);
@@ -57,4 +57,21 @@
       <p class="sf-foot reveal">모르는 건 24시간 상담으로 물어보세요. <a href="#input" class="link">내 조건 넣고 판정 보기 →</a></p>`;
   }
 
+  /* 5. 시작하기: 단지 카드. 그림은 지도에 까는 단지 주변 지도(img/map/<id>.jpg, OpenStreetMap 재해석)이고 가운데가 단지 자리다.
+     판정·월 부담은 해결 1과 같은 김지훈 예시 조건. 요건 충족 → 확인 필요 → 미충족 순. shell.js 는 이미 채워져 있으면 덮어쓰지 않는다 */
+  if (track) {
+    const cards = evs.map((x, i) => ({ ...x, i })).sort((a, b) => ORDER[a.e.light] - ORDER[b.e.light] || a.i - b.i).map(({ c, e }) => {
+      const name = c.name.replace("(예시)", "").trim(), main = e.net_monthly != null ? e.net_monthly : e.net_monthly_best;
+      const cost = main == null ? `<p class="hc__cost is-none">모은 돈이 모자라 월 부담은 계산하지 않았어요</p>`
+        : `<p class="hc__cost">월 부담 약 <b>${man1(main)}만 원</b>${e.net_monthly == null ? `<small>지원을 모두 받으면</small>` : ""}</p>`;
+      return `<button class="plan-card hc" data-cid="${c.id}" aria-label="${esc(name)} 집 보기">
+        <div class="plan-card__media hc__media"><img src="img/map/${c.id}.jpg" alt="" loading="lazy">${house(e.light, LIGHT_KO[e.light])}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span><span class="hc__osm">© OpenStreetMap</span></div>
+        ${jd(e.light)}
+        <p class="plan-card__name">${esc(name)}</p>
+        <p class="plan-card__meta">${esc(c.district)} · ${esc(SUPPLY_KO[c.supply_type] || "")} · ${c.area_m2}㎡</p>
+        ${cost}
+      </button>`;
+    });
+    track.innerHTML = cards.join("");
+  }
 })();
