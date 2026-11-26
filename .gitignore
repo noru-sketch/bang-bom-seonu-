@@ -68,3 +68,7 @@ bangbom/trace/art/
 # 예전 위치(맨 위)에 남은 선우판 로컬 파일이 올라가지 않게
 /trace/
 /__pycache__/
+
+# 실거래가 원자료 캐시 (fetch_rtms.py)
+.cache_rtms/
+bangbom/trace/rtms_log.txt
