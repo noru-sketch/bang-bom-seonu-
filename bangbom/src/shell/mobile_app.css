@@ -106,7 +106,7 @@ body.house-mode #mh .fab{display:none}
   #mh .cc-chips{display:flex;flex:none;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 16px 10px;border-bottom:1px solid var(--line)}
   #mh .cc-panes{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px 16px}
   #mh .cc [data-pane],#mh .cc-panes .pc-only,#mh .cc-panes details.fold > summary{display:none}
-  #mh .cc[data-tab="sum"] [data-pane="sum"],#mh .cc[data-tab="calc"] [data-pane="calc"],#mh .cc[data-tab="sup"] [data-pane="sup"],#mh .cc[data-tab="chk"] [data-pane="chk"],#mh .cc[data-tab="near"] [data-pane="near"],#mh .cc[data-tab="link"] [data-pane="link"],#mh .cc-panes .m-only{display:block}
+  #mh .cc[data-tab="sum"] [data-pane="sum"],#mh .cc[data-tab="calc"] [data-pane="calc"],#mh .cc[data-tab="sup"] [data-pane="sup"],#mh .cc[data-tab="chk"] [data-pane="chk"],#mh .cc[data-tab="near"] [data-pane="near"],#mh .cc[data-tab="link"] [data-pane="link"],#mh .cc[data-tab="safe"] [data-pane="safe"],#mh .cc[data-tab="sale"] [data-pane="sale"],#mh .cc-panes .m-only{display:block}
   /* 평면 그림은 마크업에서 맨 앞(PC 카드의 맨 위)에 있다. 휴대폰 시트에서는 다른 항목처럼 칩 줄 아래에 보이게 순서만 바꾼다
      (안 그러면 [평면]을 눌렀을 때 그림이 시트 머리 위로 올라가 이름과 칩 줄이 아래로 밀린다) */
   #mh .cc-plan,#mh .cc-panes{order:1}

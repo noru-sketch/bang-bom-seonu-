@@ -14,7 +14,7 @@ const man1 = n => n == null ? "—" : (Math.round(n * 10) / 10).toFixed(1);
 function toast(m) { const t = $("#mhToast"); t.textContent = m; t.classList.add("is-on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("is-on"), 2400); }
 
 /* ─── 상태 ─── */
-const PERSONA = { age: 27, monthly_income: 250, annual_income_gross: null, assets: 1000, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
+const PERSONA = { age: 27, monthly_income: 250, annual_income_gross: null, assets: 4500, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
 const S = { mode: "browse", profile: null, pr: null, evals: {}, sel: null, hover: null, chk: {} };
 try { const raw = localStorage.getItem("mh-profile"); if (raw) { S.profile = JSON.parse(raw); } } catch (e) {}
 const COMPLEX = COMPLEXES.map(c => Object.assign({}, c, { nearby: nearbyOf(c) }));
@@ -82,10 +82,10 @@ function renderPanels() {
   if (S.mode === "match" && S.pr) {
     const n = counts(), tot = n.on + n.dim + n.off || 1;
     const row = x => `<div class="jp-row" role="button" tabindex="0"><span class="ico ${x.status}">${ST_ICON[x.status]}</span><span class="nm">${esc(x.name)}</span><span class="st st--${x.status}">${ST_KO[x.status]}</span>
-      <span class="jp-more">${esc(x.reason)}<br>최종 결정: ${esc(x.approval_by)}${x.source_url ? ` · <a href="${esc(x.source_url)}" target="_blank" rel="noopener" style="pointer-events:auto">출처</a>` : ""}${x.checked_at ? ` · 확인일 ${esc(x.checked_at)}` : " · 기준일 확인 전(시연용)"}</span></div>`;
+      <span class="jp-more">${esc(x.reason)}${x.rate_label ? `<br>금리 ${esc(x.rate_label)}` : ""}${x.check_items && x.check_items.length ? `<br>직접 확인할 것: ${esc(x.check_items.join(", "))}` : ""}<br>최종 결정: ${esc(x.approval_by)}${x.source_url ? ` · <a href="${esc(x.source_url)}" target="_blank" rel="noopener" style="pointer-events:auto">출처</a>` : ""}${x.checked_at ? ` · 확인일 ${esc(x.checked_at)}` : " · 기준일 확인 전(시연용)"}</span></div>`;
     $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp${jpOpen ? " is-open" : ""}"><button class="jp-line m-only" id="jpLine" aria-expanded="${jpOpen}"><span>요건 충족 <b>${n.on}</b> · 확인 필요 <b>${n.dim}</b> · 미충족 <b>${n.off}</b></span><i>${jpOpen ? "접기" : "펼치기"}</i></button><span class="eyebrow-s">Your result</span><div class="jp-head"><h2>내 조건 판정</h2><button class="jp-fold" id="jpFold">${jpOpen ? "접기" : "대출·지원 보기"}</button></div>
       <div class="jp-list" ${jpOpen ? "" : "hidden"}>
-        <p class="jp-date">기준 ${esc(RULES.version)} · 시연용 가정치</p>
+        <p class="jp-date">기준 ${esc(RULES.version)} · 공고 확인값 + 가정치(시중금리 4.5% 등)</p>
         <p class="jp-sec">대출</p>${S.pr.loans.map(row).join("")}
         <p class="jp-sec">지원</p>${S.pr.policies.map(row).join("")}
       </div>
@@ -102,7 +102,7 @@ function renderPanels() {
     $("#pillsR").innerHTML = `<span class="pill-n">모은 돈 <b>${won(S.profile.assets)}만</b></span><span class="pill-n">월 예산 <b>${won(S.profile.monthly_budget)}만</b></span>${mn != null ? `<span class="pill-n">지원 반영 최저 <b>월 ${man1(mn)}만</b></span>` : ""}`;
     $("#legend").innerHTML = "";
   } else {
-    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">단지를 누르면 주변 시설과 집 정보가 보여요</p>
+    $("#panelL").innerHTML = `<button class="x pl-x" aria-label="패널 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button><div class="jp jp--browse"><span class="eyebrow-s">Browse</span><h2>대구 미분양 ${COMPLEX.length}곳</h2><p class="muted small" style="margin-top:4px">단지를 누르면 주변 시설과 집 정보가 보여요</p><p class="muted small" style="margin-top:4px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c99a6b;margin-right:6px"></i>작은 점 ${UNSOLD_LIST.length}곳: 대구시 공개 미분양 목록(판정 없음, 2026.9.30 기준)</p>
       <div class="jp-btns"><button class="btn btn--sm" id="bMatch">${S.profile ? "내 조건으로 보기" : "내 조건 넣고 불 켜기"} →</button></div></div>`;
     $("#bMatch").onclick = () => S.profile ? setMode("match") : (location.hash = "#input");
     $("#panelL").dataset.mode = "browse";
@@ -116,8 +116,8 @@ function legendCats() { return Object.keys(CAT_KO).map(k => `<span class="cat"><
 /* ─── 단지 카드 ─── */
 function whyLine(c) {
   const w = WHY[c.id]; if (!w) return "";
-  const built = w.built ? `${w.built}년 준공${c.is_sample ? "(샘플)" : ""}` : "준공 연도 확인 중";
-  return `<p class="why-line"><b>왜 이 집?</b> ${built} · ${LANDLORD_KO[c.supply_type]} · 주변 시세 대비 약 ${w.below}% 낮음(샘플)</p>`;
+  const built = w.built ? `${w.built}년 준공${c.is_sample ? "(예시)" : ""}` : "준공 연도 확인 중";
+  return `<p class="why-line"><b>왜 이 집?</b> ${built} · ${LANDLORD_KO[c.supply_type]} · ${w.note ? esc(w.note) : `주변 시세 대비 약 ${w.below}% 낮음(예시)`}</p>`;
 }
 /* ─── 단지 카드 ───
    PC 는 접는 목록 그대로다. 휴대폰(폭 820px 이하)은 같은 내용을 아래 시트에 넣고 칩으로 한 번에 한 항목만 보여 준다.
@@ -129,7 +129,7 @@ function cardHTML(id) {
   const noteText = c.room_id === "room_84a" && c.area_m2 !== 84 ? `집 보기는 ${c.area_m2}㎡ 평면이 아직 없어 84㎡ 구조로 대신 보여줘요.` : "";
   const roomNote = noteText ? `<p class="small muted pc-only" style="margin-top:6px">${noteText}</p>` : "", roomNoteM = noteText ? `<p class="small muted m-only" style="margin-top:10px">${noteText}</p>` : "";
   const bd = match ? breakdown(c, ev) : null;
-  const panes = [["sum", "요약"], bd && ["calc", "계산 내역"], match && ["sup", "지원"], match && ["chk", "체크리스트"], ["near", "주변 시설"], match && ["link", "링크"], ["plan", "평면"]].filter(Boolean);
+  const panes = [["sum", "요약"], bd && ["calc", "계산 내역"], match && ["sup", "지원"], match && ["chk", "체크리스트"], ["safe", "전세 안전"], c.sale_price && ["sale", "매매"], ["near", "주변 시설"], match && ["link", "링크"], ["plan", "평면"]].filter(Boolean);
   let head = `<div class="cc-plan" data-pane="plan">${planSVG(buildLayout(c.room_id || "room_84a"))}<span class="cc-plan-tag">평면 예시 · ${c.area_m2}㎡</span></div><div class="cc-top"><div><span class="eyebrow-s">${c.is_sample ? "Sample complex" : "Complex"}</span>${match ? `<span class="st st--${ev.light}">${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}</span>` : ""}<h2 style="margin-top:${match ? 8 : 0}px">${esc(c.name)}</h2>
     <div class="tags"><span class="tag">${SUPPLY_KO[c.supply_type]}</span><span class="tag">${esc(c.district)}</span><span class="tag">${c.area_m2}㎡</span>${c.is_sample ? '<span class="sample">샘플</span>' : ""}</div>${whyLine(c)}</div>
     <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
@@ -138,15 +138,17 @@ function cardHTML(id) {
   if (match) {
     const al = appliedLists(c, ev, S.pr);
     const main = ev.net_monthly != null ? ev.net_monthly : ev.net_monthly_best;
-    body += `<div class="cc-sum" data-pane="sum"><p class="big">지원 반영 후 월 부담<b class="${ev.light === "off" ? "is-off" : ""}">${main != null ? `월 ${man1(main)}만 원` : "계산할 수 없어요"}</b>
-      ${ev.net_monthly == null && ev.net_monthly_best != null ? "요건 충족 지원만으로는 어려워요 · 확인 필요까지 받을 때 기준<br>" : ""}지원 모두 받으면 ${man1(ev.net_monthly_best)}만 · 하나도 못 받으면 ${ev.net_monthly_worst != null ? man1(ev.net_monthly_worst) + "만 원" : "대출 한도 초과"}</p>
-      <p class="why">${esc(ev.light_reason)}</p>${roomNoteM}</div>`;
+    body += ev.shortfall ? `<div class="cc-sum" data-pane="sum"><p class="big">자기자금이 모자라요<b class="is-off">${wonK(ev.shortfall)} 부족</b>보증금 ${wonK(c.deposit)} − 모은 돈 ${wonK(S.profile.assets)} = 필요 대출 ${wonK(ev.loan_needed)}</p>`
+      : `<p class="big">지원 반영 후 월 부담<b class="${ev.light === "off" ? "is-off" : ""}">월 ${man1(main)}만 원</b>
+      ${ev.net_monthly == null && ev.net_monthly_best != null ? "요건 충족 지원만으로는 어려워요 · 확인 필요까지 받을 때 기준<br>" : ""}지원 모두 받으면 ${man1(ev.net_monthly_best)}만 · 하나도 못 받으면 ${man1(ev.net_monthly_worst)}만 원</p>
+      ${ev.alts.length ? `<p class="small muted" style="margin-top:6px">다른 선택: ${ev.alts.slice(0, 2).map(a => `${esc(a.label)} 월 ${man1(a.net)}만(${ST_KO[a.status]})`).join(" · ")}</p>` : ""}`;
+    body += `<p class="why">${esc(ev.light_reason)}</p>${roomNoteM}</div>`;
     if (bd) body += `<details class="fold" data-pane="calc"><summary>계산 내역</summary><table class="calc"><tbody>
       <tr><td>월세</td><td>${man1(bd.rent)}만</td></tr><tr><td>관리비${c.mgmt_known ? "" : " (추정)"}</td><td>${man1(bd.mgmt)}만</td></tr>
-      <tr><td>보증금 대출이자<br><span class="muted">${wonK(bd.loan_needed)} × ${bd.rate}% ÷ 12</span></td><td>${man1(bd.loan_interest)}만</td></tr>
+      <tr><td>보증금 대출이자<br><span class="muted">${esc(bd.calc)}</span></td><td>${man1(bd.loan_interest)}만</td></tr>
       <tr><td>월세 지원</td><td class="neg">−${man1(bd.rent_support)}만</td></tr>
       <tr class="tot"><td>월 실부담 · ${esc(bd.financing)}</td><td>${man1(bd.total)}만</td></tr></tbody></table>
-      <p class="small muted" style="margin-top:6px">실부담 = 월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원 (이자지원은 금리에서 빼서 계산)</p></details>`;
+      <p class="small muted" style="margin-top:6px">실부담 = 월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원 (이자지원은 금리에서 빼서 계산). 중개수수료 지원은 1회라 월 부담에 넣지 않고 배지로만 보여줘요.</p></details>`;
     body += `<details class="fold" data-pane="sup"><summary>적용 지원 · 빠진 지원</summary><ul class="lst">${al.applied.map(a => `<li><span>${esc(a.name)}</span><span class="st st--${a.status}">${ST_KO[a.status]}</span></li>`).join("") || "<li><span>대출·지원 없이 계산</span><span></span></li>"}
       ${al.not_applied.map(a => `<li><span class="muted">${esc(a.name)}</span><span style="white-space:normal;text-align:right">${esc(a.reason)}</span></li>`).join("")}</ul></details>`;
     body += `<details class="fold" data-pane="chk"><summary>계약 전 체크리스트</summary><ul class="chk">${RULES.fixed_checklist.concat(["등기부등본으로 소유자·근저당 확인", "전세보증보험 가입 가능 여부 확인"]).map((t, i) => `<li><label><input type="checkbox" data-ck="${c.id}-${i}"${S.chk[c.id + "-" + i] ? " checked" : ""}>${esc(t)}</label></li>`).join("")}</ul></details>`;
@@ -155,6 +157,7 @@ function cardHTML(id) {
   } else {
     body += `<div class="cc-sum" data-pane="sum"><p class="big">보증금<b>${wonK(c.deposit)}</b>${c.rent ? `월세 ${c.rent}만 원` : "월세 없음 (전세)"} · 관리비 ${mg}</p><p class="why">내 조건을 넣으면 대출·지원을 반영한 실제 월 부담을 계산해 드려요.</p>${roomNoteM}</div>`;
   }
+  body += safetyHTML(c) + saleHTML(c, match ? (ev.shortfall ? null : (ev.net_monthly != null ? ev.net_monthly : ev.net_monthly_best)) : null);
   body += `<details class="fold" data-pane="near"><summary>가까운 시설</summary><p class="pane-h m-only">가까운 시설</p><ul class="lst">${near}</ul><p class="small muted" style="margin-top:6px">거리는 직선거리 × 1.3으로 추정했어요. 시설 위치는 샘플이에요.</p></details>`;
   body += roomNote;
   body += `</div><div class="cc-btns"><a href="#house" class="btn" id="ccHouse">집 보기 →</a>${match ? `<button class="btn btn--ghost" id="ccConsult">이 단지 상담하기</button>` : `<button class="btn btn--ghost" id="ccMatch">내 조건으로 보기</button>`}</div>`;
@@ -171,6 +174,46 @@ function setTab(t) {
   $(".cc-panes", cc).scrollTop = 0;
   const on = $(".cc-chips .is-on", cc), row = on.parentElement;
   if (row.scrollWidth > row.clientWidth) row.scrollTo({ left: on.offsetLeft - 16, behavior: REDUCED ? "auto" : "smooth" });
+}
+function safetyHTML(c) {
+  const sc = safetyCheck(c);
+  return `<details class="fold" data-pane="safe"><summary>전세 안전 확인</summary>${sc ? `<p class="small" style="margin-bottom:8px"><span class="st st--${sc.status}">${ST_KO[sc.status]}</span> 보증금 + 선순위채권이 시세의 ${sc.ratio}%예요</p>` : `<p class="small muted" style="margin-bottom:8px">이 단지는 시세·선순위채권 자료가 없어 판정하지 않고 체크리스트만 보여줘요.</p>`}
+    <ul class="lst">${RULES.safety_checklist.map(t => `<li><span>${esc(t)}</span></li>`).join("")}<li><span>${esc(RULES.badges.guarantee_fee.text)} <a href="${esc(RULES.badges.guarantee_fee.source_url)}" target="_blank" rel="noopener">출처</a></span></li></ul>
+    <p class="small muted" style="margin-top:6px">대구 전세사기 피해 결정 1,013건(국토부 2026.10 발표 누적), 대구경북 피해자 76%가 40세 미만(경북매일 2026.9.7)</p></details>`;
+}
+function saleHTML(c, jeonse) {
+  if (!c.sale_price) return "";
+  const src = `<p class="small muted" style="margin-top:6px">가격 출처: <a href="${esc(c.sale_source_url)}" target="_blank" rel="noopener">${esc(c.sale_source)}</a></p>`;
+  const sc = S.mode === "match" && S.profile ? saleCalc(S.profile, c) : null;
+  if (!sc) return `<details class="fold" data-pane="sale"><summary>매매로 보면</summary><p class="big">할인가<b>${wonK(c.sale_price)}</b></p><p class="why">내 조건을 넣으면 디딤돌·보금자리론과 취득세를 반영해 계산해 드려요.</p>${src}</details>`;
+  const lp = sc.loanP;
+  return `<details class="fold" data-pane="sale"><summary>매매로 보면</summary>
+    ${sc.shortfall ? `<p class="big">사려면 자기자금이 모자라요<b class="is-off">${wonK(sc.shortfall)} 부족</b>필요한 자기자금 ${wonK(sc.own_needed)} · 모은 돈 ${wonK(S.profile.assets)}</p>` : ""}
+    <p class="why">전세로 살 때 월 ${jeonse != null ? man1(jeonse) + "만" : "—"} / 사서 살 때 월 ${man1(sc.monthly)}만(원리금+관리비)</p>
+    <p class="small" style="margin-top:8px">지방 준공 후 미분양이라 금리 0.2%p 우대 대상이에요</p>
+    <table class="calc"><tbody>
+      <tr><td>디딤돌대출</td><td><span class="st st--${sc.didimdol.status}">${ST_KO[sc.didimdol.status]}</span></td></tr>
+      <tr><td colspan="2" class="muted small" style="text-align:left">${esc(sc.didimdol.reason)}</td></tr>
+      ${lp ? `<tr><td>계산에 쓴 대출 · ${esc(lp.name)}<br><span class="muted">${esc(lp.rate_label)}</span></td><td>${wonK(sc.loan)}</td></tr>
+      <tr><td>월 원리금 (${RULES.sale.years}년)</td><td>${man1(sc.pmt)}만</td></tr>` : `<tr><td>정책 대출</td><td>해당 없음</td></tr>`}
+      <tr><td>관리비${c.mgmt_known ? "" : " (추정)"}</td><td>${man1(c.mgmt)}만</td></tr>
+      <tr><td>취득세 1.1%</td><td>${wonK(sc.tax)}</td></tr>
+      <tr><td>감면<br><span class="muted">${esc(sc.cutLabel)}</span></td><td class="neg">−${wonK(sc.cut)}</td></tr>
+    </tbody></table>
+    <p class="small muted" style="margin-top:6px">${esc(sc.notes.join(" · "))}. 보금자리론은 상태가 늘 확인 필요예요. 최종 대출 한도·금리는 은행과 기관이 정해요.</p>${src}</details>`;
+}
+/* 대구시 공개 미분양 목록 점: 판정 없이 출처만 */
+function openUnsold(k) {
+  const u = UNSOLD_LIST[k], p = $("#panelR"); S.sel = null;
+  p.innerHTML = `<div class="cc"><div class="cc-top"><div><span class="eyebrow-s">Public list</span><h2>${esc(u.name)}</h2><div class="tags"><span class="tag">${esc(u.gu)} ${esc(u.dong)}</span></div></div>
+    <button class="x" id="ccX" aria-label="카드 닫기"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+    <p class="why">대구시 공개 미분양 목록 · 현재 계약 가능 여부는 확인 필요</p>
+    <p class="small muted" style="margin-top:12px">${esc(u.source)} · ${esc(u.as_of)} 기준</p>
+    <div class="links" style="margin-top:8px"><a href="${esc(UNSOLD_SRC_URL)}" target="_blank" rel="noopener">대구시 원자료 ↗</a></div>
+    ${u.approx ? `<p class="small muted" style="margin-top:8px">지도 위치는 동 중심 근사예요.</p>` : ""}</div>`;
+  p.classList.add("is-open"); p.scrollTop = 0;
+  $("#ccX").onclick = () => { closeCard(); MapView.select(null); };
+  document.body.classList.add("card-open"); syncPl();
 }
 function openCard(id) {
   if (S.tabFor !== id) { S.tab = "sum"; S.tabFor = id; }
@@ -336,7 +379,7 @@ const MapView = {
     const sun = this.sun = new T3.DirectionalLight(0xfff0da, 1.35); sun.castShadow = true; sun.shadow.mapSize.set(isMobile() ? 1024 : 2048, isMobile() ? 1024 : 2048); sun.shadow.bias = -.0005; sun.shadow.radius = 6;
     Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 1, far: 80 }); sun.shadow.camera.updateProjectionMatrix(); sc.add(sun); sc.add(sun.target);
     this.decor = new T3.Group(); sc.add(this.decor); this.buildGround();
-    this.buildCity(); this.buildLandmarks(); this.buildUnits();
+    this.buildCity(); this.buildLandmarks(); this.buildUnits(); this.buildUnsold();
     this.lines = new T3.Group(); sc.add(this.lines);
     this.ray = new T3.Raycaster();
     const hits = () => Object.values(this.units).map(u => u.hit);
@@ -348,7 +391,9 @@ const MapView = {
       leave: () => { if (S.hover) { S.hover = null; this.lift(); } },
       tap: e => {
         this.ray.setFromCamera(ndc(cv, e), this.cam); const h = this.ray.intersectObjects(hits())[0];
-        if (!h) { return; }
+        const hu = this.ray.intersectObjects(this.uHits)[0];
+        if (!h && !hu) { return; }
+        if (!h || (hu && hu.distance < h.distance)) { this.selectUnsold(hu.object.userData.uk); return; }
         const id = h.object.userData.id;
         this.select(id, true);
       }
@@ -495,6 +540,27 @@ const MapView = {
       this.units[c.id] = { c, g, blds, wallM, roofM, bandM, em, glow, beam, ring, ring0, top, sq, hit, lbl, cur: 1.2, tgt: 1.2, delay: 0, light: "browse", lift: 0 };
     });
   },
+  buildUnsold() {
+    /* 대구시 공개 미분양 목록: 작은 회색-주황 점. 판정 없음, 마우스 올림 라벨 없음(클릭만) */
+    const m = mat("#c99a6b"), geo = new T3.CylinderGeometry(.32, .32, .22, 16); geo.translate(0, .11, 0);
+    const hg = new T3.CylinderGeometry(.6, .6, .8, 8); hg.translate(0, .4, 0);
+    const same = {}; /* 동 중심 근사로 같은 자리에 겹친 점은 작은 원으로 벌려 각각 누를 수 있게 */
+    this.uPos = UNSOLD_LIST.map(u => { const key = u.lat + "," + u.lng, i = same[key] = (same[key] || 0) + 1, a = i * 2.4, r = i > 1 ? .75 * Math.sqrt(i - 1) : 0;
+      let x = (u.lng - 128.48) * 160 + Math.cos(a) * r, z = (35.93 - u.lat) * 200 + Math.sin(a) * r;
+      const c = COMPLEX.find(c => Math.abs(x - c.map_x) < 2.2 && Math.abs(z - c.map_z) < 2.0); if (c) z = c.map_z + (z >= c.map_z ? 2.0 : -2.0); /* 판정 단지 건물에 가려지지 않게 */
+      return [x, z]; });
+    this.uHits = UNSOLD_LIST.map((u, k) => {
+      const [x, z] = this.uPos[k], d = new T3.Mesh(geo, m); d.position.set(x, 0, z); d.castShadow = true; this.decor.add(d);
+      const hit = new T3.Mesh(hg, new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.set(x, 0, z); hit.userData.uk = k; this.scene.add(hit); return hit;
+    });
+  },
+  selectUnsold(k) {
+    const [x, z] = this.uPos[k];
+    if (!this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
+    S.sel = null; this.lift(); this.showLines(null);
+    this.fly(x + (isMobile() ? 0 : 1.6), z + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
+    openUnsold(k);
+  },
   applyMode(animate) {
     if (!this.ok && !this.units.c01) return;
     const order = ["on", "dim", "off"];
@@ -511,7 +577,7 @@ const MapView = {
       u.bandM.color.set(new T3.Color(off ? "#9DB5B1" : "#1f6b4f").convertSRGBToLinear());
       const ev = S.evals[id];
       u.lbl.className = "clabel" + (light === "on" ? " is-on" : light === "dim" ? " is-dim" : light === "off" ? " is-off" : "");
-      u.lbl.innerHTML = (light !== "browse" ? `<i>${LIGHT_ICON[light]}</i>` : `<i class="b">●</i>`) + esc(u.c.name.replace("(샘플)", ""));
+      u.lbl.innerHTML = (light !== "browse" ? `<i>${LIGHT_ICON[light]}</i>` : `<i class="b">●</i>`) + esc(u.c.name.replace("(예시)", ""));
     });
     this.nightT = S.mode === "match" ? 1 : 0;
     if (S.sel && $("#panelR").classList.contains("is-open")) openCard(S.sel);
@@ -672,7 +738,7 @@ const Consult = {
   answer(q) {
     const needP = () => ["판정은 기본정보를 넣어야 정확히 알려드릴 수 있어요. 30초면 돼요.", [{ label: "정보 입력하기", action: "#input" }]];
     if (/주민(?:등록)?\s?번호|계좌\s?번호|비밀번호|여권\s?번호|카드\s?번호|\d{6}\s*-?\s*\d{7}/.test(q)) return ["그런 정보는 여기 입력하지 마세요. 상담에는 필요 없어요.", []];
-    if (/같이|중복|둘 다|함께/.test(q) && /(버팀목|이자)/.test(q)) return ["대구 청년 이자지원은 주택도시기금 전세대출(버팀목 등) 이용자는 제외돼요. 그래서 버팀목과 대구 이자지원은 같이 더하지 않고, 둘 중 하나로 계산해요. 어느 쪽이 유리한지는 단지 카드의 계산 내역에서 볼 수 있어요.", this.polLinks(["daegu_interest", "youth_beotimok"])];
+    if (/같이|중복|둘 다|함께/.test(q) && /(버팀목|이자)/.test(q)) return ["대구 청년 이자지원은 주택도시기금 전세대출(버팀목 등) 이용자는 제외되고, HF 청년 특례전세보증과도 같이 받지 않아요. 그래서 버팀목·HF 특례보증·대구 이자지원은 더하지 않고, 하나씩 따로 계산해서 월 부담이 낮은 쪽을 기본으로 보여줘요. 어느 쪽이 유리한지는 단지 카드의 계산 내역에서 볼 수 있어요.", this.polLinks(["daegu_interest", "youth_beotimok", "hf_youth_guarantee"])];
     if (/대출\s*(돼|되|가능)|받을 수 있/.test(q)) { if (!S.pr) return needP(); const y = S.pr.loans[0]; return [`입력하신 조건 기준으로 ${y.name.replace("(시연용)", "")}은 ${ST_KO[y.status]}이에요. 실제 대출 여부와 한도는 ${y.approval_by}이(가) 심사로 정해요. 계약금을 내기 전에 은행 사전 상담부터 받아보세요.`, this.polLinks(["youth_beotimok"])]; }
     if (/설명|결과|판정/.test(q)) {
       if (!S.pr) return needP();
@@ -694,7 +760,7 @@ const Consult = {
       if (!S.pr) return needP();
       const id = S.sel || Object.keys(S.evals)[0], c = COMPLEX.find(x => x.id === id), ev = S.evals[id], bd = breakdown(c, ev);
       if (!bd) return [`${c.name}은 ${ev.light_reason}`, []];
-      return [`${c.name} 기준이에요.\n관리비 ${man1(bd.mgmt)}만${bd.rent ? ` + 월세 ${man1(bd.rent)}만` : ""} + 대출이자 ${man1(bd.loan_interest)}만(${wonK(bd.loan_needed)} × ${bd.rate}% ÷ 12)${bd.rent_support ? ` − 월세지원 ${man1(bd.rent_support)}만` : ""} = 월 ${man1(bd.total)}만 원 (${bd.financing}).\n${ev.light === "on" ? "요건 충족 지원만으로 계산한 값이에요." : "확인 필요 지원까지 받을 때 값이에요."} 다른 단지를 보려면 지도에서 단지를 눌러 주세요.`, []];
+      return [`${c.name} 기준이에요.\n관리비 ${man1(bd.mgmt)}만${bd.rent ? ` + 월세 ${man1(bd.rent)}만` : ""} + 대출이자 ${man1(bd.loan_interest)}만(${bd.calc})${bd.rent_support ? ` − 월세지원 ${man1(bd.rent_support)}만` : ""} = 월 ${man1(bd.total)}만 원 (${bd.financing}).\n${ev.light === "on" ? "요건 충족 지원만으로 계산한 값이에요." : "확인 필요 지원까지 받을 때 값이에요."} 다른 단지를 보려면 지도에서 단지를 눌러 주세요.`, []];
     }
     if (/계약|특약|전에/.test(q)) return ["계약 전에 꼭 확인하세요.\n1. 계약금 내기 전 은행 대출 사전 상담\n2. 대출 불가 시 계약 해제 특약 확인\n3. 등기부등본으로 소유자·근저당 확인\n4. 전세보증보험 가입 가능 여부 확인\n먼저 1번부터 해보세요.", []];
     return ["그 질문은 아직 답을 준비하지 못했어요. 관련 기관 상담으로 연결해 드릴게요.", this.polLinks(["youth_beotimok", "daegu_interest", "youth_monthly_rent"])];
@@ -733,7 +799,7 @@ window.MH = {
   },
   galleryCards() {
     return COMPLEX.map(c => { const L = buildLayout(c.room_id || "room_84a");
-      return `<button class="plan-card" data-cid="${c.id}" aria-label="${esc(c.name)} 집 보기"><div class="plan-card__media">${planSVG(L)}<span class="tag-example">${c.is_sample ? "샘플 단지" : "공개 보도 단지"}</span></div>
+      return `<button class="plan-card" data-cid="${c.id}" aria-label="${esc(c.name)} 집 보기"><div class="plan-card__media">${planSVG(L)}<span class="tag-example">${c.is_sample ? "예시 단지" : "공개 보도 단지"}</span></div>
         <p class="plan-card__name">${esc(c.name)}</p><p class="plan-card__meta">${esc(c.district)} · ${SUPPLY_KO[c.supply_type]} · ${c.area_m2}㎡ · 보증금 ${wonK(c.deposit)}</p></button>`; }).join("");
   }
 };

@@ -34,9 +34,9 @@ const MOUNTS = [[[0, 33], [26, 33.5], [30, 36], [30, 40], [0, 40]], [[41, 20], [
 const LAKES = [[27.6, 25.2, 1.6, 1.0]];
 const DISTRICTS = [["달서구", 9.3, 23.3], ["북구", 17.6, 6.0], ["동구", 23.2, 9.0], ["수성구", 29.2, 16.7], ["서구", 12.0, 10.6]];
 const SUPPLY_KO = { cr_reits_jeonse: "CR리츠 전세", lh_dundeun: "LH 든든전세" };
-/* 단지 카드 "왜 이 집?" 한 줄. built: 준공 연도(null = 확인 전), below: 주변 시세 대비 낮은 비율. 시세 비교는 모두 샘플 값 */
+/* 단지 카드 "왜 이 집?" 한 줄. built: 준공 연도(null = 확인 전), below: 주변 시세 대비 낮은 비율(예시 값), note: 출처 있는 실제 단지 문구 */
 const LANDLORD_KO = { cr_reits_jeonse: "임대인 리츠(CR리츠)", lh_dundeun: "임대인 LH" };
-const WHY = { c01: { built: null, below: 10 }, c02: { built: 2024, below: 12 }, c03: { built: 2023, below: 10 }, c04: { built: 2024, below: 8 }, c05: { built: 2025, below: 9 }, c06: { built: 2023, below: 11 }, c07: { built: 2024, below: 13 }, c08: { built: 2025, below: 7 } };
+const WHY = { c01: { built: 2024, note: "인근 시세보다 최대 1억 원가량 저렴(뉴스1 2026.9 보도)" }, c02: { built: 2024, below: 12 }, c03: { built: 2023, below: 10 }, c04: { built: 2024, below: 8 }, c05: { built: 2025, below: 9 }, c06: { built: 2023, below: 11 }, c07: { built: 2024, below: 13 }, c08: { built: 2025, below: 7 } };
 const APPLY_LINKS = {
   cr_reits_jeonse: [{ label: "단지 임대 공고 (공급사 안내)", url: null }],
   lh_dundeun: [{ label: "LH청약플러스", url: "https://apply.lh.or.kr" }]
@@ -44,10 +44,11 @@ const APPLY_LINKS = {
 
 /* 정책 안내 요약 (CONSULT_SPEC 3장 형식 · 시연용, PM이 공고 확인 후 교체) */
 const POLICY_DOCS = {
-  youth_beotimok: { agency: "주택도시기금 · 수탁은행", apply: "주택도시기금 누리집에서 대출 자격을 먼저 확인하고, 수탁은행에서 상담·신청해요. 임대차계약서와 소득 증빙이 필요해요.", info_url: "https://nhuf.molit.go.kr" },
+  youth_beotimok: { agency: "주택도시기금 · 수탁은행", apply: "주택도시기금 누리집에서 대출 자격을 먼저 확인하고, 수탁은행에서 상담·신청해요. 보증금의 80%, 최대 1억5천만 원까지예요. 잔금일·전입일 중 빠른 날부터 3개월 안에 신청해요.", info_url: "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp" },
+  hf_youth_guarantee: { agency: "은행 · 한국주택금융공사", apply: "2026년 10월 19일 신규 신청분부터 만 39세까지 은행 창구에서 신청해요. 보증금의 90%, 최대 2억 원(신혼·유자녀 3억)까지 보증하고 금리는 은행마다 달라요.", info_url: "https://fsc.go.kr/no040101?cnId=3381" },
   market_jeonse_loan: { agency: "각 은행", apply: "거래 은행에서 전세대출 사전 상담을 받아요. 한도와 금리는 은행 심사로 정해져요.", info_url: null },
-  daegu_interest: { agency: "대구시 (대구안방)", apply: "대구시 모집 공고 기간에 온라인으로 신청해요. 배점으로 선정하고, 주택도시기금 전세대출(버팀목 등) 이용자는 제외돼요.", info_url: "https://www.daegu.go.kr" },
-  youth_monthly_rent: { agency: "주소지 행정복지센터", apply: "복지로 또는 주소지 행정복지센터에서 신청해요. 부모님(원가구) 소득·재산 기준도 함께 봐요.", info_url: "https://www.bokjiro.go.kr" }
+  daegu_interest: { agency: "대구시 (대구안방)", apply: "반기 모집 기간에 대구안방에서 신청하고, 시 추천서를 받아 iM뱅크·농협에서 대출해요. 금리를 최대 연 3.5%p 지원(본인 최저 1.5%), 1억 원까지예요. 소득 배점으로 선정하고, 버팀목·HF 특례보증과는 둘 중 하나예요.", info_url: "https://anbang.daegu.go.kr" },
+  youth_monthly_rent: { agency: "주소지 행정복지센터", apply: "복지로 또는 주소지 행정복지센터에서 신청해요. 실제 월세 중 월 최대 20만 원, 24개월이에요. 부모님(원가구) 소득·재산 기준도 함께 봐요.", info_url: "https://www.bokjiro.go.kr/ssis-tbu/cms/pc/customer/notice/1309500_1141.html" }
 };
 
 /* 가구 (가격 원 · 판매처·링크는 샘플) */

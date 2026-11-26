@@ -1,13 +1,14 @@
 const RULES = {
- "_note": "시연용 가정치. 실제 공고 기준과 다를 수 있음. PM이 각 source_url을 열어 값과 기준일을 확인한 뒤 확정한다. 금액 단위: 만 원, 금리: 연 %.",
- "version": "2026-11-26-demo",
+ "_note": "조사 결과(docs/조사, 검증메모 우선) 반영. 금액 단위: 만 원, 금리: 연 %. 판정은 요건 충족 / 확인 필요 / 미충족만 쓰고 최종 결정은 기관이 해요.",
+ "version": "2026-11-26",
  "market_loan": {
   "id": "market_jeonse_loan",
   "name": "시중은행 전세대출",
   "rate": 4.5,
+  "rate_label": "연 4.5%(가정)",
   "max_amount": 40000,
-  "ltv": null,
-  "status_rule": "always_needs_check",
+  "ltv": 0.8,
+  "_note": "LTV 80%는 결과_3 가정치(은행마다 다름)",
   "reason": "시중은행 대출은 은행 심사로 결정돼요",
   "approval_by": "각 은행",
   "link": null
@@ -15,29 +16,46 @@ const RULES = {
  "loans": [
   {
    "id": "youth_beotimok",
-   "name": "청년전용 버팀목 전세자금대출(시연용)",
+   "name": "청년전용 버팀목 전세자금대출",
    "age_min": 19,
    "age_max": 34,
    "homeless": true,
    "income_max_annual": 5000,
-   "deposit_max": 20000,
-   "max_amount": 20000,
-   "ltv": null,
-   "rate": 2.5,
+   "deposit_max": 30000,
+   "max_amount": 15000,
+   "ltv": 0.8,
+   "rate": 3.1,
+   "rate_label": "연 2.0~3.1%(소득별, 지방 −0.2%p 반영) · 계산은 최대 기준 3.1%",
+   "check_items": ["순자산 3.45억 원 이하", "세대원 전원 무주택 세대주"],
    "is_housing_fund": true,
-   "applies_to": [
-    "cr_reits_jeonse",
-    "lh_dundeun"
-   ],
+   "applies_to": ["cr_reits_jeonse", "lh_dundeun"],
    "approval_by": "수탁은행 · HUG/HF",
-   "source_url": "https://nhuf.molit.go.kr",
-   "checked_at": null
+   "source_url": "https://nhuf.molit.go.kr/FP/FP05/FP0502/FP05020301.jsp",
+   "checked_at": "2026-11-26"
+  },
+  {
+   "id": "hf_youth_guarantee",
+   "name": "HF 청년 특례전세보증",
+   "age_min": 19,
+   "age_max": 39,
+   "homeless": true,
+   "income_max_annual": 7000,
+   "max_amount": 20000,
+   "ltv": 0.9,
+   "rate": 4.5,
+   "rate_label": "은행 금리(시중 4.5% 가정)",
+   "_note": "신혼은 소득 1인 기준·한도 3억(유자녀 포함). 2026.10.19 신규 신청분부터. 대구 이자지원과 둘 중 하나",
+   "always_needs_check": ["은행 금리·심사"],
+   "applies_to": ["cr_reits_jeonse", "lh_dundeun"],
+   "approval_by": "은행 · 한국주택금융공사",
+   "source_url": "https://fsc.go.kr/no040101?cnId=3381",
+   "checked_at": "2026-11-26"
   }
  ],
  "policies": [
   {
    "id": "daegu_interest",
-   "name": "대구 청년 임차보증금 대출이자 지원(시연용)",
+   "name": "대구 청년 전·월세 임차보증금 대출이자 지원",
    "type": "interest_rate_support",
    "age_min": 19,
    "age_max": 39,
@@ -46,21 +64,20 @@ const RULES = {
    "income_max_annual": 6000,
    "deposit_max": 25000,
    "support_rate": 3.5,
-   "_note": "2026 공고: 본인 연소득 6천만 원 이하, 임차보증금 2억5천만 원 이하. 지원율 3.5%는 2025 기준(시연용)",
+   "min_rate": 1.5,
+   "support_ltv": 0.9,
+   "support_max": 10000,
+   "_note": "시중 전세대출 중 min(보증금×90%, 1억)까지 금리 최대 3.5%p 지원, 본인 최저 1.5%. 남는 대출은 시중금리로 계산(방봄 가정). 버팀목·HF 특례보증과 둘 중 하나",
    "requires_loan": "market_jeonse_loan",
-   "exclusive_with": [
-    "youth_beotimok"
-   ],
-   "always_needs_check": [
-    "대구시 배점 선정 결과"
-   ],
+   "exclusive_with": ["youth_beotimok", "hf_youth_guarantee"],
+   "always_needs_check": ["모집 기간(반기)", "소득 배점 선정 결과"],
    "approval_by": "대구시 (대구안방)",
-   "source_url": "https://www.daegu.go.kr",
-   "checked_at": null
+   "source_url": "https://biz.heraldcorp.com/article/10659700",
+   "checked_at": "2026-11-26"
   },
   {
    "id": "youth_monthly_rent",
-   "name": "청년월세 특별지원(시연용)",
+   "name": "청년월세 지원",
    "type": "rent_support",
    "age_min": 19,
    "age_max": 34,
@@ -71,15 +88,31 @@ const RULES = {
    "monthly_amount": 20,
    "months": 24,
    "requires_rent": true,
-   "deposit_max": 5000,
-   "rent_max": 70,
-   "always_needs_check": [
-    "부모님(원가구) 소득·재산 기준"
-   ],
+   "_note": "월 min(월세, 20만) × 24개월. 보증금·관리비는 지원 대상 아님. 별도 보증금·월세 상한 없음",
+   "always_needs_check": ["부모님(원가구) 소득·재산 기준"],
    "approval_by": "주소지 행정복지센터",
-   "source_url": "https://www.bokjiro.go.kr",
-   "checked_at": null
+   "source_url": "https://www.bokjiro.go.kr/ssis-tbu/cms/pc/customer/notice/1309500_1141.html",
+   "checked_at": "2026-11-26"
   }
+ ],
+ "badges": {
+  "brokerage": { "name": "대구 청년 중개수수료 지원", "text": "1회 지원 참고: 최대 30만(11.30 마감)", "deal_max": 15000, "age_min": 19, "age_max": 39, "_note": "월 실부담에는 넣지 않음(팀 결정). 2026.1.1 이후 대구 전입", "source_url": "https://dk.breaknews.com/207104", "checked_at": "2026-11-26" },
+  "guarantee_fee": { "name": "전세보증금 반환보증 보증료 지원", "text": "보증료 환급 지원이 있어요. 금액은 확인 필요(대구시 발표 최대 40만 / 국토부 기준 30만으로 출처가 달라요)", "source_url": "https://www.twig24.com/news/2026/01/12/20260112500219", "checked_at": "2026-11-26" },
+  "dundeun": "든든전세는 공고 기간에 신청하고 배점·추첨으로 정해져요"
+ },
+ "sale": {
+  "didimdol": { "id": "didimdol", "name": "디딤돌대출", "age_min": 19, "age_max": 120, "homeless": true, "income_max_annual": 6000, "income_max_first": 7000, "price_max": 50000, "area_max": 85, "single30_area": 60, "single30_price": 30000, "rate_top": 4.15, "rate_label": "연 2.85~4.15%", "unsold_pref": 0.2, "first_pref": 0.2, "pref_cap": 0.5, "rate_floor": 1.5, "limit": 20000, "limit_first": 24000, "ltv": 0.7, "ltv_first": 0.8, "source_url": "https://nhuf.molit.go.kr/FP/FP05/FP0503/FP05030101.jsp", "checked_at": "2026-11-26" },
+  "bogeumjari": { "id": "bogeumjari", "name": "보금자리론", "price_max": 60000, "rate": 5.3, "rate_label": "연 5.0~5.3%(2026-07 공시)", "limit": 36000, "limit_first": 42000, "ltv": 0.7, "ltv_first": 0.8, "source_url": "https://www.hf.go.kr/ko/interest-rate-guidance.do", "checked_at": "2026-11-26" },
+  "years": 30,
+  "tax_rate": 1.1,
+  "unsold_tax_cut": 0.5, "unsold_tax_cap": 150, "unsold_tax_area": 85, "unsold_tax_price": 60000,
+  "first_tax_cap": 200,
+  "tax_source_url": "https://www.imaeil.com/page/view/2026032914353033132"
+ },
+ "safety_checklist": [
+  "보증금 + 선순위채권이 집값의 90%를 넘으면 HUG 전세보증 가입이 어려워요 → 등기부등본으로 확인",
+  "임대인이 법인·리츠여도 보증 가입 여부를 계약 전에 확인하세요",
+  "등록임대사업자 집이면 임대인 보증 가입이 의무예요(계약서 확인)"
  ],
  "income_estimate": {
   "_note": "월 실수령만 받았을 때 세전 연소득을 추정하는 배율. 추정치가 기준보다 확실히 낮거나 높을 때만 판정하고, 애매하면 needs_check.",
@@ -95,13 +128,14 @@ const COMPLEXES = [
  {
   "id": "c01",
   "name": "상인푸르지오 센터파크",
+  "source_url": "https://www.newsis.com/view/NISX20260909_0003781931",
   "is_sample": false,
   "supply_type": "cr_reits_jeonse",
   "district": "달서구",
-  "lat": 35.818,
-  "lng": 128.537,
-  "map_x": 9.6,
-  "map_z": 22.0,
+  "lat": 35.8099,
+  "lng": 128.5378,
+  "map_x": 9.2,
+  "map_z": 24.0,
   "area_m2": 84,
   "deposit": 22200,
   "rent": 0,
@@ -113,7 +147,7 @@ const COMPLEXES = [
  },
  {
   "id": "c02",
-  "name": "월성 든든하우스(샘플)",
+  "name": "월성 든든하우스(예시)",
   "is_sample": true,
   "supply_type": "lh_dundeun",
   "district": "달서구",
@@ -127,12 +161,12 @@ const COMPLEXES = [
   "mgmt": 15,
   "mgmt_known": true,
   "room_id": "room_59a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  },
  {
   "id": "c03",
-  "name": "침산 리버뷰(샘플)",
+  "name": "침산 리버뷰(예시)",
   "is_sample": true,
   "supply_type": "lh_dundeun",
   "district": "북구",
@@ -146,12 +180,12 @@ const COMPLEXES = [
   "mgmt": 16,
   "mgmt_known": true,
   "room_id": "room_59a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  },
  {
   "id": "c04",
-  "name": "신암 센트럴(샘플)",
+  "name": "신암 센트럴(예시)",
   "is_sample": true,
   "supply_type": "cr_reits_jeonse",
   "district": "동구",
@@ -161,16 +195,19 @@ const COMPLEXES = [
   "map_z": 9.0,
   "area_m2": 84,
   "deposit": 19500,
+  "sale_price": 57900,
+  "sale_source": "대구MBC 2026.04.11 보도 할인가(중구 단지, 단지명·면적 비공개)를 예시 단지에 넣은 값",
+  "sale_source_url": "https://dgmbc.com/NewsArticle/834225",
   "rent": 0,
   "mgmt": 20,
   "mgmt_known": true,
   "room_id": "room_84a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  },
  {
   "id": "c05",
-  "name": "범어 파크원(샘플)",
+  "name": "범어 파크원(예시)",
   "is_sample": true,
   "supply_type": "cr_reits_jeonse",
   "district": "수성구",
@@ -184,31 +221,31 @@ const COMPLEXES = [
   "mgmt": 25,
   "mgmt_known": true,
   "room_id": "room_84a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  },
  {
   "id": "c06",
-  "name": "대곡 그린시티(샘플)",
+  "name": "대곡 그린시티(예시)",
   "is_sample": true,
   "supply_type": "cr_reits_jeonse",
   "district": "달서구",
-  "lat": 35.8085,
-  "lng": 128.542,
-  "map_x": 9.9,
-  "map_z": 24.3,
+  "lat": 35.802,
+  "lng": 128.555,
+  "map_x": 12.0,
+  "map_z": 25.6,
   "area_m2": 74,
   "deposit": 21000,
   "rent": 0,
   "mgmt": 19,
   "mgmt_known": true,
   "room_id": "room_84a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  },
  {
   "id": "c07",
-  "name": "평리 더힐(샘플)",
+  "name": "평리 더힐(예시)",
   "is_sample": true,
   "supply_type": "lh_dundeun",
   "district": "서구",
@@ -222,12 +259,12 @@ const COMPLEXES = [
   "mgmt": 21,
   "mgmt_known": true,
   "room_id": "room_84a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  },
  {
   "id": "c08",
-  "name": "시지 레이크(샘플)",
+  "name": "시지 레이크(예시)",
   "is_sample": true,
   "supply_type": "cr_reits_jeonse",
   "district": "수성구",
@@ -241,7 +278,7 @@ const COMPLEXES = [
   "mgmt": 24,
   "mgmt_known": true,
   "room_id": "room_84a",
-  "source": "샘플",
+  "source": "예시",
   "checked_at": null
  }
 ];

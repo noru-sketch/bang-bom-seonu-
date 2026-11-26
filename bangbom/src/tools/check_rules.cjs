@@ -1,9 +1,26 @@
-// 판정 규칙 자체 점검: node bangbom/src/tools/check_rules.cjs bangbom/src/modelhouse/  (페르소나 김지훈 → ● 3 · ◐ 2 · ○ 3, 상인푸르지오 ◐ 39.7)
-const fs = require("fs"), M = process.argv[2];
+// 판정 규칙 자체 점검: node bangbom/src/tools/check_rules.cjs bangbom/src/modelhouse/
+// 페르소나 김지훈(250/4,500/예산 60)과 부족 금액 예시(250/1,000)의 단지별 판정·월 부담 표를 찍고, 기대값을 assert 해요.
+const fs = require("fs"), M = process.argv[2] || "src/modelhouse/";
 const src = ["data.js", "data2.js", "engine.js"].map(f => fs.readFileSync(M + f, "utf8")).join("\n").replace(/if \(typeof module[^\n]*/, "");
-const out = new Function(src + "\nreturn { RULES, COMPLEXES, profileResult, evaluate, appliedLists };")();
-const P = { age: 27, monthly_income: 250, annual_income_gross: null, assets: 1000, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
-const pr = out.profileResult(P), n = { on: 0, dim: 0, off: 0 };
-out.COMPLEXES.forEach(c => { const e = out.evaluate(P, c, pr); n[e.light]++; const di = out.appliedLists(c, e, pr).not_applied.find(x => x.id === "daegu_interest"); console.log(c.name, e.light, e.net_monthly ?? e.net_monthly_best, di ? di.reason : "(적용)"); });
-console.log(n); const s = out.COMPLEXES.find(c => c.name.includes("상인푸르지오")), e = out.evaluate(P, s, pr);
-console.assert(n.on === 3 && n.dim === 2 && n.off === 3, "개수 틀림"); console.assert(e.light === "dim" && e.net_monthly_best === 39.7, "상인 틀림 " + e.light + " " + e.net_monthly_best);
+const out = new Function(src + "\nreturn { RULES, COMPLEXES, profileResult, evaluate, saleCalc, r1 };")();
+const base = { age: 27, monthly_income: 250, annual_income_gross: null, homeless: true, lives_with_parents: false, daegu_resident_or_moving: true, monthly_budget: 60, priorities: [] };
+const ICON = { on: "●", dim: "◐", off: "○" }, res = {};
+for (const assets of [4500, 1000]) {
+  const P = Object.assign({}, base, { assets }), pr = out.profileResult(P);
+  console.log(`\n### 월 실수령 250 · 모은 돈 ${assets.toLocaleString()} · 예산 60\n판정: ` + [...pr.loans, ...pr.policies].map(x => `${x.name} ${x.status}`).join(" / "));
+  console.log("| 단지 | 보증금 | 필요 대출 | 불빛 | 고른 조합 | 월 부담 | 지원 모두 | 못 받으면 | 부족액 |\n|---|---:|---:|---|---|---:|---:|---:|---:|");
+  res[assets] = {};
+  out.COMPLEXES.forEach(c => {
+    const e = out.evaluate(P, c, pr), main = e.net_monthly ?? e.net_monthly_best; res[assets][c.id] = e;
+    console.log(`| ${c.name} | ${c.deposit} | ${e.loan_needed} | ${ICON[e.light]} | ${e.financing || "-"} | ${main ?? "-"} | ${e.net_monthly_best ?? "-"} | ${e.net_monthly_worst ?? "-"} | ${e.shortfall || "-"} |`);
+    const s = out.saleCalc(P, c); if (s) console.log(`  └ 매매(${c.name}): ${s.loanP ? s.loanP.name + " " + s.loanP.rate + "%" : "대출 없음"} · 대출 ${s.loan} · 원리금 ${s.pmt} · 월 ${s.monthly} · 취득세 ${s.tax}−${s.cut} · 자기자금 ${s.own_needed} · 부족 ${s.shortfall}`);
+  });
+}
+const cnt = a => Object.values(res[a]).reduce((n, e) => (n[e.light]++, n), { on: 0, dim: 0, off: 0 });
+const A = (ok, m) => { if (!ok) { console.error("FAIL " + m); process.exitCode = 1; } };
+A(out.r1(90.25) === 90.3 && out.r1(56.25) === 56.3 && out.r1(39.66) === 39.7, "반올림");
+const n = cnt(4500); A(n.on === 3 && n.dim === 1 && n.off === 4, "4500 개수 " + JSON.stringify(n));
+A(res[4500].c01.light === "off" && res[4500].c01.net_monthly_best === 63.4, "상인 4500 " + res[4500].c01.net_monthly_best);
+A(res[4500].c02.net_monthly === 42.1 && res[4500].c06.light === "dim" && res[4500].c06.net_monthly_best === 55.9, "c02/c06");
+A(res[1000].c01.shortfall === 1220 && res[1000].c01.light === "off", "상인 1000 부족액 " + res[1000].c01.shortfall);
+console.log("\n점검 " + (process.exitCode ? "실패" : "통과"));

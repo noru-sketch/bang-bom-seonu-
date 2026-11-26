@@ -8,9 +8,9 @@ from PIL import Image  # 없으면: pip install pillow
 UA = {"User-Agent": "BangbomHackathonDemo/1.0 (student project, low volume)"}
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "refs")
 SITES = [  # id, 위도, 경도  (c06은 산 위였던 좌표를 주거지로 옮김)
-    ("c01_sangin", 35.818, 128.537), ("c02_wolseong", 35.826, 128.530),
+    ("c01_sangin", 35.8099, 128.5378), ("c02_wolseong", 35.826, 128.530),
     ("c03_chimsan", 35.900, 128.590), ("c04_sinam", 35.885, 128.625),
-    ("c05_beomeo", 35.858, 128.625), ("c06_daegok", 35.8085, 128.5420),
+    ("c05_beomeo", 35.858, 128.625), ("c06_daegok", 35.802, 128.555),
     ("c07_pyeongni", 35.877, 128.555), ("c08_siji", 35.835, 128.700),
 ]
 

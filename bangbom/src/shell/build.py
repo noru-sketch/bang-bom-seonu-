@@ -351,7 +351,7 @@ faq_old=b[b.index('<div class="faq">'):b.index('</div>',b.index('무료인가요
 faq_new='''<div class="faq">
         <details><summary>"요건 충족"이면 대출이 되는 건가요?<i aria-hidden="true"></i></summary><p>아니에요. 방봄은 입력하신 조건으로 요건만 따져서 요건 충족 / 확인 필요 / 미충족으로 보여줘요. 대출 승인과 지원 선정은 은행과 기관이 정해요. 그래서 체크리스트 맨 위에 "계약금 전 은행 사전 상담"을 넣었어요.</p></details>
         <details><summary>월 부담은 어떻게 계산해요?<i aria-hidden="true"></i></summary><p>월세 + 관리비 + 보증금 대출이자 − 월세지원 − 이자지원이에요. 같이 받을 수 없는 지원(예: 버팀목 대출과 대구 이자지원)은 더하지 않고, "지원 모두 받으면 / 하나도 못 받으면" 범위를 같이 보여줘요.</p></details>
-        <details><summary>데이터는 어디서 오나요?<i aria-hidden="true"></i></summary><p>미분양 통계는 국토교통부 주택통계를 쓰고 출처와 기준일을 적어요. 이름 끝에 (샘플)이 붙은 단지와 시설, 금리·지원 기준은 시연용 가정치예요.</p></details>
+        <details><summary>데이터는 어디서 오나요?<i aria-hidden="true"></i></summary><p>미분양 통계는 국토교통부 주택통계를 쓰고 출처와 기준일을 적어요. 이름 끝에 (예시)가 붙은 단지와 (샘플)이 붙은 시설은 시연용이에요. 대출·지원 기준은 공고에서 확인한 값이고, 시중금리 4.5% 같은 가정치는 화면에 따로 적어요. 작은 주황 점은 대구시 공개 미분양 목록(2026.9.30 기준)이에요.</p></details>
         <details><summary>지도와 평면도는 어디서 가져왔나요?<i aria-hidden="true"></i></summary><p>지도는 실제 배치를 참고해 단순한 블록으로 직접 그렸고, 지도 화면을 복사하지 않았어요. 평면도도 공고 평면도 원본 이미지를 쓰지 않고 표준 구조로 단순화해 그렸어요.</p></details>
         <details><summary>아이 눈높이는 왜 90cm인가요?<i aria-hidden="true"></i></summary><p>만 3~5세 아이의 눈높이가 대략 이 정도라서 잡은 참고값이에요. 법적·안전 기준은 아니에요. 집 보기의 3D에서 [아이 눈높이]를 누르면 그 높이로 방 안을 둘러볼 수 있고, 아이 얼굴 높이에 오는 가구 모서리를 빨간 점으로 짚어줘요. 참고용 안전 체크예요.</p></details>
         <details><summary>24시간 상담은 AI가 판정하나요?<i aria-hidden="true"></i></summary><p>판정은 규칙이 하고, 상담은 그 결과를 쉬운 말로 설명만 해요. 판정을 바꾸거나 새 숫자를 만들지 않고, 링크는 공식 주소만 붙여요. AI 연결이 안 되면 규칙으로 만든 기본 안내로 답해요.</p></details>
@@ -372,7 +372,7 @@ mb=mb.replace('<button type="button" class="btn btn--ghost" id="formBack">둘러
 mb=mb.replace('<div class="toast" id="toast" role="status"></div>','<div class="toast" id="mhToast" role="status"></div>')
 mb=mb.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>','')
 b=b.replace('<footer class="footer">','<div id="mh" hidden>\n'+mb+'\n</div>\n\n<footer class="footer">',1)
-b=R(b,'<li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>','<li>단지 공개 보도 · 뉴시스·뉴스1<span>2026.9</span></li>\n          <li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>')
+b=R(b,'<li>대구광역시 · 공공데이터포털<span>단지 정보 연결 예정</span></li>','<li>단지 공개 보도 · 뉴시스·뉴스1<span>2026.9</span></li>\n          <li>대구광역시 공동주택 미분양 현황(공개 단지)<span>2026.9.30 기준</span></li>')
 b=R(b,'<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n','<li>국토교통부 건축물 현황<span>2023 기준</span></li>\n')
 # 탭바 4칸
 h=h.replace('.tabbar{display:grid;grid-template-columns:repeat(5,1fr);','.tabbar{display:grid;grid-template-columns:repeat(4,1fr);')
@@ -383,7 +383,7 @@ HOUSE_MARK='/* [house_view.js] 집 보기(House)는 house_view.js 에 있다. bu
 APP_BB=open(os.path.join(HERE,'app_bb.js'),encoding='utf-8').read()
 assert APP_BB.count(HOUSE_MARK)==1, 'app_bb.js 에 집 보기 표시 줄이 없어요'
 APP_BB=APP_BB.replace(HOUSE_MARK, open(os.path.join(HERE,'house_view.js'),encoding='utf-8').read())
-mjs=open(M+'data.js',encoding='utf-8').read()+open(M+'data2.js',encoding='utf-8').read()+open(M+'geo.js',encoding='utf-8').read()+open(M+'engine.js',encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists };','')+open(M+'house.js',encoding='utf-8').read()+open(os.path.join(HERE,'backend.js'),encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { createBackend };','')+APP_BB+open(os.path.join(HERE,'tutorial.js'),encoding='utf-8').read()
+mjs=open(M+'data.js',encoding='utf-8').read()+open(M+'data2.js',encoding='utf-8').read()+open(M+'unsold_list.js',encoding='utf-8').read()+open(M+'geo.js',encoding='utf-8').read()+open(M+'engine.js',encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists };','')+open(M+'house.js',encoding='utf-8').read()+open(os.path.join(HERE,'backend.js'),encoding='utf-8').read().replace('if (typeof module !== "undefined") module.exports = { createBackend };','')+APP_BB+open(os.path.join(HERE,'tutorial.js'),encoding='utf-8').read()
 shell=open(os.path.join(HERE,'shell.js'),encoding='utf-8').read()
 tail='<script src="vendor/three.min.js"></script>\n<script>\n{\n'+mjs+'\n}\n</script>\n<script>\n'+shell+'\nBB.route();\n</script>\n</body>\n</html>\n'
 out=h+b.replace('</body>','').replace('</html>','')+tail

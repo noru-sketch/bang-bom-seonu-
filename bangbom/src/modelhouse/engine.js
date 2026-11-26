@@ -4,8 +4,8 @@ const ST_KO = { eligible: "요건 충족", needs_check: "확인 필요", ineligi
 const ST_ICON = { eligible: "●", needs_check: "◐", ineligible: "○" };
 const LIGHT_KO = { on: "요건 충족", dim: "확인 필요", off: "미충족" };
 const LIGHT_ICON = { on: "●", dim: "◐", off: "○" };
-/* 파이썬 round(x, 1)과 같게: 딱 .x5면 짝수 쪽으로 */
-const r1 = v => { const y = v * 10, f = Math.floor(y), d = y - f; if (Math.abs(d - .5) < 1e-9) return (f % 2 === 0 ? f : f + 1) / 10; return Math.round(y) / 10; };
+/* 일반 반올림(0.05 → 올림). docs/조사/data/calc3.py 의 round(x+1e-9, 1)과 같은 결과 */
+const r1 = v => Math.round(v * 10 + 1e-9) / 10;
 function wonK(v) { v = Math.round(v); const eok = Math.floor(v / 10000), man = v % 10000; if (eok && man) return `${eok}억 ${man.toLocaleString("ko-KR")}만 원`; if (eok) return `${eok}억 원`; return `${man.toLocaleString("ko-KR")}만 원`; }
 function worse(a, b) { const o = { eligible: 0, needs_check: 1, ineligible: 2 }; return o[a] >= o[b] ? a : b; }
 const fmtN = n => Number(n).toLocaleString("ko-KR");
@@ -31,6 +31,7 @@ function personChecks(p, it) {
   const reasons = []; let status = ELIG;
   if (!(it.age_min <= p.age && p.age <= it.age_max)) return [NO, `만 ${it.age_min}~${it.age_max}세 대상 (입력 만 ${p.age}세)`];
   if (it.homeless && !p.homeless) return [NO, "무주택자만 신청할 수 있어요"];
+  if (it.id === "youth_beotimok" && p.assets > 34500) return [NO, "순자산 3.45억 원 초과"];
   if (it.daegu_resident_or_moving && !p.daegu_resident_or_moving) return [NO, "대구 거주 또는 전입 예정자 대상"];
   if (it.lives_apart_from_parents && p.lives_with_parents) return [NO, "부모님과 따로 사는 청년 대상"];
   const [s, r] = incomeStatus(p, it.income_max_annual, it.income_max_monthly_recognized, it.earned_income_deduction || 0);
@@ -41,59 +42,70 @@ function personChecks(p, it) {
 }
 function profileResult(p) {
   const loans = [], policies = [];
-  RULES.loans.forEach(ln => { const [s, r] = personChecks(p, ln); loans.push({ id: ln.id, name: ln.name, status: s, max_amount: ln.max_amount, rate: ln.rate, reason: r, approval_by: ln.approval_by, source_url: ln.source_url, checked_at: ln.checked_at }); });
+  RULES.loans.forEach(ln => { const [s, r] = personChecks(p, ln); loans.push({ id: ln.id, name: ln.name, status: s, max_amount: ln.max_amount, rate: ln.rate, rate_label: ln.rate_label, reason: r, check_items: ln.check_items || [], always_needs_check: ln.always_needs_check || [], approval_by: ln.approval_by, source_url: ln.source_url, checked_at: ln.checked_at }); });
   const m = RULES.market_loan;
   loans.push({ id: m.id, name: m.name, status: CHECK, max_amount: m.max_amount, rate: m.rate, reason: m.reason, approval_by: m.approval_by, source_url: m.link });
   RULES.policies.forEach(po => { const [s, r] = personChecks(p, po); policies.push({ id: po.id, name: po.name, status: s, reason: r, monthly_amount: po.monthly_amount, support_rate: po.support_rate, approval_by: po.approval_by, source_url: po.source_url, checked_at: po.checked_at, always_needs_check: po.always_needs_check || [] }); });
   return { loans, policies };
 }
 const interest = (amount, rate) => amount * rate / 100 / 12;
+/* 대출 한도 = min(최대 금액, 보증금 × LTV). 대상 보증금을 넘으면 0 */
+const loanCap = (ln, c) => ln.deposit_max != null && c.deposit > ln.deposit_max ? 0 : Math.min(ln.max_amount, ln.ltv == null ? Infinity : c.deposit * ln.ltv);
 function evaluate(p, c, pr) {
   const loan_needed = Math.max(0, Math.trunc(c.deposit - p.assets));
   const st = {}; [...pr.loans, ...pr.policies].forEach(x => st[x.id] = x.status);
   const pol = {}; RULES.policies.forEach(x => pol[x.id] = x);
-  const market = RULES.market_loan;
-  let rentSup = 0, rentStatus = null;
-  const yr = pol.youth_monthly_rent;
-  if (yr && c.rent > 0 && st[yr.id] !== NO && c.deposit <= yr.deposit_max && c.rent <= yr.rent_max) { rentSup = yr.monthly_amount; rentStatus = st[yr.id]; }
-  const combos = [], base = c.rent + c.mgmt;
-  const add = (status, rate, label, used) => {
-    const net = base + interest(loan_needed, rate);
-    combos.push({ status, net: r1(net), label, rate, used, rentSup: 0 });
-    if (rentStatus) combos.push({ status: worse(status, rentStatus), net: r1(net - rentSup), label: label + " + 청년월세지원", rate, used: [...used, "youth_monthly_rent"], rentSup });
+  const market = RULES.market_loan, yr = pol.youth_monthly_rent;
+  /* 청년월세: 월세가 있는 단지만, 월 min(월세, 20만) */
+  const rentSup = yr && c.rent > 0 && st[yr.id] !== NO ? Math.min(c.rent, yr.monthly_amount) : 0, rentStatus = rentSup ? st[yr.id] : null;
+  const combos = [], caps = [], base = c.rent + c.mgmt;
+  const add = (status, li, label, used, rate, calc) => {
+    combos.push({ status, net: r1(base + li), li, label, rate, calc, used, rentSup: 0 });
+    if (rentStatus) combos.push({ status: worse(status, rentStatus), net: r1(base + li - rentSup), li, label: label + " + 청년월세지원", rate, calc, used: [...used, yr.id], rentSup });
   };
-  if (loan_needed === 0) add(ELIG, 0, "대출 없이", []);
+  const simple = (rate, tag) => `${wonK(loan_needed)} × ${rate}%${tag || ""} ÷ 12`;
+  if (loan_needed === 0) add(ELIG, 0, "대출 없이", [], 0, "대출 없음");
   else {
     RULES.loans.forEach(ln => {
-      const okHouse = ln.applies_to.includes(c.supply_type) && c.deposit <= ln.deposit_max && loan_needed <= ln.max_amount && (ln.ltv == null || loan_needed <= c.deposit * ln.ltv);
-      if (okHouse && st[ln.id] !== NO) add(st[ln.id], ln.rate, ln.name.split("(")[0], [ln.id]);
+      if (!ln.applies_to.includes(c.supply_type) || st[ln.id] === NO) return;
+      const cap = loanCap(ln, c); caps.push(cap);
+      if (loan_needed <= cap) add(st[ln.id], interest(loan_needed, ln.rate), ln.name, [ln.id], ln.rate, simple(ln.rate, ln.id === "youth_beotimok" ? "(최대 기준)" : ""));
     });
-    const mkOk = loan_needed <= market.max_amount && (market.ltv == null || loan_needed <= c.deposit * market.ltv);
-    if (mkOk) {
-      add(CHECK, market.rate, "시중 전세대출", [market.id]);
+    const mcap = loanCap(market, c); caps.push(mcap);
+    if (loan_needed <= mcap) {
+      add(CHECK, interest(loan_needed, market.rate), "시중 전세대출", [market.id], market.rate, simple(market.rate));
       const di = pol.daegu_interest;
-      if (di && st[di.id] !== NO && c.deposit <= di.deposit_max) add(CHECK, market.rate - di.support_rate, "시중 전세대출 + 대구 청년 이자지원", [market.id, di.id]);
+      if (di && st[di.id] !== NO && c.deposit <= di.deposit_max) {
+        /* 지원은 min(대출, 보증금×90%, 1억)까지. 남는 대출은 시중금리(방봄 가정) */
+        const sup = Math.min(loan_needed, c.deposit * di.support_ltv, di.support_max), own = Math.max(market.rate - di.support_rate, di.min_rate), rest = loan_needed - sup;
+        add(CHECK, interest(sup, own) + interest(rest, market.rate), "시중 전세대출 + 대구 청년 이자지원", [market.id, di.id], own,
+          `${wonK(sup)} × ${own}%${rest > 0 ? ` + ${wonK(rest)} × ${market.rate}%` : ""} ÷ 12`);
+      }
     }
   }
   const elig = combos.filter(x => x.status === ELIG);
   const eBest = elig.length ? elig.reduce((a, b) => b.net < a.net ? b : a) : null;
   const best = combos.length ? combos.reduce((a, b) => b.net < a.net ? b : a) : null;
-  const worst = (loan_needed === 0 || loan_needed <= market.max_amount) ? r1(base + interest(loan_needed, market.rate)) : null;
+  const worst = combos.length ? r1(base + interest(loan_needed, market.rate)) : null;
+  const maxCap = Math.max(0, ...caps), shortfall = combos.length ? 0 : loan_needed - maxCap;
   const budget = p.monthly_budget;
   let light, reason, chosen;
   if (eBest && eBest.net <= budget) { light = "on"; chosen = eBest; reason = `${eBest.label} 요건 충족 기준으로 월 ${eBest.net}만 원, 예산 안이에요`; }
   else if (best && best.net <= budget) { light = "dim"; chosen = best; reason = `${best.label}(확인 필요)을 받으면 월 ${best.net}만 원으로 예산 안이에요`; }
   else {
     light = "off"; chosen = best;
-    if (!combos.length) { const limit = Math.max(market.max_amount, ...RULES.loans.map(l => l.max_amount)); reason = `필요 대출 ${wonK(loan_needed)}이 대출 한도(${wonK(limit)})보다 ${wonK(loan_needed - limit)} 많아요`; }
-    else reason = `지원을 모두 받아도 월 ${best.net}만 원으로 예산보다 ${r1(best.net - budget)}만 원 많아요`;
+    reason = !combos.length ? `자기자금이 ${wonK(shortfall)} 부족해요 (보증금 ${wonK(c.deposit)} 중 대출은 최대 ${wonK(maxCap)}까지 기준)`
+      : `지원을 모두 받아도 월 ${best.net}만 원으로 예산보다 ${r1(best.net - budget)}만 원 많아요`;
   }
-  return { id: c.id, loan_needed, light, light_reason: reason, net_monthly: eBest ? eBest.net : null, net_monthly_best: best ? best.net : null, net_monthly_worst: worst, financing: chosen ? chosen.label : null, chosen, combos, rentSup };
+  if (c.supply_type === "lh_dundeun") reason += ` · ${RULES.badges.dundeun}`;
+  /* 다른 선택: 고른 조합과 다른 대출·지원 묶음 중 가장 낮은 것부터 */
+  const key = x => x.used.filter(u => u !== "youth_monthly_rent").join("+");
+  const alts = chosen ? combos.filter(x => key(x) !== key(chosen)).sort((a, b) => a.net - b.net).filter((x, i, arr) => arr.findIndex(y => key(y) === key(x)) === i) : [];
+  return { id: c.id, loan_needed, shortfall, light, light_reason: reason, net_monthly: eBest ? eBest.net : null, net_monthly_best: best ? best.net : null, net_monthly_worst: worst, financing: chosen ? chosen.label : null, chosen, alts, combos, rentSup };
 }
 function breakdown(c, ev) {
   const ch = ev.chosen; if (!ch) return null;
-  const li = r1(interest(ev.loan_needed, ch.rate));
-  return { rent: c.rent, mgmt: c.mgmt, loan_needed: ev.loan_needed, rate: ch.rate, loan_interest: li, rent_support: ch.rentSup || 0, total: ch.net, financing: ch.label };
+  return { rent: c.rent, mgmt: c.mgmt, loan_needed: ev.loan_needed, rate: ch.rate, calc: ch.calc, loan_interest: r1(ch.li), rent_support: ch.rentSup || 0, total: ch.net, financing: ch.label };
 }
 function appliedLists(c, ev, pr) {
   const all = {}; [...pr.loans, ...pr.policies].forEach(x => all[x.id] = x);
@@ -104,12 +116,47 @@ function appliedLists(c, ev, pr) {
     if (used.includes(po.id)) return;
     if (po.status === NO) { not_applied.push({ id: po.id, name: po.name, reason: po.reason }); return; }
     if (po.id === "daegu_interest" && c.deposit > RULES.policies.find(x => x.id === po.id).deposit_max) not_applied.push({ id: po.id, name: po.name, reason: "보증금이 대구 이자지원 기준(2억5천만 원)을 넘어요" });
-    else if (po.id === "daegu_interest" && used.includes("youth_beotimok")) not_applied.push({ id: po.id, name: po.name, reason: "버팀목 대출 이용자는 대구 이자지원과 중복 불가" });
+    else if (po.id === "daegu_interest" && (used.includes("youth_beotimok") || used.includes("hf_youth_guarantee"))) not_applied.push({ id: po.id, name: po.name, reason: "버팀목·HF 특례보증과는 둘 중 하나만 받을 수 있어요" });
     else if (po.id === "daegu_interest" && ev.loan_needed === 0) not_applied.push({ id: po.id, name: po.name, reason: "대출이 필요 없어 해당 없음" });
     else if (po.id === "youth_monthly_rent" && c.rent === 0) not_applied.push({ id: po.id, name: po.name, reason: "월세가 없는 전세 단지라 해당 없음" });
+    else if (!ev.chosen) not_applied.push({ id: po.id, name: po.name, reason: "자기자금이 모자라 계산하지 못했어요" });
     else not_applied.push({ id: po.id, name: po.name, reason: "더 낮은 조합이 있어 이번 계산에선 빠졌어요" });
   });
   return { applied, not_applied };
+}
+/* 중개수수료 지원 배지: 월 부담에는 넣지 않음(팀 결정). 거래금액 = 보증금 + 월세×100
+   shortcut: 거래금액 5천만 미만이면 ×70 규칙은 생략, 월세 단지가 생기면 보강 */
+function brokerageBadge(p, c) {
+  const b = RULES.badges.brokerage;
+  return !!p && p.daegu_resident_or_moving && p.age >= b.age_min && p.age <= b.age_max && c.deposit + c.rent * 100 <= b.deal_max;
+}
+/* 전세 안전: 시세·선순위채권이 둘 다 있을 때만 판정, 없으면 null(체크리스트만) */
+function safetyCheck(c) {
+  if (c.market_price == null || c.senior_debt == null) return null;
+  const ratio = (c.deposit + c.senior_debt) / c.market_price;
+  return { ratio: r1(ratio * 100), status: ratio > 0.9 ? CHECK : ELIG };
+}
+/* 매매로 보면: sale_price가 있는 단지만. 생애최초·미혼 단독세대주로 가정하고 그 가정은 확인 필요로 표시 */
+function saleCalc(p, c) {
+  if (!c.sale_price || !p) return null;
+  const R_ = RULES.sale, d = R_.didimdol, b = R_.bogeumjari, price = c.sale_price, first = !!p.homeless;
+  const notes = ["생애최초·미혼 단독세대주로 가정했어요(확인 필요)"];
+  let [ds, dr] = personChecks(p, Object.assign({}, d, { income_max_annual: first ? d.income_max_first : d.income_max_annual }));
+  if (ds !== NO && (c.area_m2 > d.area_max || price > d.price_max)) [ds, dr] = [NO, `${d.area_max}㎡·평가액 ${wonK(d.price_max)} 이하 주택만 돼요`];
+  else if (ds !== NO && p.age >= 30 && (c.area_m2 > d.single30_area || price > d.single30_price)) [ds, dr] = [NO, `만 30세 이상 미혼 단독세대주는 ${d.single30_area}㎡·${wonK(d.single30_price)} 이하만 돼요`];
+  else if (ds !== NO && p.age < 30) [ds, dr] = [worse(ds, CHECK), "만 30세 미만 단독세대주는 부양 요건을 확인해야 해요"];
+  const dRate = Math.max(d.rate_top - Math.min(d.unsold_pref + (first ? d.first_pref : 0), d.pref_cap), d.rate_floor);
+  const tax = price * R_.tax_rate / 100;
+  const unsoldCut = c.area_m2 <= R_.unsold_tax_area && price <= R_.unsold_tax_price ? Math.min(tax * R_.unsold_tax_cut, R_.unsold_tax_cap) : 0, firstCut = first ? Math.min(tax, R_.first_tax_cap) : 0;
+  const cut = Math.max(unsoldCut, firstCut);
+  const cutLabel = !cut ? "감면 없음" : unsoldCut >= firstCut ? "대구 준공 후 미분양 감면 · 한도 적용 여부 확인 필요, 분양사에게서 처음 살 때만" : "생애최초 감면 · 미분양 감면과 중복 여부가 정해지지 않아 큰 쪽 하나만 넣었어요";
+  let loanP = null;
+  if (ds !== NO) loanP = { id: d.id, name: d.name, status: ds, reason: dr, rate: dRate, rate_label: `${d.rate_label} → 계산 ${dRate}%(최대 기준 − 우대)`, cap: Math.min(price * (first ? d.ltv_first : d.ltv), first ? d.limit_first : d.limit) };
+  else if (price <= b.price_max) loanP = { id: b.id, name: b.name, status: CHECK, reason: "금리·한도는 한국주택금융공사 심사로 정해져요", rate: b.rate, rate_label: `${b.rate_label} → 계산 ${b.rate}%(최대 기준)`, cap: Math.min(price * (first ? b.ltv_first : b.ltv), first ? b.limit_first : b.limit) };
+  const loan = loanP ? Math.min(loanP.cap, Math.max(0, price + tax - cut - p.assets)) : 0;
+  const own_needed = price + tax - cut - loan, shortfall = Math.max(0, own_needed - p.assets);
+  const r = loanP ? loanP.rate / 100 / 12 : 0, n = R_.years * 12, pmt = loan && r ? loan * r / (1 - Math.pow(1 + r, -n)) : 0;
+  return { price, source: c.sale_source, source_url: c.sale_source_url, didimdol: { status: ds, reason: dr }, loanP, loan: Math.round(loan), pmt: r1(pmt), monthly: r1(pmt + c.mgmt), tax: r1(tax), cut: r1(cut), cutLabel, own_needed: Math.round(own_needed), shortfall: Math.round(shortfall), notes };
 }
 
 /* ═══════ 가까운 시설 (카테고리마다 가장 가까운 1곳) ═══════ */
@@ -124,4 +171,4 @@ function nearbyOf(c) {
     return { infra_id: best.i.id, name: best.i.name, category: cat, distance_km: km, walk_min: walk, drive_min: drive, map_x: best.i.map_x, map_z: best.i.map_z };
   }).filter(Boolean);
 }
-if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists };
+if (typeof module !== "undefined") module.exports = { profileResult, evaluate, breakdown, appliedLists, saleCalc, safetyCheck, brokerageBadge };
