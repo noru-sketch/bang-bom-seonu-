@@ -55,7 +55,7 @@ const House = {
     if (!this.on || this.cid !== c.id) document.dispatchEvent(new CustomEvent("mh:house", { detail: { complexId: c.id } }));
     this.on = true;
     if (this.cid !== c.id || !rooms.some(r => r.id === this.room)) { this.cid = c.id; this.room = living; }
-    $("#hvTitle").innerHTML = `<span class="eyebrow-s">Model house</span><b><i class="hv-name">${esc(c.name)}</i><i class="hv-type"> · ${esc(L.name)}</i></b><span>${SUPPLY_KO[c.supply_type]} · ${c.area_m2}㎡${c.area_m2 !== L.area ? ` (${L.area}㎡ 구조로 대신 보기)` : ""} · 표준 구조 단순화, 공고 평면도 원본 미사용${ev && S.mode === "match" ? ` · ${LIGHT_ICON[ev.light]} ${LIGHT_KO[ev.light]}` : ""}</span>`;
+    $("#hvTitle").innerHTML = `<span class="eyebrow-s">Model house</span><b><i class="hv-name">${esc(c.name)}</i><i class="hv-type"> · ${esc(L.name)}</i></b><span>${SUPPLY_KO[c.supply_type]} · ${c.area_m2}㎡${c.area_m2 !== L.area ? ` (${L.area}㎡ 구조로 대신 보기)` : ""} · 표준 구조 단순화, 공고 평면도 원본 미사용${ev && S.mode === "match" ? ` · <i class="jd-dot jd-dot--${ev.light}" aria-hidden="true"></i> ${LIGHT_KO[ev.light]}` : ""}</span>`;
     /* #house 는 전체 구조, #house/<방> 은 그 방. 이 집에 없는 방이면 전체 구조로 고친다 */
     let want = location.hash.startsWith("#house/") ? location.hash.slice(7) : "";
     if (want && !rooms.some(r => r.id === want)) { want = ""; history.replaceState(null, "", "#house"); }
