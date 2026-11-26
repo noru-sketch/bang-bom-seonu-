@@ -939,7 +939,7 @@ body.card-open #mh .pills-r{display:none}
 #mh .form-wrap{max-width:880px;margin:0 auto}
 #mh .form-head{margin-bottom:32px}
 #mh .form{width:100%;padding:32px;box-shadow:none}
-#mh .persona{gap:8px}
+#mh .persona{gap:8px;flex-wrap:wrap}
 #mh .fgrid{gap:20px 24px;margin-top:24px}
 #mh .f label,#mh .f .lb{font-size:14px;font-weight:600;margin-bottom:8px}
 #mh .f label small,#mh .f .lb small{font-size:12px}
@@ -1029,7 +1029,12 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 #mh .cc-plan svg{position:absolute;inset:0;width:100%;height:100%;padding:14px}
 #mh .cc-plan-tag{position:absolute;left:14px;bottom:12px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid var(--line);color:var(--sub)}
 #mh .panel-r .x{position:absolute;top:14px;right:14px;z-index:2;background:rgba(255,255,255,.92)}
-#mh .panel-r{overflow:auto;padding-bottom:0}
+/* 카드 빈 띠 버그: 카드(.panel-r)가 스크롤 상자이면서 안쪽 평면도가 음수 margin 을 쓰면 지도 위에 빈 띠가 생겼다.
+   카드는 넘침을 자르는 세로 flex 로 두고, 안쪽 .cc 만 스크롤한다 (휴대폰은 mobile_app.css 가 같은 구조) */
+@media (min-width:821px){
+  #mh .panel-r{overflow:hidden;padding-top:0;padding-bottom:0;display:flex;flex-direction:column}
+  #mh .panel-r .cc{overflow:auto;overscroll-behavior:contain;min-height:0;flex:1 1 auto;margin:0 -24px;padding:24px 24px 0}
+}
 /* 닫힌 단지 카드도 투명하게만 두면 Tab 이 그 안의 단추에 멈추고 눌리기까지 한다. 닫히면 숨긴다 */
 #mh .panel-r{visibility:hidden;transition:transform .3s,opacity .3s,visibility 0s .3s}
 #mh .panel-r.is-open{visibility:visible;transition:transform .3s,opacity .3s}
@@ -1148,6 +1153,31 @@ body.card-open #mh .map-hint,#mh .map-hint.is-gone{opacity:0}
 .zz__media--plain > img{object-fit:contain}
 .hs__links{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);margin-top:var(--s3)}
 .hs__links .link{margin-top:0}
+/* ═══════ 풀페이지 스크롤 (shell.js) · 예전 hyewon 홈에서 옮김 ═══════ */
+/* 오른쪽 섹션 점: 풀페이지가 켜졌을 때만(body.fp-on) 보인다. 어두운 화면(히어로·푸터)에서는 밝게 */
+.fp-dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:40;display:none;flex-direction:column;gap:14px}
+body.fp-on .fp-dots{display:flex}
+body.app-mode .fp-dots{display:none}
+.fp-dots button{position:relative;width:10px;height:10px;border-radius:50%;background:rgba(20,23,20,.22);transition:transform .25s,background .25s}
+.fp-dots button::after{content:"";position:absolute;inset:-8px}
+.fp-dots button.is-on{background:var(--ink);transform:scale(1.35)}
+.fp-dots.is-light button{background:rgba(255,255,255,.4)}
+.fp-dots.is-light button.is-on{background:#fff}
+.fp-dots button span{position:absolute;right:22px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--ink);color:#fff;opacity:0;pointer-events:none;transition:opacity .2s}
+.fp-dots button:hover span,.fp-dots button:focus-visible span{opacity:1}
+/* 어두운 화면(히어로 아래쪽·푸터)에서 위 막대 글자를 밝게 */
+.nav.is-dark:not(.is-clear){background:rgba(20,23,20,.78);color:#fff;border-bottom-color:rgba(255,255,255,.08)}
+.nav.is-dark:not(.is-clear) .btn:not(.btn--ghost){background:#fff;color:var(--ink)}
+.nav.is-dark:not(.is-clear) .btn--ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.24)}
+/* 맨 위로: 홈 맨 끝에 닿으면 나타난다 */
+.to-top{position:fixed;right:var(--pad-x);bottom:32px;z-index:45;height:48px;padding:0 18px 0 16px;border-radius:999px;background:#fff;color:var(--ink);font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;box-shadow:0 10px 30px rgba(0,0,0,.22);opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .25s,transform .25s}
+.to-top.is-on{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{background:var(--gray)}
+body.app-mode .to-top{display:none}
+@media (max-width:900px){.to-top{bottom:calc(var(--tab-h) + 16px);right:16px}}
+@media (prefers-reduced-motion:reduce){.fp-dots button,.to-top{transition:none}}
+/* 맨 위로 단추가 푸터 맨 아래 줄(저작권)을 가리지 않게 PC 에서는 푸터 아래 여백을 늘린다 (휴대폰은 mobile_home.css) */
+@media (min-width:901px){.footer{padding-bottom:112px}}
 
 /* ═════════ 휴대폰 화면: 홈·이용 안내 (build.py가 맨 끝에 붙인다) ═════════ */
 
@@ -1352,6 +1382,10 @@ body.house-mode #mh .fab{display:none}
   #mh #form > .persona{order:1;margin-top:14px}
   #mh #form > .persona > .muted{display:none}
   #mh #form > .persona .chip{height:44px;font-size:15px}
+  /* 예시 단추가 둘이라(김지훈 · 모은 돈이 부족할 때) 좁은 폭(360)에서 두 줄로 접히면 첫 걸음이 한 화면을 넘친다. 한 줄로 두고 그 줄 안에서만 옆으로 민다 */
+  #mh #form > .persona{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  #mh #form > .persona::-webkit-scrollbar{display:none}
+  #mh #form > .persona > *{flex:none}
   #mh .fgrid{order:2;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:14px}
   #mh #vInput[data-step="1"] .f:not([data-step="1"]),#mh #vInput[data-step="2"] .f:not([data-step="2"]),#mh #vInput[data-step="3"] .f:not([data-step="3"]){display:none}
   #mh .f label,#mh .f .lb{font-size:15px;margin-bottom:4px;align-items:baseline}
@@ -1734,6 +1768,10 @@ body.house-mode #mh .fab{display:none}
 
 </section>
 
+<!-- 풀페이지 스크롤(shell.js): 오른쪽 섹션 점과 맨 위로 단추. 점 이름은 각 화면의 data-hs 값 -->
+<nav class="fp-dots" id="fpDots" aria-label="홈 화면 이동"></nav>
+<button type="button" class="to-top" id="toTop" aria-label="맨 위로 가기"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14V4M4.5 8.5 9 4l4.5 4.5"/></svg><span>맨 위로</span></button>
+
 <!-- ═══════════════ #guide ═══════════════ -->
 <section class="page" id="page-guide" data-page="guide" aria-label="이용 안내">
   <!-- 휴대폰(820px 이하)에서만 보이는 카테고리 칩 -->
@@ -1813,7 +1851,7 @@ body.house-mode #mh .fab{display:none}
     <p class="small muted gets-note">입력값은 이 브라우저에만 저장해요. 24시간 상담에 질문할 때만 질문과 판정 요약을 AI 답변을 만드는 데 보내요. 최종 판정과 승인은 각 기관이 해요.</p>
   </div>
   <form class="card form" id="form" novalidate aria-labelledby="fTitle">
-    <div class="persona"><button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button><span class="sample">시연용</span><span class="muted small" style="margin-left:auto">금액은 만 원 단위</span></div>
+    <div class="persona"><button type="button" class="chip" id="fillPersona">예시 페르소나 넣기 · 김지훈(27)</button><button type="button" class="chip" id="fillShort">모은 돈이 부족할 때 · 1,000만</button><span class="sample">시연용</span><span class="muted small" style="margin-left:auto">금액은 만 원 단위</span></div>
     <div class="fgrid">
       <div class="f" data-step="1"><label for="f-age">나이 <small>만 나이, 19~70</small></label><div class="in"><input id="f-age" type="number" inputmode="numeric" min="19" max="70" required><span>세</span></div><p class="err" id="e-age"></p></div>
       <div class="f" data-step="1"><label for="f-income">월 소득 <small>세후 실수령</small></label><div class="in"><input id="f-income" type="number" inputmode="numeric" min="0" step="10" required><span>만 원</span></div><p class="err" id="e-income"></p></div>
@@ -3796,6 +3834,8 @@ function closeCard() {
   document.body.classList.remove("card-open"); p.classList.remove("is-open"); p.style.transform = ""; syncPl();
   /* 휴대폰: 시트가 열린 동안에는 단지를 시트 위쪽 좁은 지도로 올려서 봤다. 닫으면 다시 나타나는 구 칩 줄과 요약 줄에 이름표가 깔리지 않게 화면 가운데로 되돌린다 */
   if (was && isPhone() && S.sel && MapView.ok) { const c = MapView.units[S.sel].c; MapView.fly(c.map_x, c.map_z, Math.min(MapView.zoom, 44)); }
+  /* 카드가 닫히면 숨겼던 다른 단지·이름표·미분양 점을 다시 보인다 */
+  if (MapView.ok) MapView.paintSel();
 }
 
 /* ─── S1 입력 ─── */
@@ -3815,6 +3855,8 @@ function renderPrio() {
   $$("#prioChips button").forEach(b => b.addEventListener("click", () => { const k = b.dataset.p; prio = prio.includes(k) ? prio.filter(x => x !== k) : [...prio, k]; renderPrio(); formDirty = true; }));
 }
 $("#fillPersona").onclick = () => { fillForm(PERSONA); formDirty = true; };
+/* 부족 금액 예시: 김지훈 예시와 같고 모은 돈만 1,000만 원 (bangbom/CLAUDE.md 페르소나 규칙) */
+$("#fillShort").onclick = () => { fillForm(Object.assign({}, PERSONA, { assets: 1000 })); formDirty = true; };
 /* 칸을 고치면 그 칸의 빨간 알림을 바로 지운다 (다음을 다시 누를 때까지 남아 있으면 맞게 적어도 틀린 것처럼 보인다) */
 $$("#form input").forEach(i => i.addEventListener("input", () => { formDirty = true; const e = $("#e-" + i.id.slice(2)); if (e) e.textContent = ""; }));
 $("#formBack").onclick = () => { S.mode = "browse"; location.hash = "#map"; };
@@ -3958,6 +4000,8 @@ const MapView = {
     });
     new ResizeObserver(() => this.resize()).observe($("#mapWrap"));
     this.resize(); this.applyMode(false); this.ok = true;
+    /* 처음에는 판정 단지와 미분양 점이 다 보이게 줌아웃한다. 왼쪽 패널 자리를 재야 해서 그린 뒤 한 번 더 맞춘다 */
+    this.overview(false); requestAnimationFrame(() => { if (!S.sel) this.overview(false); });
     let t0 = performance.now();
     const loop = t => { const dt = Math.min(.05, (t - t0) / 1000); t0 = t; this.tick(dt, t / 1000); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
@@ -4108,14 +4152,13 @@ const MapView = {
       const c = COMPLEX.find(c => Math.abs(x - c.map_x) < 2.2 && Math.abs(z - c.map_z) < 2.0); if (c) z = c.map_z + (z >= c.map_z ? 2.0 : -2.0); /* 판정 단지 건물에 가려지지 않게 */
       return [x, z]; });
     this.uHits = UNSOLD_LIST.map((u, k) => {
-      const [x, z] = this.uPos[k], d = new T3.Mesh(geo, m); d.position.set(x, 0, z); d.castShadow = true; this.decor.add(d);
+      const [x, z] = this.uPos[k], d = new T3.Mesh(geo, m); d.position.set(x, 0, z); d.castShadow = true; this.decor.add(d); (this.uDots = this.uDots || []).push(d);
       const hit = new T3.Mesh(hg, new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.set(x, 0, z); hit.userData.uk = k; this.scene.add(hit); return hit;
     });
   },
   selectUnsold(k) {
     const [x, z] = this.uPos[k];
-    if (!this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
-    S.sel = null; this.lift(); this.showLines(null);
+    S.sel = null; this.lift(); this.showLines(null); this.paintSel();
     this.fly(x + (isMobile() ? 0 : 1.6), z + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
     openUnsold(k);
   },
@@ -4131,30 +4174,84 @@ const MapView = {
       u.tgt = { browse: 1.0, on: 3.0, dim: 1.0, off: 0 }[light];
       if (animate && light !== "browse") u.cur = 0;
       const off = light === "off";
-      u.wallM.color.set(off ? new T3.Color("#c3c6c4").convertSRGBToLinear() : new T3.Color("#ffffff"));
-      u.bandM.color.set(new T3.Color(off ? "#9DB5B1" : "#1f6b4f").convertSRGBToLinear());
+      /* 기본 색은 paintSel 이 칠한다(고른 단지는 구 색, 나머지는 이 색) */
+      u.baseWall = off ? "#c3c6c4" : null; u.baseBand = off ? "#9DB5B1" : "#1f6b4f";
       const ev = S.evals[id];
       u.lbl.className = "clabel" + (light === "on" ? " is-on" : light === "dim" ? " is-dim" : light === "off" ? " is-off" : "");
       u.lbl.innerHTML = (light !== "browse" ? `<i>${LIGHT_ICON[light]}</i>` : `<i class="b">●</i>`) + esc(u.c.name.replace("(예시)", ""));
     });
-    this.nightT = S.mode === "match" ? 1 : 0;
+    this.nightT = S.mode === "match" ? 1 : 0; this.paintSel();
     if (S.sel && $("#panelR").classList.contains("is-open")) openCard(S.sel);
+  },
+  /* 고른 단지의 구별 선택 색 [벽, 띠·이름표]. 대구 9개 구·군이 모두 서로 구분되는 색을 가진다 (판정 단지 목록에 없는 구·군도 미리 둔다) */
+  GU_PAL: { 달서구: ["#ffb36b", "#d9600f"], 북구: ["#7fb8ff", "#1d5fd1"], 동구: ["#c39bff", "#7034d6"], 수성구: ["#6fe0b0", "#0d8f5c"], 서구: ["#ff8fa8", "#d12e5a"],
+    중구: ["#ffe066", "#b38600"], 남구: ["#6fd9e8", "#0b8a9c"], 달성군: ["#d6c08a", "#8a6d1f"], 군위군: ["#b9c97a", "#5b7016"] },
+  /* 선택 표시: 카드가 열려 있는 동안 고른 단지만 구 색으로 칠하고, 다른 단지·이름표·미분양 점은 숨긴다 */
+  paintSel() {
+    if (!this.units) return;
+    const cardOn = document.body.classList.contains("card-open"), focus = !!S.sel && cardOn;
+    Object.entries(this.units).forEach(([id, u]) => {
+      const sel = id === S.sel, pal = this.GU_PAL[u.c.district] || ["#8fd6ad", "#0f7a4a"];
+      u.g.visible = !(focus && !sel); u.lbl.style.display = focus && !sel ? "none" : "";
+      u.wallM.color.set(sel ? new T3.Color(pal[0]).convertSRGBToLinear() : u.baseWall ? new T3.Color(u.baseWall).convertSRGBToLinear() : new T3.Color("#ffffff"));
+      u.bandM.color.set(new T3.Color(sel ? pal[1] : (u.baseBand || "#1f6b4f")).convertSRGBToLinear());
+      u.lbl.style.background = sel ? pal[1] : ""; u.lbl.style.color = sel ? "#fff" : ""; u.lbl.style.borderColor = sel ? pal[1] : "";
+    });
+    (this.uDots || []).forEach(d => { d.visible = !focus; }); (this.uHits || []).forEach(h => { h.visible = !focus; });
+  },
+  /* P(월드 좌표)가 배율 Z 에서 화면 (dx, dy) 자리에 오게 하는 카메라 target. 카메라는 늘 target + (20,20,20) 에서 내려다본다 */
+  placeAt(P, Z, dx, dy) {
+    const W = innerWidth, H = innerHeight, cam = this.cam;
+    const save = { p: cam.position.clone(), q: cam.quaternion.clone() };
+    cam.position.copy(P).add(new T3.Vector3(20, 20, 20)); cam.lookAt(P); cam.updateMatrixWorld();
+    const r = new T3.Vector3().setFromMatrixColumn(cam.matrixWorld, 0), up = new T3.Vector3().setFromMatrixColumn(cam.matrixWorld, 1), d = new T3.Vector3(-1, -1, -1).normalize();
+    cam.position.copy(save.p); cam.quaternion.copy(save.q); cam.updateMatrixWorld();
+    const T = P.clone().addScaledVector(r, (W / 2 - dx) / Z).addScaledVector(up, (dy - H / 2) / Z);
+    return T.addScaledVector(d, -T.y / d.y);
+  },
+  /* 단지를 카드에 가리지 않는 지도 영역의 가운데로 옮기며 줌인.
+     PC: 오른쪽 카드 왼쪽 영역의 가운데. 휴대폰: 시트가 화면의 3분의 2를 덮으므로 시트 위쪽 지도에 건물이 서게 한다 */
+  flyTo(c) {
+    const W = innerWidth, H = innerHeight, u = this.units[c.id], P = new T3.Vector3(c.map_x, u.top * .5, c.map_z);
+    if (isPhone()) {
+      /* 건물 바닥을 시트 바로 위(시트 위 24px)에 세워서, 건물과 이름표가 위 막대와 시트 사이에 다 들어오게 한다 */
+      const sheetTop = H * .34, Z = clamp((sheetTop - 72 - 74) / 3.02, 30, 44);
+      const T = this.placeAt(new T3.Vector3(c.map_x, 0, c.map_z), Z, W / 2, sheetTop - 24); this.fly(T.x, T.z, Z); return;
+    }
+    const pr = $("#panelR"), Z = clamp(this.zoom, 36, 44);
+    const dx = pr && pr.offsetWidth && pr.offsetLeft > W / 3 ? Math.max(160, pr.offsetLeft / 2) : W / 2;
+    const T = this.placeAt(P, Z, dx, (140 + H) / 2); this.fly(T.x, T.z, Z);
+  },
+  /* 선택 전: 판정 단지와 미분양 점이 모두 보이게 줌아웃. 왼쪽 패널·위 막대(휴대폰은 한 줄 요약·아래 탭)를 피한다.
+     등축 화면 좌표: sx = (x − z)/√2, sy = −(x + z)/√6 (카메라 방향 (1,1,1)) */
+  overview(animate) {
+    if (!this.cam) return;
+    const W = innerWidth, H = innerHeight, pl = $("#panelL"), phone = isPhone();
+    const plOn = pl && !pl.hidden && pl.offsetWidth && getComputedStyle(pl).display !== "none";
+    const left = !phone && plOn ? pl.getBoundingClientRect().right + 24 : 24, right = W - 24;
+    const top = phone ? (plOn ? pl.getBoundingClientRect().bottom + 16 : 190) : 150, bottom = H - (phone ? 130 : 90);
+    /* 휴대폰은 폭이 좁아 미분양 점 60곳까지 넣으면 배율이 10 아래로 떨어진다(예전 처음 배율 17). 휴대폰에서는 판정 단지만 맞추고 점은 끌어서 본다 */
+    const pts = COMPLEX.map(c => [c.map_x, c.map_z]).concat(phone ? [] : this.uPos || []);
+    const xs = pts.map(([x, z]) => (x - z) / Math.SQRT2), ys = pts.map(([x, z]) => -(x + z) / Math.sqrt(6));
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), hTop = 4.6 * Math.sqrt(2 / 3);
+    const Z = clamp(Math.min((right - left) / (x1 - x0 + 3), (bottom - top) / (y1 - y0 + hTop + 2)), 6, 40);
+    const mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + hTop / 2;
+    const P = new T3.Vector3((Math.SQRT2 * mx - Math.sqrt(6) * my) / 2, 0, (-Math.SQRT2 * mx - Math.sqrt(6) * my) / 2);
+    const T = this.placeAt(P, Z, (left + right) / 2, (top + bottom) / 2);
+    this.lastOverviewZoom = Z;
+    if (animate && !REDUCED) this.fly(T.x, T.z, Z); else { this.target.set(T.x, 0, T.z); this.zoom = Z; this.fly0 = null; }
   },
   lift() { Object.entries(this.units).forEach(([id, u]) => u.liftT = (id === S.hover || id === S.sel) ? .05 : 0); },
   fly(x, z, zoom) { this.fly0 = { x, z, zoom: zoom || this.zoom, t: 0, fx: this.target.x, fz: this.target.z, fzoom: this.zoom }; },
   select(id, fly) {
-    if (id && !this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
     S.sel = id; this.lift(); this.showLines(id);
-    if (!id) { if (this.home) { this.fly(this.home.x, this.home.z, this.home.zoom); this.home = null; } return; }
+    /* 카드 X(선택 해제): 다시 전체가 보이게 줌아웃 */
+    if (!id) { this.paintSel(); if (this.ok && fly !== false) this.overview(true); return; }
     if (location.hash !== "#map") location.hash = "#map";
-    const u = this.units[id], c = u.c, m = u.top * .45;
-    if (fly && isPhone()) {
-      /* 휴대폰: 아래 시트가 화면의 3분의 2를 덮으므로, 단지가 시트 위쪽 지도에 보이게 화면 아래 방향으로 그만큼 옮겨서 본다 */
-      /* 건물(높이 약 3.7)과 이름표가 위 막대와 시트 사이에 다 들어오는 배율로 맞춘다 */
-      const sheetTop = innerHeight * .34, zoom = clamp((sheetTop - 72 - 74) / 3.02, 30, 44), dy = innerHeight / 2 - (sheetTop - 24), d = Math.max(0, dy) / zoom / Math.sin(Math.asin(1 / Math.sqrt(3))) / Math.SQRT2;
-      this.fly(c.map_x + d, c.map_z + d, zoom);
-    } else if (fly) this.fly(c.map_x - m + (isMobile() ? 0 : 1.6), c.map_z - m + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
-    openCard(id);
+    const c = this.units[id].c;
+    /* 카드를 먼저 열어야 카드 자리(왼쪽 끝)를 재서 그 밖의 지도 가운데로 옮길 수 있다 */
+    openCard(id); this.paintSel();
+    if (fly) this.flyTo(c);
   },
   showLines(id) {
     while (this.lines.children.length) { const o = this.lines.children.pop(); o.geometry && o.geometry.dispose(); }
@@ -4577,6 +4674,8 @@ window.MH = {
   route(v) { if (v === "map" && S.profile && S.mode !== "match" && !route.seen) S.mode = "match"; route.seen = true; route(v); if (v === "map" && MapView.ok) MapView.applyMode(false); },
   browse() { S.mode = "browse"; if (location.hash === "#map") { route("map"); MapView.applyMode(false); } else location.hash = "#map"; },
   openHouse(cid) { S.sel = cid; location.hash = "#house"; },
+  /* 검사용(읽기만): 지도 배율, 처음 줌아웃 배율, 고른 단지, 숨긴 단지·미분양 점 개수 */
+  mapState() { const us = Object.values(MapView.units || {}); return { ok: !!MapView.ok, zoom: Math.round(MapView.zoom * 10) / 10, overview: MapView.lastOverviewZoom ? Math.round(MapView.lastOverviewZoom * 10) / 10 : null, sel: S.sel, hiddenUnits: us.filter(u => !u.g.visible).length, units: us.length, hiddenDots: (MapView.uDots || []).filter(d => !d.visible).length, dots: (MapView.uDots || []).length, flying: !!MapView.fly0 }; },
   /* 눈높이로 집 보기: "child"(아이) 나 "adult"(어른). 다음에 집 보기를 열 때 room.html 에 view=3d&eye=<mode> 를 붙인다 (한 번 쓰고 지운다).
      이미 집 보기 화면이면 바로 다시 연다. 눈높이 화면 자체는 방 배치 도구(room.html)가 그린다 */
   setEye(mode) {
@@ -4625,6 +4724,7 @@ function route() {
     closeMenu(); updateNav();
     if (window.MH) MH.route(app ? name : null);
     requestAnimationFrame(observeReveals);
+    if (window.BBfp) requestAnimationFrame(BBfp.sync);  /* 풀페이지 점·맨 위로 단추를 지금 화면에 맞춘다 */
   };
   const bigJump = !first && (APP.includes(name) !== APP.includes(prev) || PAGES.includes(name));
   if (bigJump && document.startViewTransition && !REDUCED) document.startViewTransition(swap); else swap();
@@ -4676,12 +4776,12 @@ $$("[data-count]").forEach(el => countIO ? countIO.observe(el) : el.textContent 
 const vidIO = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { const v = e.target; if (e.intersectionRatio >= .35) { if (v.ended) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); } else if (!v.ended) v.pause(); }), { threshold: [0, .35, .6] }) : null;
 $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
 
-/* 비포/애프터 슬라이더 */
+/* 비포/애프터 슬라이더: 화면에 들어올 때마다 한 번 왔다갔다(sweep). 사용자가 한 번 만지면 그 뒤로는 움직이지 않는다 */
 (function () {
   const ba = $("#ba"); if (!ba) return;
-  const range = $(".ba__range", ba); let done = false, touched = false;
+  const range = $(".ba__range", ba); let touched = false, run = 0;
   const set = p => { ba.style.setProperty("--p", p + "%"); range.value = p; };
-  range.addEventListener("input", () => { touched = true; done = true; set(+range.value); });
+  range.addEventListener("input", () => { touched = true; set(+range.value); });
   /* 터치 화면(pointer:coarse)에서는 CSS가 range 의 pointer-events 를 꺼서 여기로 온다: 사진 어디를 잡아도 선이 따라오고,
      세로로 밀면 브라우저가 페이지를 내리며(pointercancel) 선은 그대로 둔다. 마우스 화면에서는 지금처럼 range 입력이 처리한다 */
   let pid = null, x0 = 0, moved = false;
@@ -4691,18 +4791,112 @@ $$("video[data-autoplay]").forEach(v => vidIO && vidIO.observe(v));
     if (e.pointerId !== pid) return;
     if (!moved && Math.abs(e.clientX - x0) < 6) return;
     if (!moved) { moved = true; try { ba.setPointerCapture(pid); } catch (err) {} }
-    touched = true; done = true; set(at(e.clientX));
+    touched = true; set(at(e.clientX));
   });
-  ba.addEventListener("pointerup", e => { if (e.pointerId !== pid) return; if (!moved) { touched = true; done = true; set(at(e.clientX)); } pid = null; });
+  ba.addEventListener("pointerup", e => { if (e.pointerId !== pid) return; if (!moved) { touched = true; set(at(e.clientX)); } pid = null; });
   ba.addEventListener("pointercancel", e => { if (e.pointerId === pid) pid = null; });
-  const io = new IntersectionObserver(es => {
-    if (!es[0].isIntersecting || done) return; io.disconnect(); done = true;
-    if (REDUCED) { set(50); return; }
-    const t0 = performance.now();
-    const step = t => { if (touched) return; const s = (t - t0) / 1000; let p; if (s < 1.8) { const k = s / 1.8; p = 100 - 100 * (k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2); } else { const k = clamp((s - 1.8) / .8, 0, 1); p = 50 * (1 - Math.pow(1 - k, 3)); } set(p); if (s < 2.6) requestAnimationFrame(step); else set(50); };
+  const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  /* 놓은 후(100) 잠깐 → 놓기 전(0)까지 밀고 → 잠깐 → 가운데(50). 돌아가는 중에 화면을 벗어나면 멈추고(run 이 바뀜) 처음 자리로 */
+  const sweep = () => {
+    if (touched) return; if (REDUCED) { set(50); return; }
+    const id = ++run, t0 = performance.now();
+    const step = t => {
+      if (touched || id !== run) return;
+      const s = (t - t0) / 1000;
+      const p = s < .4 ? 100 : s < 2 ? 100 - 100 * ease((s - .4) / 1.6) : s < 2.4 ? 0 : 50 * ease(clamp((s - 2.4) / 1.1, 0, 1));
+      set(p); if (s < 3.5) requestAnimationFrame(step);
+    };
     requestAnimationFrame(step);
-  }, { threshold: .5 });
-  io.observe(ba);
+  };
+  new IntersectionObserver(es => { if (es[0].isIntersecting) sweep(); else if (!touched) { run++; set(100); } }, { threshold: .55 }).observe(ba);
+})();
+
+/* 홈 풀페이지 스크롤: 휠·키보드·터치 밀기 한 번에 한 화면(홈 .hs 6화면 + 푸터). 영상·애니메이션이 끝나길 기다리지 않는다.
+   - 화면보다 긴 화면(해결 1·2·3 등)은 그 안에서 굴린 만큼 내려가고(화면 끝을 넘지 않음), 끝에 닿은 뒤 새로 굴리면 다음 화면으로 간다.
+     넘치는 길이가 섹션 아래 여백(48px)보다 작으면 잘리는 내용이 없으니 한 화면으로 본다.
+   - 900px 이하이거나 높이 560px 미만이면 끄고 일반 스크롤. 메뉴가 열려 있어도 끈다.
+   - 시작하기의 단지 가로 목록(.plans__track)에서 옆으로 미는 것은 막지 않는다 */
+(function () {
+  const dots = $("#fpDots"), top = $("#toTop"); if (!dots || !top) return;
+  const SLACK = 48, LINE = 16;
+  const panels = () => [...$$("#page-home .hs"), $(".footer")];
+  const nameOf = p => p.dataset.hs || "끝";
+  const isDark = p => !!p && (p.classList.contains("hero") || p.classList.contains("footer"));
+  const on = () => current === "home" && innerWidth > 900 && innerHeight >= 560 && !document.body.classList.contains("menu-open");
+  const maxY = () => document.documentElement.scrollHeight - innerHeight;
+  /* k 번째 화면이 차지하는 스크롤 범위 [a, b]. 길지 않은 화면은 a === b */
+  const span = k => {
+    const ps = panels(), p = ps[k], t = Math.round(p.getBoundingClientRect().top + scrollY), h = p.offsetHeight;
+    const a = Math.min(t, maxY()), b = h - innerHeight > SLACK ? Math.min(t + h - innerHeight, maxY()) : a;
+    return [a, k === ps.length - 1 ? maxY() : b];
+  };
+  const idx = () => { const ps = panels(); let k = 0; ps.forEach((p, j) => { if (span(j)[0] <= scrollY + innerHeight * .45) k = j; }); return k; };
+  let busy = false, raf = 0, lastWheel = 0, gestureAt = 0;
+  const paint = k => {
+    const ps = panels(); $$("button", dots).forEach((b, j) => { b.classList.toggle("is-on", j === k); b.toggleAttribute("aria-current", j === k); });
+    dots.classList.toggle("is-light", isDark(ps[k]));
+    nav.classList.toggle("is-dark", current === "home" && isDark(ps[k]) && !nav.classList.contains("is-clear") && !document.body.classList.contains("menu-open"));
+  };
+  const animate = (to, k) => {
+    const from = scrollY, t0 = performance.now(), dur = REDUCED ? 0 : 760;
+    busy = true; cancelAnimationFrame(raf); if (k != null) paint(k);
+    const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const step = t => { const x = dur ? clamp((t - t0) / dur, 0, 1) : 1; scrollTo(0, from + (to - from) * ease(x)); if (x < 1) raf = requestAnimationFrame(step); else busy = false; };
+    if (!dur) { scrollTo(0, to); busy = false; return; }
+    raf = requestAnimationFrame(step);
+  };
+  /* 다른 화면으로: 아래로 갈 때는 그 화면 맨 위, 위로 갈 때는 그 화면 맨 아래(긴 화면이면 끝부분)로 */
+  const go = (k, up) => { const n = panels().length; k = clamp(k, 0, n - 1); const [a, b] = span(k); animate(up ? b : a, k); };
+  /* dy 만큼 내리려 한다. 긴 화면 안이면 그 안에서만 움직이고 true, 끝에 닿아 있으면 false */
+  const inner = dy => {
+    const k = idx(), [a, b] = span(k); if (a === b) return false;
+    if ((dy > 0 && scrollY >= b - 1) || (dy < 0 && scrollY <= a + 1)) return false;
+    cancelAnimationFrame(raf); busy = false; scrollTo(0, clamp(scrollY + dy, a, b)); return true;
+  };
+  /* 한 번의 몸짓(휠·키·밀기): 긴 화면 안이면 그만큼 내리고, 아니면 한 화면 넘긴다 */
+  const move = (dy, fresh) => {
+    if (inner(dy)) { gestureAt = performance.now(); return; }
+    if (busy || !fresh) return;
+    go(idx() + (dy > 0 ? 1 : -1), dy < 0);
+  };
+  dots.innerHTML = panels().map(p => `<button type="button" aria-label="${nameOf(p)}(으)로 이동"><span>${nameOf(p)}</span></button>`).join("");
+  $$("button", dots).forEach((b, j) => b.addEventListener("click", () => go(j)));
+  addEventListener("wheel", e => {
+    if (!on() || e.ctrlKey) return;
+    const tr = e.target.closest && e.target.closest(".plans__track"); if (tr && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    const now = performance.now(), fresh = now - lastWheel > 220 && now - gestureAt > 220; lastWheel = now;
+    if (Math.abs(e.deltaY) < 2) return;
+    move(e.deltaY * (e.deltaMode === 1 ? LINE : e.deltaMode === 2 ? innerHeight : 1), fresh);
+  }, { passive: false });
+  addEventListener("keydown", e => {
+    if (!on() || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName || "") || e.target.isContentEditable) return;
+    if (e.key === "Home" || e.key === "End") { e.preventDefault(); go(e.key === "Home" ? 0 : panels().length - 1); return; }
+    if (e.key === " " && e.target.closest && e.target.closest("button,a")) return;
+    const page = innerHeight * .85, d = { ArrowDown: 120, ArrowUp: -120, PageDown: page, PageUp: -page, " ": e.shiftKey ? -page : page }[e.key];
+    if (!d) return; e.preventDefault(); move(d, true);
+  });
+  let t0 = null;
+  addEventListener("touchstart", e => { t0 = on() ? { x: e.touches[0].clientX, y: e.touches[0].clientY, y1: e.touches[0].clientY, track: !!(e.target.closest && e.target.closest(".plans__track")), side: false } : null; }, { passive: true });
+  addEventListener("touchmove", e => {
+    if (!t0 || !on()) return;
+    const x = e.touches[0].clientX, y = e.touches[0].clientY;
+    if (t0.track && Math.abs(x - t0.x) > Math.abs(y - t0.y)) { t0.side = true; return; }   /* 단지 목록 옆으로 밀기는 그대로 */
+    e.preventDefault(); if (inner(t0.y1 - y)) gestureAt = performance.now(); t0.y1 = y;  /* 긴 화면 안에서는 손가락을 따라 내려간다 */
+  }, { passive: false });
+  addEventListener("touchend", e => {
+    if (!t0) return; const s = t0; t0 = null; if (s.side) return;
+    const d = s.y - e.changedTouches[0].clientY;
+    if (Math.abs(d) > 40 && performance.now() - gestureAt > 120) move(d > 0 ? 1 : -1, true);
+  });
+  top.addEventListener("click", () => { if (on()) go(0); else scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); });
+  const sync = () => {
+    document.body.classList.toggle("fp-on", on());
+    top.classList.toggle("is-on", current === "home" && scrollY + innerHeight >= document.documentElement.scrollHeight - 160);
+    if (current !== "home") nav.classList.remove("is-dark"); else if (!busy) paint(idx());
+  };
+  addEventListener("scroll", sync, { passive: true }); addEventListener("resize", sync); addEventListener("hashchange", () => setTimeout(sync, 50));
+  window.BBfp = { sync, go, idx: () => idx() }; sync();
 })();
 
 /* How it helps 탭 */
