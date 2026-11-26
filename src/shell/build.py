@@ -185,6 +185,10 @@ body.card-open #mh .pills-r{display:none}
 #mh .rlabel{font-size:12px;font-weight:600;background:rgba(255,255,255,.88);border-radius:999px;padding:3px 9px}
 #mh .dimlabel{color:var(--green);background:transparent;font-weight:600}
 #mh .toast{background:var(--ink)}
+#mh .hv-side-open{position:absolute;right:var(--pad-x);top:120px;z-index:4;display:none}
+#mh #houseView.side-closed .hv-side{display:none}
+#mh #houseView.side-closed .hv-side-open{display:inline-flex;align-items:center}
+#mh #houseView.side-closed .rooms-bar{max-width:calc(100% - 32px)}
 
 
 /* ── 2차 디렉팅 ── */

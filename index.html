@@ -998,6 +998,10 @@ body.card-open #mh .pills-r{display:none}
 #mh .rlabel{font-size:12px;font-weight:600;background:rgba(255,255,255,.88);border-radius:999px;padding:3px 9px}
 #mh .dimlabel{color:var(--green);background:transparent;font-weight:600}
 #mh .toast{background:var(--ink)}
+#mh .hv-side-open{position:absolute;right:var(--pad-x);top:120px;z-index:4;display:none}
+#mh #houseView.side-closed .hv-side{display:none}
+#mh #houseView.side-closed .hv-side-open{display:inline-flex;align-items:center}
+#mh #houseView.side-closed .rooms-bar{max-width:calc(100% - 32px)}
 
 
 /* ── 2차 디렉팅 ── */
@@ -2632,7 +2636,7 @@ const House = {
           drag.it.cx = Math.round((p.x + this.L.W / 2) * 10) / 10; drag.it.cz = Math.round((p.z + this.L.D / 2) * 10) / 10; this.placeMesh(drag.it); return;
         }
         if (this.cam === "bird") { this.orbit.th -= dx * .006; this.orbit.ph = clamp(this.orbit.ph - dy * .005, Math.PI / 2 - 70 * Math.PI / 180, Math.PI / 2 - 25 * Math.PI / 180); }
-        else if (this.cam === "inside") { this.look.yaw -= dx * .005; this.look.pitch = clamp(this.look.pitch - dy * .004, -.9, .6); }
+        else if (this.cam === "inside") { if (this.lookTo) this.lookTo.t = 1; this.look.yaw -= dx * .005; this.look.pitch = clamp(this.look.pitch - dy * .004, -.9, .6); }
       },
       up: () => {
         if (!drag) return; const it = drag.it;
@@ -2648,6 +2652,8 @@ const House = {
     $$("[data-cam]").forEach(b => b.addEventListener("click", () => this.setCam(b.dataset.cam)));
     $$("[data-hv]").forEach(b => b.addEventListener("click", () => { this.tab = b.dataset.hv; this.renderSide(); }));
     $("#hvBack").onclick = () => { location.hash = "#map"; };
+    const sideBtn = document.createElement("button"); sideBtn.className = "btn btn--sm hv-side-open"; sideBtn.id = "hvSideOpen"; sideBtn.textContent = "가구 패널 열기"; $("#houseView").appendChild(sideBtn);
+    sideBtn.onclick = () => $("#houseView").classList.remove("side-closed");
     $("#selRot").onclick = () => this.rotateSel(); $("#selDel").onclick = () => this.removeSel();
     const loop = () => { if ($("#houseView").classList.contains("is-on")) this.tick(); requestAnimationFrame(loop); }; requestAnimationFrame(loop);
   },
@@ -2669,7 +2675,7 @@ const House = {
   build() {
     if (this.root) { this.scene.remove(this.root); this.root.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
     const L = this.L, root = this.root = new T3.Group(); root.position.set(-L.W / 2, 0, -L.D / 2); this.scene.add(root);
-    const base = box(L.W + .5, .22, L.D + .5, mat("#e7e4dc")); base.position.set(L.W / 2, -.1, L.D / 2); root.add(base);
+    const base = box(L.W + .5, .22, L.D + .5, mat("#e7e4dc")); base.position.set(L.W / 2, -.115, L.D / 2) /* 윗면이 바닥(0.004)보다 아래 */; root.add(base);
     L.rooms.forEach(r => { const f = new T3.Mesh(new T3.PlaneGeometry(r.w, r.d), mat(r.type === "bath" ? "#e4e5e1" : r.type === "hall" || r.type === "dress" ? "#dcd6cb" : "#d9bf98", { roughness: .75 })); f.rotation.x = -Math.PI / 2; f.position.set(r.x + r.w / 2, .004, r.z + r.d / 2); f.receiveShadow = true; root.add(f); });
     this.walls = new T3.Group(); this.front = new T3.Group(); root.add(this.walls); root.add(this.front);
     const wm = mat("#f6f3ec"), capM = mat("#1f6b4f", { roughness: .6 }), glass = new T3.MeshStandardMaterial({ color: 0xcfe0dc, transparent: true, opacity: .3, depthWrite: false });
@@ -2753,11 +2759,22 @@ const House = {
       const rooms = this.L.rooms.filter(r => !["bath", "hall", "dress"].includes(r.type));
       rb.innerHTML = rooms.map(r => `<button class="chip" data-room="${r.id}">${esc(r.name)}</button>`).join("");
       $$("[data-room]").forEach(b => b.onclick = () => this.goRoom(b.dataset.room));
-      this.goRoom((rooms.find(r => r.type === "living") || rooms[0]).id);
+      this.goRoom((rooms.find(r => r.type === "living") || rooms[0]).id, true);
     }
+    $("#houseView").classList.toggle("side-closed", c === "inside");
     this.camT = 0; this.labels();
   },
-  goRoom(id) { const r = this.L.rooms.find(x => x.id === id); this.look.x = r.x + r.w / 2; this.look.z = r.z + r.d / 2; this.look.yaw = r.type === "living" ? Math.PI : 0; this.look.pitch = -.12; $$("[data-room]").forEach(b => b.classList.toggle("is-on", b.dataset.room === id)); },
+  goRoom(id, now) {
+    const r = this.L.rooms.find(x => x.id === id), m = Math.min(.45, r.w / 4, r.d / 4), cx = r.x + r.w / 2, cz = r.z + r.d / 2;
+    /* 긴 방향으로 맞은편을 봐요. 서는 자리에 키 큰 가구(1.4m 넘음)가 있으면 반대쪽에 서요 */
+    const opts = r.w >= r.d ? [[r.x + m, cz, -Math.PI / 2], [r.x + r.w - m, cz, Math.PI / 2], [cx, r.z + m, Math.PI], [cx, r.z + r.d - m, 0]] : [[cx, r.z + m, Math.PI], [cx, r.z + r.d - m, 0], [r.x + m, cz, -Math.PI / 2], [r.x + r.w - m, cz, Math.PI / 2]];
+    const free = ([x, z]) => !this.items.some(it => it.h > 1.4 && Math.abs(x - it.cx) < it.w / 2 + .3 && Math.abs(z - it.cz) < it.d / 2 + .3);
+    const [x, z, yaw] = opts.find(free) || opts[0];
+    let dy = yaw - this.look.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+    this.lookTo = { fx: this.look.x, fz: this.look.z, fy: this.look.yaw, fp: this.look.pitch, x, z, yaw: this.look.yaw + dy, pitch: -.18, t: now ? 1 : 0 };
+    if (now) Object.assign(this.look, { x, z, yaw, pitch: -.18 });
+    $$("[data-room]").forEach(b => b.classList.toggle("is-on", b.dataset.room === id));
+  },
   curCam() { return this.cam === "plan" ? this.ortho : this.persp; },
   resize() {
     if (!this.ok) return; const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); this.persp.aspect = w / h; this.persp.updateProjectionMatrix();
@@ -2789,9 +2806,10 @@ const House = {
       if (cam.fov !== 38) { cam.fov = 38; cam.updateProjectionMatrix(); }
       cam.setViewOffset(innerWidth, innerHeight, mob ? 0 : 190, mob ? innerHeight * .22 : 0, innerWidth, innerHeight);
     } else {
-      cam = this.persp; cam.clearViewOffset(); cam.up.set(0, 1, 0); cam.position.set(this.look.x - L.W / 2, 1.6, this.look.z - L.D / 2); cam.rotation.set(this.look.pitch, this.look.yaw, 0); if (cam.fov !== 72) { cam.fov = 72; cam.updateProjectionMatrix(); }
+      const f = this.lookTo; if (f && f.t < 1) { f.t = Math.min(1, f.t + 1 / 60 / .8); const k = 1 - Math.pow(1 - f.t, 3); Object.assign(this.look, { x: f.fx + (f.x - f.fx) * k, z: f.fz + (f.z - f.fz) * k, yaw: f.fy + (f.yaw - f.fy) * k, pitch: f.fp + (f.pitch - f.fp) * k }); }
+      cam = this.persp; cam.clearViewOffset(); cam.up.set(0, 1, 0); cam.position.set(this.look.x - L.W / 2, 1.6, this.look.z - L.D / 2); cam.rotation.set(this.look.pitch, this.look.yaw, 0); if (cam.fov !== 70) { cam.fov = 70; cam.updateProjectionMatrix(); }
     }
-    $$(".rlabel,.dimlabel", $("#hvLbl")).forEach(el => { const p = new T3.Vector3(+el.dataset.x - L.W / 2, .05, +el.dataset.z - L.D / 2).project(cam); el.style.left = (p.x + 1) / 2 * innerWidth + "px"; el.style.top = (1 - p.y) / 2 * innerHeight + "px"; el.style.display = (el.classList.contains("dimlabel") && this.cam !== "plan") ? "none" : ""; });
+    $$(".rlabel,.dimlabel", $("#hvLbl")).forEach(el => { const p = new T3.Vector3(+el.dataset.x - L.W / 2, this.cam === "bird" && el.classList.contains("rlabel") ? L.H * .55 : .05, +el.dataset.z - L.D / 2).project(cam); el.style.left = (p.x + 1) / 2 * innerWidth + "px"; el.style.top = (1 - p.y) / 2 * innerHeight + "px"; el.style.display = (el.classList.contains("dimlabel") && this.cam !== "plan") ? "none" : ""; });
     this.r.render(this.scene, cam);
   }
 };
