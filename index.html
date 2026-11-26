@@ -2356,7 +2356,7 @@ const MapView = {
   resize() { const w = innerWidth, h = innerHeight; this.r.setSize(w, h, false); Object.assign(this.cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 }); this.cam.updateProjectionMatrix(); },
   blocked(x, z, pad) {
     if (!inGeo(x, z, GEO.outline)) return true;
-    for (const c of COMPLEX) if (Math.abs(x - c.map_x) < 1.7 + pad && Math.abs(z - c.map_z) < 1.5 + pad) return true;
+    for (const c of COMPLEX) if (Math.abs(x - c.map_x) < 2.0 + pad && Math.abs(z - c.map_z) < 1.8 + pad) return true;
     for (const i of INFRA) if (Math.hypot(x - i.map_x, z - i.map_z) < (i.category === "park" ? 1.4 : .9)) return true;
     if (GEO.lakes.some(([lx, lz, rx, rz]) => ((x - lx) / (rx + .5)) ** 2 + ((z - lz) / (rz + .5)) ** 2 < 1)) return true;
     const near = (list, extra) => list.some(r => { for (let k = 0; k < r.pts.length - 1; k++) if (segD(x, z, r.pts[k], r.pts[k + 1]) < r.w / 2 + extra) return true; return false; });
@@ -2419,15 +2419,15 @@ const MapView = {
     const rnd = seeded("daegu-v5"), apt = [], low = [], field = [], CW = 2.0, CD = 1.7;
     for (let gx = -11; gx < 34; gx++) for (let gz = -12; gz < 40; gz++) {
       const cx = gx * CW + CW / 2, cz = gz * CD + CD / 2;
-      if (!inGeo(cx, cz, GEO.urban) || rnd() < .3) continue;
+      if (!inGeo(cx, cz, GEO.urban) || rnd() < .3 || rnd() < .5) continue;
       const free = (x, z, pad) => !this.blocked(x, z, pad) && inGeo(x, z, GEO.urban) && !COMPLEX.some(u => Math.hypot(x - u.map_x, z - u.map_z) < 3.2); /* 바닥 지도 위에는 예시 블록을 두지 않음 */
       const kind = rnd(), dense = Math.max(0, 1 - Math.hypot(cx - 18, cz - 13) / 22);
       if (kind < .36 + dense * .2) {
-        const rows = 2 + Math.floor(rnd() * 2), hgt = .3 + rnd() * .28 + dense * .2;
+        const rows = 2 + Math.floor(rnd() * 2), hgt = (.3 + rnd() * .28 + dense * .2) * .6;
         for (let r = 0; r < rows; r++) { const z = cz - CD * .3 + r * (CD * .6 / Math.max(1, rows - 1)); for (const x of [cx - .45, cx + .45]) if (free(x, z, .15)) apt.push([x, z, .78, .24, hgt * (.85 + rnd() * .3)]); }
       } else if (kind < .9) {
-        for (let k = 0; k < 7; k++) { const x = cx + (rnd() - .5) * CW * .8, z = cz + (rnd() - .5) * CD * .8; if (free(x, z, .1)) low.push([x, z, .22 + rnd() * .2, .2 + rnd() * .18, .08 + rnd() * .1]); }
-      } else if (free(cx, cz, .5)) { field.push([cx - .25, cz]); apt.push([cx + .55, cz, .26, .9, .3]); }
+        for (let k = 0; k < 7; k++) { const x = cx + (rnd() - .5) * CW * .8, z = cz + (rnd() - .5) * CD * .8; if (free(x, z, .1)) low.push([x, z, .22 + rnd() * .2, .2 + rnd() * .18, (.08 + rnd() * .1) * .7]); }
+      } else if (free(cx, cz, .5)) { field.push([cx - .25, cz]); apt.push([cx + .55, cz, .26, .9, .18]); }
     }
     const inst = (arr, color) => {
       const geo = new T3.BoxGeometry(1, 1, 1); geo.translate(0, .5, 0);
@@ -2435,7 +2435,7 @@ const MapView = {
       arr.forEach((b, i) => { m.compose(new T3.Vector3(b[0], 0, b[1]), q, new T3.Vector3(b[2], b[4], b[3])); im.setMatrixAt(i, m); });
       im.castShadow = true; im.receiveShadow = true; this.decor.add(im);
     };
-    inst(apt, "#e4e5e2"); inst(low, "#dddcd8");
+    inst(apt, "#eeeeec"); inst(low, "#ebeae7");
     field.forEach(([x, z]) => { const f = rbox(1.0, .02, 1.1, .3, mat("#e2d9c8")); f.position.set(x, 0, z); f.castShadow = false; this.decor.add(f); });
   },
   buildLandmarks() {
@@ -2457,33 +2457,35 @@ const MapView = {
   buildUnits() {
     COMPLEX.forEach(c => {
       const g = new T3.Group(); g.position.set(c.map_x, 0, c.map_z); this.scene.add(g);
-      const rim = rbox(2.7, .03, 2.2, .3, mat("#d9e8de")); g.add(rim); const site = rbox(2.5, .05, 2.0, .25, mat("#f7f2e8")); g.add(site);
+      const rim = rbox(3.3, .03, 2.8, .3, mat("#d9e8de")); g.add(rim); const site = rbox(3.1, .05, 2.6, .25, mat("#f7f2e8")); g.add(site);
       const rnd = seeded(c.id), n = 3 + (rnd() > .5 ? 1 : 0), L = rnd() > .5;
       const wallTex = windowTexture(c.id, 1, false);
       const em = { browse: windowTexture(c.id, .4, true), on: windowTexture(c.id, .7, true), dim: windowTexture(c.id, .3, true) };
       const wallM = new T3.MeshStandardMaterial({ color: 0xffffff, map: wallTex, roughness: .9, emissive: new T3.Color("#FFC46B").convertSRGBToLinear(), emissiveMap: em.browse, emissiveIntensity: 1.2 });
       const roofM = new T3.MeshStandardMaterial({ color: new T3.Color("#FFF1D6").convertSRGBToLinear(), roughness: .9 });
       const bandM = new T3.MeshStandardMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), roughness: .8 });
-      const blds = new T3.Group(); g.add(blds);
+      const blds = new T3.Group(); g.add(blds); let top = 0;
       for (let k = 0; k < n; k++) {
-        const h = 2.7 + rnd() * 1.1, x = L && k === n - 1 ? .7 : -.85 + k * (1.7 / (n - (L ? 2 : 1) || 1)), z = L && k === n - 1 ? .35 : -.3;
-        const b = new T3.Mesh(new T3.BoxGeometry(.5, h, .8), [wallM, wallM, roofM, roofM, wallM, wallM]); b.castShadow = true; b.receiveShadow = true;
+        const h = (2.7 + rnd() * 1.1) * 2.5, x = L && k === n - 1 ? .95 : -1.05 + k * (2.1 / (n - (L ? 2 : 1) || 1)), z = L && k === n - 1 ? .45 : -.4;
+        const b = new T3.Mesh(new T3.BoxGeometry(.62, h, 1.0), [wallM, wallM, roofM, roofM, wallM, wallM]); b.castShadow = true; b.receiveShadow = true;
         if (L && k === n - 1) b.rotation.y = Math.PI / 2;
-        b.position.set(clamp(x, -.85, .85), h / 2 + .05, z); blds.add(b);
-        const t = .05, y = h + .07, bw = .5, bd = .8, rot = b.rotation.y;
+        b.position.set(clamp(x, -1.05, 1.05), h / 2 + .05, z); blds.add(b); top = Math.max(top, h);
+        const t = .06, y = h + .07, bw = .62, bd = 1.0, rot = b.rotation.y;
         const band = new T3.Group(); band.position.set(b.position.x, y, b.position.z); band.rotation.y = rot;
         [[0, -bd / 2 + t / 2, bw, t], [0, bd / 2 - t / 2, bw, t], [-bw / 2 + t / 2, 0, t, bd], [bw / 2 - t / 2, 0, t, bd]].forEach(([px, pz, w, d]) => { const m = new T3.Mesh(new T3.BoxGeometry(w, .05, d), bandM); m.position.set(px, 0, pz); band.add(m); });
         blds.add(band);
         const crown = new T3.Mesh(new T3.BoxGeometry(bw * .55, .22, bd * .4), bandM); crown.position.set(b.position.x, h + .16, b.position.z); crown.rotation.y = rot; blds.add(crown);
       }
-      const beam = new T3.Mesh(new T3.CylinderGeometry(1.05, 1.25, 9, 32, 1, true), new T3.MeshBasicMaterial({ map: beamTex(), color: 0xffc46b, transparent: true, opacity: 0, blending: T3.AdditiveBlending, depthWrite: false, side: T3.DoubleSide })); beam.position.y = 4.6; beam.renderOrder = 3; g.add(beam);
-      const glow = new T3.Sprite(new T3.SpriteMaterial({ map: glowTex(), color: 0xffc46b, blending: T3.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 })); glow.scale.set(5, 5, 1); glow.position.y = 1; g.add(glow);
-      const ring = new T3.Mesh(new T3.RingGeometry(1.4, 1.5, 48), new T3.MeshBasicMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), transparent: true, opacity: 0, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .05; g.add(ring);
-      const sq = new T3.LineSegments(new T3.EdgesGeometry(new T3.PlaneGeometry(2.9, 2.4)), new T3.LineDashedMaterial({ color: new T3.Color("#9a6a1f").convertSRGBToLinear(), dashSize: .14, gapSize: .1, transparent: true, opacity: 0 })); sq.rotation.x = -Math.PI / 2; sq.position.y = .05; sq.computeLineDistances(); g.add(sq);
-      const hit = new T3.Mesh(new T3.BoxGeometry(2.6, 4.2, 2.2), new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.y = 1.8; hit.userData.id = c.id; g.add(hit);
+      const beam = new T3.Mesh(new T3.CylinderGeometry(1.3, 1.55, 22, 32, 1, true), new T3.MeshBasicMaterial({ map: beamTex(), color: 0xffc46b, transparent: true, opacity: 0, blending: T3.AdditiveBlending, depthWrite: false, side: T3.DoubleSide })); beam.position.y = 11; beam.renderOrder = 3; g.add(beam);
+      const glow = new T3.Sprite(new T3.SpriteMaterial({ map: glowTex(), color: 0xffc46b, blending: T3.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 })); glow.scale.set(6.5, 6.5, 1); glow.position.y = 1.4; g.add(glow);
+      const ring = new T3.Mesh(new T3.RingGeometry(1.75, 1.88, 48), new T3.MeshBasicMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), transparent: true, opacity: 0, depthWrite: false })); ring.rotation.x = -Math.PI / 2; ring.position.y = .05; g.add(ring);
+      const ring0 = new T3.Mesh(new T3.RingGeometry(1.75, 1.95, 48), new T3.MeshBasicMaterial({ color: new T3.Color("#1f6b4f").convertSRGBToLinear(), transparent: true, opacity: 0, depthWrite: false })); ring0.rotation.x = -Math.PI / 2; ring0.position.y = .06; g.add(ring0);
+      const sq = new T3.LineSegments(new T3.EdgesGeometry(new T3.PlaneGeometry(3.5, 3.0)), new T3.LineDashedMaterial({ color: new T3.Color("#9a6a1f").convertSRGBToLinear(), dashSize: .14, gapSize: .1, transparent: true, opacity: 0 })); sq.rotation.x = -Math.PI / 2; sq.position.y = .05; sq.computeLineDistances(); g.add(sq);
+      /* 클릭 대상: 동 묶음 전체를 덮는 보이지 않는 박스 */
+      const hit = new T3.Mesh(new T3.BoxGeometry(3.6, top + 1, 3.2), new T3.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })); hit.position.y = (top + 1) / 2; hit.userData.id = c.id; g.add(hit);
       const lbl = document.createElement("button"); lbl.className = "clabel"; lbl.setAttribute("aria-label", c.name + " 카드 열기");
       lbl.addEventListener("click", () => this.select(c.id, true)); $("#lblLayer").appendChild(lbl);
-      this.units[c.id] = { c, g, blds, wallM, roofM, bandM, em, glow, beam, ring, sq, hit, lbl, cur: 1.2, tgt: 1.2, delay: 0, light: "browse", lift: 0 };
+      this.units[c.id] = { c, g, blds, wallM, roofM, bandM, em, glow, beam, ring, ring0, top, sq, hit, lbl, cur: 1.2, tgt: 1.2, delay: 0, light: "browse", lift: 0 };
     });
   },
   applyMode(animate) {
@@ -2498,7 +2500,7 @@ const MapView = {
       u.tgt = { browse: 1.0, on: 3.0, dim: 1.0, off: 0 }[light];
       if (animate && light !== "browse") u.cur = 0;
       const off = light === "off";
-      u.wallM.color.set(off ? new T3.Color("#b4b8b7").convertSRGBToLinear() : new T3.Color("#ffffff"));
+      u.wallM.color.set(off ? new T3.Color("#c3c6c4").convertSRGBToLinear() : new T3.Color("#ffffff"));
       u.bandM.color.set(new T3.Color(off ? "#9DB5B1" : "#1f6b4f").convertSRGBToLinear());
       const ev = S.evals[id];
       u.lbl.className = "clabel" + (light === "on" ? " is-on" : light === "dim" ? " is-dim" : light === "off" ? " is-off" : "");
@@ -2510,10 +2512,12 @@ const MapView = {
   lift() { Object.entries(this.units).forEach(([id, u]) => u.liftT = (id === S.hover || id === S.sel) ? .05 : 0); },
   fly(x, z, zoom) { this.fly0 = { x, z, zoom: zoom || this.zoom, t: 0, fx: this.target.x, fz: this.target.z, fzoom: this.zoom }; },
   select(id, fly) {
+    if (id && !this.home) this.home = { x: this.target.x, z: this.target.z, zoom: this.zoom };
     S.sel = id; this.lift(); this.showLines(id);
-    if (!id) return;
+    if (!id) { if (this.home) { this.fly(this.home.x, this.home.z, this.home.zoom); this.home = null; } return; }
     if (location.hash !== "#map") location.hash = "#map";
-    const c = this.units[id].c; if (fly) this.fly(c.map_x + (isMobile() ? 0 : 1.2), c.map_z + (isMobile() ? 2.2 : 0), Math.max(this.zoom, 44));
+    /* 동 중간 높이가 화면 가운데 오게: 등각 시점에서 높이 H는 바닥 (x-H, z-H)와 겹쳐 보여요 */
+    const u = this.units[id], c = u.c, m = u.top * .45; if (fly) this.fly(c.map_x - m + (isMobile() ? 0 : 1.6), c.map_z - m + (isMobile() ? 2.2 : 0), clamp(this.zoom, 36, 44));
     openCard(id);
   },
   showLines(id) {
@@ -2546,23 +2550,31 @@ const MapView = {
     Object.values(this.units).forEach(u => {
       if (now >= u.delay) u.cur += (u.tgt - u.cur) * Math.min(1, dt * 6);
       let e = u.cur;
-      if (u.light === "dim") e = .6 + .8 * (.5 + .5 * Math.sin(time * Math.PI * 2 / 1.6));
+      if (u.light === "dim") e = .3 + 1.3 * (.5 + .5 * Math.sin(time * Math.PI * 2 / 3));
       u.wallM.emissiveIntensity = e * (now >= u.delay ? 1 : 0);
       u.beam.material.opacity = u.light === "on" ? (.22 + .08 * Math.sin(time * 2.4)) * Math.min(1, u.cur / 3) : 0;
       u.glow.material.opacity = u.light === "on" ? .8 * Math.min(1, u.cur / 3) : u.light === "dim" ? .25 * (e / 1.4) : u.light === "browse" ? .18 : 0;
       if (u.light === "on" && !REDUCED) { const p = (time % 1.8) / 1.8; u.ring.scale.setScalar(.8 + p * .6); u.ring.material.opacity = .7 * (1 - p); } else u.ring.material.opacity = 0;
+      u.ring0.material.opacity = u.light === "on" ? .9 : 0;
       u.sq.material.opacity = u.light === "dim" ? .5 : 0;
       u.lift = (u.lift || 0) + ((u.liftT || 0) - (u.lift || 0)) * Math.min(1, dt * 10); u.blds.position.y = u.lift;
-      const p = this.project(new T3.Vector3(u.c.map_x, 4.3, u.c.map_z)); const far = this.zoom < 18; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
+      const p = this.project(new T3.Vector3(u.c.map_x, u.top + .6, u.c.map_z)); const far = this.zoom < 18; u.lbl.classList.toggle("is-sel", S.sel === u.c.id && document.body.classList.contains("card-open"));
       u.lbl.style.left = p.x + "px"; u.lbl.style.top = p.y + "px"; u.lbl.classList.toggle("is-dot", far); const focus = this.lineFor && S.sel; u.lbl.classList.toggle("is-faint", !!focus && focus !== u.c.id);
     });
     const near = this.zoom >= 30;
     this.lines.visible = near;
     if (this.lineFor) {
-      this.lineT = Math.min(1, this.lineT + dt / .4);
+      if (!this.fly0) this.lineT = Math.min(1, this.lineT + dt / .4); /* 줌인이 끝난 뒤에 선을 그려요 */
       this.lines.children.forEach(m => m.geometry.setDrawRange(0, Math.floor(m.userData.count * this.lineT / 3) * 3));
     }
-    $$(".ilabel,.score-badge", $("#lblLayer")).forEach(el => { const p = this.project(el._p); el.style.left = p.x + "px"; el.style.top = p.y + "px"; el.style.opacity = near && this.lineT >= 1 ? 1 : 0; el.style.visibility = near ? "visible" : "hidden"; });
+    /* 시설 라벨: 겹치면 위아래로 밀어내요 */
+    const placed = [];
+    $$(".ilabel,.score-badge", $("#lblLayer")).map(el => ({ el, p: this.project(el._p), w: el.offsetWidth + 6, h: el.offsetHeight + 4 })).sort((a, b) => a.p.y - b.p.y).forEach(o => {
+      let y = o.p.y;
+      for (let k = 0; k < placed.length; k++) { const q = placed[k]; if (Math.abs(o.p.x - q.x) < (o.w + q.w) / 2 && Math.abs(y - q.y) < (o.h + q.h) / 2) { y = q.y + (o.h + q.h) / 2 + 1; k = -1; } } /* +1: 소수점 오차로 같은 자리에서 다시 겹치지 않게 */
+      placed.push({ x: o.p.x, y, w: o.w, h: o.h });
+      const el = o.el; el.style.left = o.p.x + "px"; el.style.top = y + "px"; el.style.opacity = near && this.lineT >= 1 ? 1 : 0; el.style.visibility = near ? "visible" : "hidden";
+    });
     this.r.render(this.scene, this.cam);
   }
 };
