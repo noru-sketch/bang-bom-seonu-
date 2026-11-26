@@ -54,7 +54,7 @@
         <div class="sf-result__houses">${lights.map(({ c, e }) => house(e.light, `${c.name.replace("(예시)", "").trim()} · ${LIGHT_KO[e.light]}`)).join("")}</div>
         <p class="sf-result__n"><span><i class="jd-dot jd-dot--on" aria-hidden="true"></i>${LIGHT_KO.on} <b>${n.on}</b></span><span><i class="jd-dot jd-dot--dim" aria-hidden="true"></i>${LIGHT_KO.dim} <b>${n.dim}</b></span><span><i class="jd-dot jd-dot--off" aria-hidden="true"></i>${LIGHT_KO.off} <b>${n.off}</b></span></p>
       </div>
-      <p class="sf-foot reveal">모르는 건 24시간 상담으로 물어보세요. <a href="#input" class="link">내 조건 넣고 판정 보기 →</a></p>`;
+      <p class="sf-foot reveal">모르는 건 24시간 상담으로 물어보세요. <a href="#input" class="link">내 조건 넣기 →</a></p>`;
   }
 
   /* 5. 시작하기: 단지 카드. 그림은 지도에 까는 단지 주변 지도(img/map/<id>.jpg, OpenStreetMap 재해석)이고 가운데가 단지 자리다.
