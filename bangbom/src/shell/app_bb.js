@@ -118,7 +118,7 @@ function renderPanels() {
         <p class="jp-sec">지원</p>${S.pr.policies.map(row).join("")}
       </div>
       <div class="bar3" aria-hidden="true"><span style="width:${n.on / tot * 100}%;background:var(--teal)"></span><span style="width:${n.dim / tot * 100}%;background:var(--glow)"></span><span style="width:${n.off / tot * 100}%;background:#CFCAC1"></span></div>
-      <p class="bar3-txt"><i class="jd-dot jd-dot--on" aria-hidden="true"></i> 요건 충족 ${n.on} · <i class="jd-dot jd-dot--dim" aria-hidden="true"></i> 확인 필요 ${n.dim} · <i class="jd-dot jd-dot--off" aria-hidden="true"></i> <span class="muted">미충족 ${n.off}</span></p>
+      <p class="bar3-txt"><span><i class="jd-dot jd-dot--on" aria-hidden="true"></i> 요건 충족 ${n.on}</span> · <span><i class="jd-dot jd-dot--dim" aria-hidden="true"></i> 확인 필요 ${n.dim}</span> · <span class="muted"><i class="jd-dot jd-dot--off" aria-hidden="true"></i> 미충족 ${n.off}</span></p>
       ${(() => { if (n.on) return ""; const hs = openHints(S.profile); return hs.length ? `<div class="jp-open"><b>이렇게 하면 열려요</b><ul>${hs.map(h => `<li>${h}</li>`).join("")}</ul><p>판정 규칙으로 조건만 바꿔 다시 계산한 값이에요.</p></div>` : ""; })()}
       <div class="jp-btns"><button class="btn btn--ghost btn--sm m-only" id="jpEdit">조건 바꾸기</button><button class="btn btn--ghost btn--sm m-only" id="jpBrowse">둘러보기 모드</button><button class="btn btn--sm" id="jpConsult">상담 이어가기 →</button></div></div>`;
     $$(".jp-row").forEach(r => { const t = () => r.classList.toggle("is-open"); r.addEventListener("click", t); r.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); t(); } }); });
@@ -689,7 +689,8 @@ const MapView = {
     if (!this.units) return;
     const cardOn = document.body.classList.contains("card-open"), focus = !!S.sel && cardOn;
     Object.entries(this.units).forEach(([id, u]) => {
-      const sel = id === S.sel, pal = this.GU_PAL[u.c.district] || ["#8fd6ad", "#0f7a4a"];
+      /* 선택 색은 카드가 열려 있을 때만 (카드를 닫고 다른 화면에 다녀와도 예전 선택이 칠해져 남지 않게) */
+      const sel = id === S.sel && cardOn, pal = this.GU_PAL[u.c.district] || ["#8fd6ad", "#0f7a4a"];
       u.g.visible = !(focus && !sel); u.lbl.style.display = focus && !sel ? "none" : "";
       u.wallM.color.set(sel ? new T3.Color(pal[0]).convertSRGBToLinear() : u.baseWall ? new T3.Color(u.baseWall).convertSRGBToLinear() : new T3.Color("#ffffff"));
       u.bandM.color.set(new T3.Color(sel ? pal[1] : (u.baseBand || "#1f6b4f")).convertSRGBToLinear());

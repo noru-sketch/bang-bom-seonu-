@@ -65,3 +65,5 @@ body.card-big #cardScrim{display:block}
 #mh .cc-mhead .why-line{margin-top:0}
 @media (min-width:821px){#mh .cc-mhead{display:none}}
 @media (max-width:820px){#mh .cc-top .pc-only{display:none}}
+/* 판정 요약 줄: 기호와 글자가 따로 줄바꿈되지 않게 항목마다 한 덩어리로 */
+#mh .bar3-txt > span{white-space:nowrap}
