@@ -65,3 +65,6 @@ backend/data/*.db
 # 선우판 trace 로컬 전용 (네이버 캡처·생성 원본은 올리지 않는다)
 bangbom/trace/refs/
 bangbom/trace/art/
+# 예전 위치(맨 위)에 남은 선우판 로컬 파일이 올라가지 않게
+/trace/
+/__pycache__/
