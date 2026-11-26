@@ -43,7 +43,10 @@ const RULES = {
    "age_max": 39,
    "homeless": true,
    "daegu_resident_or_moving": true,
-   "support_rate": 2.5,
+   "income_max_annual": 6000,
+   "deposit_max": 25000,
+   "support_rate": 3.5,
+   "_note": "2026 공고: 본인 연소득 6천만 원 이하, 임차보증금 2억5천만 원 이하. 지원율 3.5%는 2025 기준(시연용)",
    "requires_loan": "market_jeonse_loan",
    "exclusive_with": [
     "youth_beotimok"

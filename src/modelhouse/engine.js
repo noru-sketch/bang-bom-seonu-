@@ -72,7 +72,7 @@ function evaluate(p, c, pr) {
     if (mkOk) {
       add(CHECK, market.rate, "시중 전세대출", [market.id]);
       const di = pol.daegu_interest;
-      if (di && st[di.id] !== NO) add(CHECK, market.rate - di.support_rate, "시중 전세대출 + 대구 청년 이자지원", [market.id, di.id]);
+      if (di && st[di.id] !== NO && c.deposit <= di.deposit_max) add(CHECK, market.rate - di.support_rate, "시중 전세대출 + 대구 청년 이자지원", [market.id, di.id]);
     }
   }
   const elig = combos.filter(x => x.status === ELIG);
@@ -103,7 +103,8 @@ function appliedLists(c, ev, pr) {
   pr.policies.forEach(po => {
     if (used.includes(po.id)) return;
     if (po.status === NO) { not_applied.push({ id: po.id, name: po.name, reason: po.reason }); return; }
-    if (po.id === "daegu_interest" && used.includes("youth_beotimok")) not_applied.push({ id: po.id, name: po.name, reason: "버팀목 대출 이용자는 대구 이자지원과 중복 불가" });
+    if (po.id === "daegu_interest" && c.deposit > RULES.policies.find(x => x.id === po.id).deposit_max) not_applied.push({ id: po.id, name: po.name, reason: "보증금이 대구 이자지원 기준(2억5천만 원)을 넘어요" });
+    else if (po.id === "daegu_interest" && used.includes("youth_beotimok")) not_applied.push({ id: po.id, name: po.name, reason: "버팀목 대출 이용자는 대구 이자지원과 중복 불가" });
     else if (po.id === "daegu_interest" && ev.loan_needed === 0) not_applied.push({ id: po.id, name: po.name, reason: "대출이 필요 없어 해당 없음" });
     else if (po.id === "youth_monthly_rent" && c.rent === 0) not_applied.push({ id: po.id, name: po.name, reason: "월세가 없는 전세 단지라 해당 없음" });
     else not_applied.push({ id: po.id, name: po.name, reason: "더 낮은 조합이 있어 이번 계산에선 빠졌어요" });
